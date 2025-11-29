@@ -1,10 +1,8 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { GeminiAnalysisResult } from "../types";
 
-const apiKey = process.env.API_KEY;
-
 // Initialize Gemini client
-const ai = new GoogleGenAI({ apiKey: apiKey });
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 /**
  * Converts a File object to a Base64 string.
@@ -27,7 +25,7 @@ const fileToGenerativePart = async (file: File): Promise<{ inlineData: { data: s
 };
 
 export const analyzeItemImage = async (imageFile: File, currency: string = 'JPY'): Promise<GeminiAnalysisResult> => {
-  if (!apiKey) {
+  if (!process.env.API_KEY) {
     console.warn("API Key is missing. Skipping AI analysis.");
     throw new Error("API Key is missing.");
   }
