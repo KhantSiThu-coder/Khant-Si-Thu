@@ -146,7 +146,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
         {getActionButton()}
       </div>
 
-      {/* Delete Button - Placed at end of container and with z-50 to ensure it is clickable */}
+      {/* Delete Button - Placed at end of container and with z-20 to ensure it is clickable but below header/sidebar */}
       <button 
         type="button"
         onClick={(e) => { 
@@ -154,7 +154,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
           e.preventDefault();
           onDelete(item.id);
         }}
-        className={`absolute top-1.5 right-1.5 z-50 bg-white/95 dark:bg-gray-800/95 hover:bg-red-100 dark:hover:bg-red-900/80 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded-full shadow-sm border border-gray-100 dark:border-gray-700 transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 cursor-pointer ${size === 'small' ? 'p-1.5' : 'p-2'}`}
+        className={`absolute top-1.5 right-1.5 z-20 bg-white/95 dark:bg-gray-800/95 hover:bg-red-100 dark:hover:bg-red-900/80 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded-full shadow-sm border border-gray-100 dark:border-gray-700 transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 cursor-pointer ${size === 'small' ? 'p-1.5' : 'p-2'}`}
         title={t.delete}
         aria-label={t.delete}
       >
