@@ -1,7 +1,7 @@
 
 export type Language = 'en' | 'ja' | 'zh' | 'my' | 'ko';
 
-export const CATEGORY_KEYS = ['Cooking Ingredients', 'Food & Drinks', 'Clothing', 'Electronics', 'Others'];
+export const CATEGORY_KEYS = ['Cooking Ingredients', 'Food & Drinks', 'Cosmetics', 'Medicine', 'Clothing', 'Electronics', 'Others'];
 
 export type Currency = 'USD' | 'JPY' | 'CNY' | 'MMK' | 'KRW' | 'SGD';
 
@@ -80,6 +80,8 @@ export const TRANSLATIONS = {
     categories: {
       'Cooking Ingredients': 'Cooking Ingredients',
       'Food & Drinks': 'Food & Drinks',
+      'Cosmetics': 'Cosmetics',
+      'Medicine': 'Medicine',
       'Clothing': 'Clothing',
       'Electronics': 'Electronics',
       'Others': 'Others'
@@ -149,6 +151,8 @@ export const TRANSLATIONS = {
     categories: {
       'Cooking Ingredients': '食材',
       'Food & Drinks': '食品・飲料',
+      'Cosmetics': '化粧品',
+      'Medicine': '医薬品',
       'Clothing': '衣類',
       'Electronics': '家電',
       'Others': 'その他'
@@ -218,6 +222,8 @@ export const TRANSLATIONS = {
     categories: {
       'Cooking Ingredients': '烹饪原料',
       'Food & Drinks': '食品饮料',
+      'Cosmetics': '化妆品',
+      'Medicine': '药品',
       'Clothing': '服装',
       'Electronics': '电子产品',
       'Others': '其他'
@@ -287,6 +293,8 @@ export const TRANSLATIONS = {
     categories: {
       'Cooking Ingredients': 'ချက်ပြုတ်ပစ္စည်းများ',
       'Food & Drinks': 'အစားအသောက်',
+      'Cosmetics': 'အလှကုန်',
+      'Medicine': 'ဆေးဝါး',
       'Clothing': 'အဝတ်အစား',
       'Electronics': 'လျှပ်စစ်ပစ္စည်း',
       'Others': 'အခြား'
@@ -357,6 +365,8 @@ export const TRANSLATIONS = {
     categories: {
       'Cooking Ingredients': '요리 재료',
       'Food & Drinks': '식음료',
+      'Cosmetics': '화장품',
+      'Medicine': '의약품',
       'Clothing': '의류',
       'Electronics': '전자제품',
       'Others': '기타'

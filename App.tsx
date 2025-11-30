@@ -8,7 +8,7 @@ import {
   Plus, Search, ShoppingBag, Utensils, Coffee, Shirt, Monitor, 
   MoreHorizontal, ListFilter, SlidersHorizontal, Grid3X3, Grid2X2, RectangleHorizontal, 
   CheckCircle2, AlertCircle, PackageCheck, Settings, X, Moon, Sun, MonitorSmartphone, Languages,
-  Coins, Trash2, Undo2, Database, HardDrive, Download, Menu, Sparkles
+  Coins, Trash2, Undo2, Database, HardDrive, Download, Menu, Sparkles, Palette, Pill
 } from 'lucide-react';
 import { TRANSLATIONS, Language, CATEGORY_KEYS, Currency, CURRENCY_OPTIONS } from './constants';
 
@@ -17,6 +17,8 @@ const getCategoryIcon = (category: string, size: number = 20) => {
   switch (category) {
     case 'Cooking Ingredients': return <Utensils size={size} />;
     case 'Food & Drinks': return <Coffee size={size} />;
+    case 'Cosmetics': return <Palette size={size} />;
+    case 'Medicine': return <Pill size={size} />;
     case 'Clothing': return <Shirt size={size} />;
     case 'Electronics': return <Monitor size={size} />;
     default: return <MoreHorizontal size={size} />;
