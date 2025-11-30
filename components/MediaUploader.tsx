@@ -103,14 +103,19 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({ media, onMediaChan
           onClick={() => setPreviewMedia(null)}
         >
           <button 
-            className="absolute top-4 right-4 p-2 md:p-3 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-colors z-[120]"
-            onClick={() => setPreviewMedia(null)}
+            type="button"
+            className="absolute top-4 right-4 md:top-6 md:right-6 p-3 text-white/90 hover:text-white bg-white/10 hover:bg-white/20 active:bg-white/30 rounded-full transition-all z-[120] backdrop-blur-md shadow-lg"
+            onClick={(e) => {
+              e.stopPropagation();
+              setPreviewMedia(null);
+            }}
+            aria-label="Close preview"
           >
-            <X size={24} />
+            <X size={32} />
           </button>
           
           <div 
-            className="relative w-full h-full p-4 flex items-center justify-center pointer-events-none"
+            className="relative w-full h-full p-2 md:p-8 flex items-center justify-center pointer-events-none"
           >
             {previewMedia.type === 'image' ? (
               <img 
