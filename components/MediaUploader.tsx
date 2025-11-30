@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { MediaItem } from '../types';
 import { X, Upload, Image as ImageIcon, Film } from 'lucide-react';
 import { TRANSLATIONS, Language } from '../constants';
@@ -12,6 +12,7 @@ interface MediaUploaderProps {
 
 export const MediaUploader: React.FC<MediaUploaderProps> = ({ media, onMediaChange, onAnalyzeReq, lang = 'en' }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [previewMedia, setPreviewMedia] = useState<MediaItem | null>(null);
   const t = TRANSLATIONS[lang];
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,20 +50,28 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({ media, onMediaChan
     <div className="space-y-4">
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         {media.map((item) => (
-          <div key={item.id} className="relative group aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
+          <div 
+            key={item.id} 
+            onClick={() => setPreviewMedia(item)}
+            className="relative group aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600 cursor-pointer hover:opacity-90 transition-opacity"
+            title="Click to expand"
+          >
             {item.type === 'image' ? (
               <img src={item.url} alt="Preview" className="w-full h-full object-cover" />
             ) : (
-              <video src={item.url} className="w-full h-full object-cover" controls />
+              <video src={item.url} className="w-full h-full object-cover" />
             )}
             <button
               type="button"
-              onClick={() => removeMedia(item.id)}
-              className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                removeMedia(item.id);
+              }}
+              className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity z-10 hover:bg-red-600"
             >
               <X size={14} />
             </button>
-            <div className="absolute bottom-1 left-1 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded flex items-center gap-1">
+            <div className="absolute bottom-1 left-1 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded flex items-center gap-1 pointer-events-none">
                {item.type === 'image' ? <ImageIcon size={10} /> : <Film size={10} />}
             </div>
           </div>
@@ -86,6 +95,42 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({ media, onMediaChan
         accept="image/*,video/*"
         multiple
       />
+
+      {/* Lightbox Overlay */}
+      {previewMedia && (
+        <div 
+          className="fixed inset-0 z-[110] flex items-center justify-center bg-black/95 backdrop-blur-sm animate-in fade-in duration-200"
+          onClick={() => setPreviewMedia(null)}
+        >
+          <button 
+            className="absolute top-4 right-4 p-2 md:p-3 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-colors z-[120]"
+            onClick={() => setPreviewMedia(null)}
+          >
+            <X size={24} />
+          </button>
+          
+          <div 
+            className="relative w-full h-full p-4 flex items-center justify-center pointer-events-none"
+          >
+            {previewMedia.type === 'image' ? (
+              <img 
+                src={previewMedia.url} 
+                alt="Full preview" 
+                className="max-w-full max-h-full object-contain rounded-md shadow-2xl pointer-events-auto" 
+                onClick={(e) => e.stopPropagation()}
+              />
+            ) : (
+              <video 
+                src={previewMedia.url} 
+                className="max-w-full max-h-full object-contain rounded-md shadow-2xl pointer-events-auto" 
+                controls 
+                autoPlay 
+                onClick={(e) => e.stopPropagation()}
+              />
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
