@@ -27,7 +27,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
 
   const getStatusBadge = () => {
     const baseClasses = "rounded-md font-semibold backdrop-blur-md text-white shadow-sm";
-    const sizeClasses = size === 'small' ? "px-1.5 py-0.5 text-[10px]" : "px-2 py-1 text-xs";
+    const sizeClasses = size === 'small' ? "px-1.5 py-0.5 text-[9px]" : "px-2 py-1 text-[10px]";
     
     switch (item.status) {
       case 'to-buy':
@@ -56,10 +56,10 @@ export const ItemCard: React.FC<ItemCardProps> = ({
             e.preventDefault();
             onStatusToggle(item.id, item.status); 
           }}
-          className={`w-full py-1.5 rounded-lg text-xs font-medium flex items-center justify-center transition-colors ${baseColor}`}
+          className={`w-full py-1 rounded-md text-[10px] font-medium flex items-center justify-center transition-colors ${baseColor}`}
           title={Label}
         >
-          <Icon size={14} />
+          <Icon size={12} />
         </button>
       );
     }
@@ -72,9 +72,9 @@ export const ItemCard: React.FC<ItemCardProps> = ({
           e.preventDefault();
           onStatusToggle(item.id, item.status); 
         }}
-        className={`w-full py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors ${baseColor}`}
+        className={`w-full py-1.5 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-colors ${baseColor}`}
       >
-        <Icon size={16} /> {Label}
+        <Icon size={14} /> {Label}
       </button>
     );
   };
@@ -94,46 +94,46 @@ export const ItemCard: React.FC<ItemCardProps> = ({
              )
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-300 dark:text-gray-600">
-              <ShoppingCart size={size === 'small' ? 24 : 32} />
+              <ShoppingCart size={size === 'small' ? 20 : 28} />
             </div>
           )}
           
           {item.media.length > 1 && (
-            <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-1.5 py-0.5 rounded flex items-center gap-1 z-10">
+            <div className="absolute bottom-2 right-2 bg-black/60 text-white text-[9px] px-1 py-0.5 rounded flex items-center gap-1 z-10">
               +{item.media.length - 1}
             </div>
           )}
           
-          <div className="absolute top-2 left-2 z-10">
+          <div className="absolute top-1.5 left-1.5 z-10">
             {getStatusBadge()}
           </div>
         </div>
 
-        <div className={`${size === 'small' ? 'p-2' : 'p-4'}`}>
-          <div className="flex justify-between items-start mb-1 gap-2">
-            <h3 className={`font-semibold text-gray-900 dark:text-white line-clamp-1 ${size === 'large' ? 'text-lg' : 'text-sm'}`}>
+        <div className={`${size === 'small' ? 'p-1.5' : 'p-3'}`}>
+          <div className="flex justify-between items-start mb-0.5 gap-1.5">
+            <h3 className={`font-semibold text-gray-900 dark:text-white line-clamp-1 ${size === 'large' ? 'text-base' : 'text-xs'}`}>
               {item.name}
             </h3>
             <span className={`font-medium whitespace-nowrap ${
-              item.price === null ? 'text-gray-400 dark:text-gray-500 italic text-xs' : 'text-gray-900 dark:text-gray-200'
-            } ${size === 'large' ? 'text-base' : 'text-sm'}`}>
+              item.price === null ? 'text-gray-400 dark:text-gray-500 italic text-[10px]' : 'text-gray-900 dark:text-gray-200'
+            } ${size === 'large' ? 'text-sm' : 'text-xs'}`}>
               {item.price !== null ? `${currencySymbol}${item.price.toLocaleString()}` : 'Unk.'}
             </span>
           </div>
           
           {size !== 'small' && (
             <>
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 {item.store && (
-                  <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
-                    <MapPin size={12} className="mr-1.5" />
+                  <div className="flex items-center text-[10px] text-gray-500 dark:text-gray-400">
+                    <MapPin size={10} className="mr-1" />
                     <span className="truncate">{item.store}</span>
                   </div>
                 )}
               </div>
               
               {item.notes && (
-                 <p className={`mt-2 text-xs text-gray-500 dark:text-gray-400 line-clamp-2 italic border-l-2 border-gray-200 dark:border-gray-700 pl-2 ${size === 'large' ? 'line-clamp-4' : ''}`}>
+                 <p className={`mt-1 text-[10px] text-gray-500 dark:text-gray-400 line-clamp-2 italic border-l-2 border-gray-200 dark:border-gray-700 pl-1.5 ${size === 'large' ? 'line-clamp-3' : ''}`}>
                    {item.notes}
                  </p>
               )}
@@ -142,7 +142,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
         </div>
       </div>
 
-      <div className={`${size === 'small' ? 'px-2 pb-2' : 'px-4 pb-4'} pt-0 mt-auto`}>
+      <div className={`${size === 'small' ? 'px-1.5 pb-1.5' : 'px-3 pb-3'} pt-0 mt-auto`}>
         {getActionButton()}
       </div>
 
@@ -154,11 +154,11 @@ export const ItemCard: React.FC<ItemCardProps> = ({
           e.preventDefault();
           onDelete(item.id);
         }}
-        className="absolute top-2 right-2 z-50 p-2.5 bg-white/95 dark:bg-gray-800/95 hover:bg-red-100 dark:hover:bg-red-900/80 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded-full shadow-sm border border-gray-100 dark:border-gray-700 transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 cursor-pointer"
+        className={`absolute top-1.5 right-1.5 z-50 bg-white/95 dark:bg-gray-800/95 hover:bg-red-100 dark:hover:bg-red-900/80 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded-full shadow-sm border border-gray-100 dark:border-gray-700 transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 cursor-pointer ${size === 'small' ? 'p-1.5' : 'p-2'}`}
         title={t.delete}
         aria-label={t.delete}
       >
-        <Trash2 size={16} />
+        <Trash2 size={size === 'small' ? 12 : 14} />
       </button>
     </div>
   );

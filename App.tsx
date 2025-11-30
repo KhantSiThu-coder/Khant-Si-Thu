@@ -8,7 +8,7 @@ import {
   Plus, Search, ShoppingBag, Utensils, Coffee, Shirt, Monitor, 
   MoreHorizontal, ListFilter, SlidersHorizontal, Grid3X3, Grid2X2, RectangleHorizontal, 
   CheckCircle2, AlertCircle, PackageCheck, Settings, X, Moon, Sun, MonitorSmartphone, Languages,
-  Coins, Trash2, Undo2, Database, HardDrive, Download
+  Coins, Trash2, Undo2, Database, HardDrive, Download, Menu, Sparkles
 } from 'lucide-react';
 import { TRANSLATIONS, Language, CATEGORY_KEYS, Currency, CURRENCY_OPTIONS } from './constants';
 
@@ -50,12 +50,14 @@ const App: React.FC = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isRecycleBinOpen, setIsRecycleBinOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ShoppingItem | null>(null);
   
   // Settings State
   const [language, setLanguage] = useState<Language>('en');
   const [theme, setTheme] = useState<Theme>('system');
   const [currency, setCurrency] = useState<Currency>('JPY');
+  const [enableAI, setEnableAI] = useState<boolean>(true);
   
   // Storage Stats
   const [storageStats, setStorageStats] = useState<{usage: number, quota: number} | null>(null);
@@ -125,8 +127,6 @@ const App: React.FC = () => {
       }
     };
     
-    // Slight delay to ensure translations are loaded if necessary, though here t is synchronous
-    // Just run it
     checkForShare();
   }, [t.itemImported]);
 
@@ -176,11 +176,9 @@ const App: React.FC = () => {
       createdAt: Date.now(),
     };
     
-    // Update UI immediately
     setItems((prev) => [newItem, ...prev]);
     setIsFormOpen(false);
 
-    // Persist to DB
     try {
       await saveItemToDB(newItem);
     } catch (e) {
@@ -192,18 +190,12 @@ const App: React.FC = () => {
   const handleUpdateItem = async (itemData: Omit<ShoppingItem, 'id' | 'createdAt'>) => {
     if (!editingItem) return;
     
-    // If editingItem has an empty ID, it's a shared item being saved as new.
-    // handleAddItem handles ID generation, but we call handleUpdateItem if editingItem is not null.
-    // We need to check if it's a "real" update or a "save imported item"
-    
     if (editingItem.id === '') {
-       // It was an imported item, treat as new add
        await handleAddItem(itemData);
        setEditingItem(null);
        return;
     }
 
-    // Normal Update
     const updatedItem = { ...editingItem, ...itemData };
     
     setItems((prev) => 
@@ -212,7 +204,6 @@ const App: React.FC = () => {
     setEditingItem(null);
     setIsFormOpen(false);
 
-    // Persist to DB
     try {
       await saveItemToDB(updatedItem);
     } catch (e) {
@@ -221,31 +212,21 @@ const App: React.FC = () => {
   };
 
   const handleDeleteItem = async (id: string) => {
-    console.log("Moving item to trash:", id);
-    
-    // 1. Find the item to update it
     const itemToDelete = items.find(i => i.id === id);
     if (!itemToDelete) return;
 
     const deletedItem = { ...itemToDelete, deletedAt: Date.now() };
 
-    // 2. Update State
     setItems((prev) => 
       prev.map((i) => i.id === id ? deletedItem : i)
     );
     
-    // 3. Update DB
     await saveItemToDB(deletedItem);
-
-    // Store ID for undo
     setLastDeletedId(id);
-    
-    // Show feedback toast
     setToastMessage(t.itemMovedToTrash);
     setShowToast(true);
     setTimeout(() => setShowToast(false), 4000);
 
-    // Close form if open
     if (editingItem && editingItem.id === id) {
       setEditingItem(null);
       setIsFormOpen(false);
@@ -282,7 +263,6 @@ const App: React.FC = () => {
     const itemsToDelete = items.filter(i => i.deletedAt);
     setItems((prev) => prev.filter((i) => !i.deletedAt));
     
-    // Delete all trash items from DB
     for (const item of itemsToDelete) {
       await deleteItemFromDB(item.id);
     }
@@ -308,20 +288,14 @@ const App: React.FC = () => {
   };
 
   const filteredItems = items.filter((item) => {
-    // Exclude deleted items - This checks if deletedAt is truthy (number > 0)
     if (item.deletedAt) return false;
 
-    // 1. Text Search
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           (item.store && item.store.toLowerCase().includes(searchQuery.toLowerCase()));
     
-    // 2. Category Filter (Sidebar)
     const matchesCategory = selectedCategory === 'All' || item.category === selectedCategory;
-
-    // 3. Status Filter (Top Bar)
     const matchesStatus = activeStatuses.length === 0 || activeStatuses.includes(item.status);
 
-    // 4. Price Filter
     let matchesPrice = true;
     if (isPriceFilterActive) {
       const p = item.price;
@@ -339,15 +313,17 @@ const App: React.FC = () => {
   });
 
   const trashItems = items.filter(item => item.deletedAt).sort((a, b) => (b.deletedAt || 0) - (a.deletedAt || 0));
-
   const categoriesToShow = selectedCategory === 'All' ? CATEGORY_KEYS : [selectedCategory];
 
-  // Dynamic grid columns based on cardSize
+  // Modified grid columns for smaller view on mobile
   const getGridClasses = () => {
     switch (cardSize) {
-      case 'small': return "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6";
-      case 'medium': return "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
-      case 'large': return "grid-cols-1 md:grid-cols-2 xl:grid-cols-3";
+      // Small: 3 cols on mobile, 4 on tablet, 6 on desktop
+      case 'small': return "grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6";
+      // Medium: 2 cols on mobile, 3 on tablet, 4 on desktop
+      case 'medium': return "grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4";
+      // Large: 1 col on mobile, 2 on tablet, 3 on desktop
+      case 'large': return "grid-cols-1 md:grid-cols-2 lg:grid-cols-3";
     }
   };
 
@@ -364,17 +340,35 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col md:flex-row font-sans text-gray-900 dark:text-white transition-colors duration-200">
-      {/* Sidebar / Mobile Tab Bar */}
-      <div className="bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 md:w-64 flex-shrink-0 flex md:flex-col justify-start p-2 md:p-4 fixed md:relative bottom-0 w-full z-20 md:h-screen shadow-[0_-2px_10px_rgba(0,0,0,0.05)] md:shadow-none overflow-x-auto md:overflow-visible transition-colors duration-200">
-        <div className="hidden md:flex items-center gap-2 mb-8 px-2 text-indigo-600 dark:text-indigo-400">
-          <ShoppingBag size={28} />
-          <h1 className="text-2xl font-bold tracking-tight">{t.appName}</h1>
+      
+      {/* Mobile Backdrop for Sidebar */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-30 md:hidden backdrop-blur-sm"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar (Drawer on Mobile, Static on Desktop) */}
+      <div className={`fixed inset-y-0 left-0 z-40 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-transform duration-300 ease-in-out md:translate-x-0 md:static ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="p-4 flex items-center justify-between">
+           <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+             <ShoppingBag size={28} />
+             <h1 className="text-2xl font-bold tracking-tight">{t.appName}</h1>
+           </div>
+           {/* Close button for mobile sidebar */}
+           <button 
+             onClick={() => setIsSidebarOpen(false)}
+             className="md:hidden p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
+           >
+             <X size={20} />
+           </button>
         </div>
 
-        <nav className="flex md:flex-col gap-2 w-max md:w-full px-2 md:px-0 pb-2 md:pb-0">
+        <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
           <button
-            onClick={() => setSelectedCategory('All')}
-            className={`flex-none flex items-center gap-2 p-3 rounded-xl transition-all whitespace-nowrap ${
+            onClick={() => { setSelectedCategory('All'); setIsSidebarOpen(false); }}
+            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
               selectedCategory === 'All' 
                 ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 font-semibold' 
                 : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
@@ -384,14 +378,13 @@ const App: React.FC = () => {
             <span className="text-sm">{t.all}</span>
           </button>
 
-          <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1 md:hidden"></div>
-          <div className="h-px w-full bg-gray-200 dark:bg-gray-700 my-2 hidden md:block"></div>
+          <div className="h-px w-full bg-gray-200 dark:bg-gray-700 my-2"></div>
 
           {CATEGORY_KEYS.map(cat => (
             <button
               key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`flex-none flex items-center gap-2 p-3 rounded-xl transition-all whitespace-nowrap ${
+              onClick={() => { setSelectedCategory(cat); setIsSidebarOpen(false); }}
+              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
                 selectedCategory === cat 
                   ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 font-semibold' 
                   : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
@@ -403,11 +396,11 @@ const App: React.FC = () => {
           ))}
         </nav>
 
-        {/* Settings Button (Desktop: Bottom, Mobile: Top Right in Header) */}
-        <div className="hidden md:block mt-auto">
+        {/* Settings Button in Sidebar */}
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
           <button 
-            onClick={() => setIsSettingsOpen(true)}
-            className="w-full flex items-center gap-2 p-3 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+            onClick={() => { setIsSettingsOpen(true); setIsSidebarOpen(false); }}
+            className="w-full flex items-center gap-3 p-3 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
           >
             <Settings size={20} />
             <span className="text-sm">{t.settings}</span>
@@ -416,16 +409,20 @@ const App: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col h-screen overflow-hidden pb-16 md:pb-0 relative">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
         {/* Header */}
         <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10 flex flex-col transition-colors duration-200">
-          {/* Top Row: Brand (Mobile) + Search */}
+          {/* Top Row */}
           <div className="p-4 flex items-center justify-between gap-4">
-            <div className="md:hidden flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
-              <ShoppingBag size={24} />
-            </div>
+            {/* Hamburger Menu Button (Mobile Only) */}
+            <button 
+              onClick={() => setIsSidebarOpen(true)}
+              className="md:hidden p-2 -ml-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
+            >
+              <Menu size={24} />
+            </button>
             
-            <div className="flex-1 max-w-lg relative">
+            <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={18} />
               <input 
                 type="text" 
@@ -435,20 +432,11 @@ const App: React.FC = () => {
                 className="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-gray-700 dark:text-white rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
-
-            <button 
-              onClick={() => setIsSettingsOpen(true)}
-              className="md:hidden p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
-            >
-              <Settings size={20} />
-            </button>
           </div>
 
           {/* Filter & View Controls Bar */}
           <div className="px-4 pb-3 flex flex-wrap items-center gap-3 border-t border-gray-100 dark:border-gray-700 pt-3">
             <div className="flex items-center gap-2 mr-auto overflow-x-auto no-scrollbar mask-gradient">
-               <span className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mr-1">{t.filter}</span>
-               
                {/* Status Filters */}
                <button 
                  onClick={() => toggleStatusFilter('to-buy')}
@@ -550,7 +538,7 @@ const App: React.FC = () => {
         </header>
 
         {/* Scrollable List */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-gray-50/50 dark:bg-gray-900/50 flex flex-col">
+        <main className="flex-1 overflow-y-auto p-3 md:p-8 bg-gray-50/50 dark:bg-gray-900/50 flex flex-col">
           {filteredItems.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 text-center min-h-[300px]">
               <ShoppingBag size={48} className="mb-4 opacity-50" />
@@ -566,22 +554,22 @@ const App: React.FC = () => {
               )}
             </div>
           ) : (
-            <div className="space-y-8 flex-1">
+            <div className="space-y-6 flex-1">
               {categoriesToShow.map((cat) => {
                 const categoryItems = filteredItems.filter(i => i.category === cat);
                 if (categoryItems.length === 0) return null;
 
                 return (
                   <div key={cat}>
-                    <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
-                      {getCategoryIcon(cat, 22)}
+                    <h2 className="text-base font-bold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
+                      {getCategoryIcon(cat, 18)}
                       {t.categories[cat as keyof typeof t.categories] || cat}
                       <span className="ml-2 text-xs font-normal text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full">
                         {categoryItems.length}
                       </span>
                       <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700 ml-4"></div>
                     </h2>
-                    <div className={`grid gap-4 md:gap-6 ${getGridClasses()}`}>
+                    <div className={`grid gap-3 ${getGridClasses()}`}>
                       {categoryItems.map((item) => (
                         <ItemCard 
                           key={item.id} 
@@ -602,7 +590,7 @@ const App: React.FC = () => {
           )}
 
           {/* Footer */}
-          <footer className="mt-12 py-8 text-center text-sm text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-800">
+          <footer className="mt-12 py-8 text-center text-sm text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-800 pb-24 md:pb-8">
             <p>{t.footerCreatedBy} <span className="font-semibold text-gray-900 dark:text-gray-200">Khant Si Thu</span>.</p>
             <p className="mt-1">
               {t.footerEmailPrompt}{" "}
@@ -616,11 +604,15 @@ const App: React.FC = () => {
           </footer>
         </main>
 
-        {/* Floating Action Button */}
+        {/* Floating Action Button (Glass Liquid Style & Smaller) */}
         {!isFormOpen && !isSettingsOpen && (
           <button
             onClick={() => { setEditingItem(null); setIsFormOpen(true); }}
-            className="fixed right-6 bottom-24 md:bottom-8 z-30 bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+            className="fixed right-6 bottom-6 md:right-8 md:bottom-8 z-30 
+                       bg-gradient-to-br from-indigo-500/90 to-purple-600/90 hover:from-indigo-400/90 hover:to-purple-500/90
+                       backdrop-blur-md border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]
+                       text-white h-12 w-12 flex items-center justify-center rounded-full 
+                       hover:scale-105 active:scale-95 transition-all duration-300"
             aria-label="Add Item"
           >
             <Plus size={24} />
@@ -670,6 +662,7 @@ const App: React.FC = () => {
               lang={language}
               currencyCode={currency}
               currencySymbol={currencySymbol}
+              enableAI={enableAI}
             />
           </div>
         </div>
@@ -725,6 +718,24 @@ const App: React.FC = () => {
                       <div className="h-6 w-full animate-pulse bg-gray-200 dark:bg-gray-600 rounded"></div>
                     )}
                  </div>
+              </div>
+
+              {/* AI Enable Toggle */}
+              <div>
+                <label className="flex items-center justify-between text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <div className="flex items-center gap-2">
+                    <Sparkles size={16} />
+                    {t.enableAI}
+                  </div>
+                  <button 
+                    onClick={() => setEnableAI(!enableAI)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${enableAI ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-600'}`}
+                  >
+                    <span 
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${enableAI ? 'translate-x-6' : 'translate-x-1'}`} 
+                    />
+                  </button>
+                </label>
               </div>
 
               {/* Language Setting */}

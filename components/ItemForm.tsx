@@ -13,6 +13,7 @@ interface ItemFormProps {
   lang?: Language;
   currencyCode?: Currency;
   currencySymbol?: string;
+  enableAI?: boolean;
 }
 
 export const ItemForm: React.FC<ItemFormProps> = ({ 
@@ -22,7 +23,8 @@ export const ItemForm: React.FC<ItemFormProps> = ({
   onDelete,
   lang = 'en', 
   currencyCode = 'JPY',
-  currencySymbol = '¥' 
+  currencySymbol = '¥',
+  enableAI = true
 }) => {
   const t = TRANSLATIONS[lang];
   const [name, setName] = useState(initialData?.name || '');
@@ -65,6 +67,8 @@ export const ItemForm: React.FC<ItemFormProps> = ({
   };
 
   const handleAutoFill = async (file: File) => {
+    if (!enableAI) return;
+
     setIsAnalyzing(true);
     try {
       const result = await analyzeItemImage(file, currencyCode);
@@ -167,14 +171,18 @@ export const ItemForm: React.FC<ItemFormProps> = ({
         {/* Media Section */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t.mediaTitle}</label>
-          <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-100 dark:border-blue-900/50 mb-4 text-sm text-blue-800 dark:text-blue-300 flex items-start gap-2">
-            <Sparkles size={16} className="mt-0.5 flex-shrink-0" />
-            <p>{t.uploadTip}</p>
-          </div>
+          
+          {enableAI && (
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-100 dark:border-blue-900/50 mb-4 text-sm text-blue-800 dark:text-blue-300 flex items-start gap-2">
+              <Sparkles size={16} className="mt-0.5 flex-shrink-0" />
+              <p>{t.uploadTip}</p>
+            </div>
+          )}
+          
           <MediaUploader 
             media={media} 
             onMediaChange={setMedia} 
-            onAnalyzeReq={handleAutoFill}
+            onAnalyzeReq={enableAI ? handleAutoFill : undefined}
             lang={lang}
           />
           {isAnalyzing && (
