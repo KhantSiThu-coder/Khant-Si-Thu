@@ -77,6 +77,44 @@ export const TRANSLATIONS = {
     shareSuccess: 'Link copied to clipboard!',
     shareWarning: 'Link generated. Note: Photos/Videos are not shared.',
     itemImported: 'Shared item imported!',
+    termsAndConditions: 'Terms & Conditions',
+    termsTitle: 'Data Storage & Privacy Policy',
+    termsContent: `
+    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">1. What kind of storage is used?</h3>
+    <p class="mb-4">The application uses <strong class="text-gray-900 dark:text-white">IndexedDB.</strong><br/>
+    This is a standard, low-level API provided by modern web browsers to store significant amounts of structured data, including files/blobs, directly inside the user's browser.</p>
+
+    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">2. Where are the media files uploaded?</h3>
+    <p class="mb-2"><strong class="text-gray-900 dark:text-white">They are stored locally on the user's device.</strong></p>
+    <ul class="list-disc pl-5 mb-4 space-y-1">
+      <li><strong class="text-gray-900 dark:text-white">No Cloud Server:</strong> The app does not upload your photos or videos to a cloud server (like AWS S3, Firebase, or a dedicated backend).</li>
+      <li><strong class="text-gray-900 dark:text-white">Local Blob Storage:</strong> When a user selects a file, the binary data (the file itself) is saved directly into the browser's IndexedDB database under the store name SmartShopDB.</li>
+      <li>Note: There is one exception. If the user uses the "AI Auto-fill" feature, the image is temporarily sent to Google's Gemini API for analysis, but it is not stored there permanently for the app's hosting purposes.</li>
+    </ul>
+
+    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">3. Is it safe?</h3>
+    <p class="mb-2"><strong class="text-gray-900 dark:text-white">Privacy-wise: Yes.</strong></p>
+    <p class="mb-4">Since the data lives on the user's device, you (the developer) and other users cannot see their data. It is completely private to the specific browser and device they are using.</p>
+
+    <p class="mb-2"><strong class="text-gray-900 dark:text-white">Data Security-wise: Moderate Risk.</strong></p>
+    <p class="mb-2">Because there is no cloud backup:</p>
+    <ul class="list-disc pl-5 mb-4 space-y-1">
+      <li>If the user clears their browser's "Site Data" or "Cache," <strong class="text-gray-900 dark:text-white">all data (including photos) will be lost.</strong></li>
+      <li>If the user loses their phone or their computer crashes, the data is unrecoverable.</li>
+      <li>The data does not sync between devices (e.g., adding an item on a phone won't show up on a laptop).</li>
+    </ul>
+
+    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">4. How long does the media last?</h3>
+    <p class="mb-2">The media lasts <strong class="text-gray-900 dark:text-white">indefinitely</strong>, with specific conditions:</p>
+    <ul class="list-disc pl-5 mb-4 space-y-1">
+      <li><strong class="text-gray-900 dark:text-white">Persistence Request:</strong> Your code calls initStoragePersistence() in services/storage.ts. This asks the browser not to delete the data automatically, even if device storage is running low. If the browser grants this, the data is very stable.</li>
+      <li><strong class="text-gray-900 dark:text-white">User Action:</strong> The media stays until the user explicitly deletes the item.</li>
+      <li><strong class="text-gray-900 dark:text-white">Trash Logic:</strong> Your App.tsx contains logic that automatically permanently deletes items that have been in the "Recycle Bin" (deleted status) for more than <strong class="text-gray-900 dark:text-white">30 days</strong>.</li>
+    </ul>
+
+    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">Summary for Users</h3>
+    <p>Your data is stored privately on your device. We do not upload your personal photos to the cloud. However, please do not clear your browser data for this site, or you will lose your list.</p>
+    `,
     categories: {
       'Cooking Ingredients': 'Cooking Ingredients',
       'Food & Drinks': 'Food & Drinks',
@@ -148,6 +186,44 @@ export const TRANSLATIONS = {
     shareSuccess: 'リンクをコピーしました！',
     shareWarning: 'リンクを作成しました。注意：写真や動画は共有されません。',
     itemImported: '共有アイテムを読み込みました！',
+    termsAndConditions: '利用規約とプライバシー',
+    termsTitle: 'データ保存とプライバシーポリシー',
+    termsContent: `
+    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">1. どのようなストレージを使用していますか？</h3>
+    <p class="mb-4">このアプリケーションは<strong class="text-gray-900 dark:text-white">IndexedDB</strong>を使用しています。<br/>
+    これは、最新のWebブラウザが提供する標準的なAPIで、ファイルや写真などの構造化されたデータを、ユーザーのブラウザ内に直接保存する仕組みです。</p>
+
+    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">2. メディアファイルはどこにアップロードされますか？</h3>
+    <p class="mb-2"><strong class="text-gray-900 dark:text-white">すべて「ユーザーのデバイス内」に保存されます。</strong></p>
+    <ul class="list-disc pl-5 mb-4 space-y-1">
+      <li><strong class="text-gray-900 dark:text-white">クラウドサーバーなし:</strong> このアプリは、写真や動画をAWSやFirebaseなどのクラウドサーバーにアップロードしません。</li>
+      <li><strong class="text-gray-900 dark:text-white">ローカル保存:</strong> ユーザーがファイルを選択すると、そのデータはブラウザ内のIndexedDBに直接保存されます。</li>
+      <li>注意: 「AI自動入力」機能を使用する場合のみ、画像分析のために一時的にGoogle Gemini APIに送信されますが、アプリのホスティング目的で永続的に保存されることはありません。</li>
+    </ul>
+
+    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">3. 安全ですか？</h3>
+    <p class="mb-2"><strong class="text-gray-900 dark:text-white">プライバシーの観点: はい。</strong></p>
+    <p class="mb-4">データはユーザーのデバイス内にのみ存在するため、開発者や他のユーザーがデータを見ることはできません。完全にプライベートです。</p>
+
+    <p class="mb-2"><strong class="text-gray-900 dark:text-white">データの安全性の観点: 中程度のリスク。</strong></p>
+    <p class="mb-2">クラウドバックアップがないため、以下の点にご注意ください。</p>
+    <ul class="list-disc pl-5 mb-4 space-y-1">
+      <li>ブラウザの「サイトデータ」や「キャッシュ」を削除すると、<strong class="text-gray-900 dark:text-white">写真を含むすべてのデータが消えます。</strong></li>
+      <li>スマートフォンを紛失したり、故障した場合、データの復旧はできません。
+      <li>デバイス間（スマホとPCなど）でのデータ同期は行われません。</li>
+    </ul>
+
+    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">4. データはいつまで保存されますか？</h3>
+    <p class="mb-2">基本的に<strong class="text-gray-900 dark:text-white">無期限</strong>ですが、いくつかの条件があります。</p>
+    <ul class="list-disc pl-5 mb-4 space-y-1">
+      <li><strong class="text-gray-900 dark:text-white">永続化リクエスト:</strong> アプリはブラウザに対してデータを自動削除しないよう要求しています。許可されれば、データは安定して保持されます。</li>
+      <li><strong class="text-gray-900 dark:text-white">ユーザーの操作:</strong> ユーザーが削除しない限り残ります。</li>
+      <li><strong class="text-gray-900 dark:text-white">ゴミ箱のロジック:</strong> 「ゴミ箱」に入れたアイテムは、<strong class="text-gray-900 dark:text-white">30日</strong>経過すると自動的に完全に削除されます。</li>
+    </ul>
+
+    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">ユーザーへの要約</h3>
+    <p>あなたのデータは、あなたのデバイス内にプライベートに保存されています。個人の写真をクラウドにアップロードすることはありません。ただし、ブラウザのデータをクリアするとリストが失われるため、ご注意ください。</p>
+    `,
     categories: {
       'Cooking Ingredients': '食材',
       'Food & Drinks': '食品・飲料',
@@ -219,6 +295,44 @@ export const TRANSLATIONS = {
     shareSuccess: '链接已复制！',
     shareWarning: '链接已生成。注意：照片/视频无法共享。',
     itemImported: '已导入分享的物品！',
+    termsAndConditions: '条款与隐私',
+    termsTitle: '数据存储与隐私政策',
+    termsContent: `
+    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">1. 使用了什么类型的存储？</h3>
+    <p class="mb-4">应用程序使用 <strong class="text-gray-900 dark:text-white">IndexedDB</strong>。<br/>
+    这是现代网络浏览器提供的标准底层 API，用于直接在用户浏览器中存储大量结构化数据（包括文件/图像）。</p>
+
+    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">2. 媒体文件上传到了哪里？</h3>
+    <p class="mb-2"><strong class="text-gray-900 dark:text-white">它们存储在用户设备的本地。</strong></p>
+    <ul class="list-disc pl-5 mb-4 space-y-1">
+      <li><strong class="text-gray-900 dark:text-white">无云端服务器：</strong> 此应用不会将您的照片或视频上传到云服务器（如 AWS S3、Firebase 或专用后端）。</li>
+      <li><strong class="text-gray-900 dark:text-white">本地 Blob 存储：</strong> 当用户选择文件时，二进制数据（文件本身）直接保存到浏览器的 IndexedDB 数据库中。</li>
+      <li>注意：有一个例外。如果用户使用“AI 自动填充”功能，图像会临时发送到 Google Gemini API 进行分析，但不会为了应用的托管目的而永久存储。</li>
+    </ul>
+
+    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">3. 安全吗？</h3>
+    <p class="mb-2"><strong class="text-gray-900 dark:text-white">隐私方面：是的。</strong></p>
+    <p class="mb-4">由于数据存储在用户设备上，开发者和其他用户无法查看您的数据。它对于特定的浏览器和设备是完全私密的。</p>
+
+    <p class="mb-2"><strong class="text-gray-900 dark:text-white">数据安全方面：中等风险。</strong></p>
+    <p class="mb-2">因为没有云备份：</p>
+    <ul class="list-disc pl-5 mb-4 space-y-1">
+      <li>如果用户清除浏览器的“站点数据”或“缓存”，<strong class="text-gray-900 dark:text-white">所有数据（包括照片）都将丢失。</strong></li>
+      <li>如果手机丢失或电脑崩溃，数据将无法恢复。</li>
+      <li>数据不会在设备之间同步（例如，在手机上添加的物品不会显示在电脑上）。</li>
+    </ul>
+
+    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">4. 媒体文件能保存多久？</h3>
+    <p class="mb-2">媒体文件将<strong class="text-gray-900 dark:text-white">无限期</strong>保存，但有特定条件：</p>
+    <ul class="list-disc pl-5 mb-4 space-y-1">
+      <li><strong class="text-gray-900 dark:text-white">持久化请求：</strong> 代码调用了 storage.ts 中的 initStoragePersistence()。这请求浏览器不要自动删除数据，即使设备存储空间不足。如果浏览器批准，数据将非常稳定。</li>
+      <li><strong class="text-gray-900 dark:text-white">用户操作：</strong> 除非用户明确删除物品，否则媒体将一直保留。</li>
+      <li><strong class="text-gray-900 dark:text-white">回收站逻辑：</strong> App.tsx 包含逻辑，会自动永久删除在“回收站”中停留超过 <strong class="text-gray-900 dark:text-white">30 天</strong>的物品。</li>
+    </ul>
+
+    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">给用户的总结</h3>
+    <p>您的数据私密地存储在您的设备上。我们不会将您的个人照片上传到云端。但是，请不要清除此网站的浏览器数据，否则您的清单将会丢失。</p>
+    `,
     categories: {
       'Cooking Ingredients': '烹饪原料',
       'Food & Drinks': '食品饮料',
@@ -290,6 +404,44 @@ export const TRANSLATIONS = {
     shareSuccess: 'လင့်ခ်ကို ကူးယူပြီးပါပြီ!',
     shareWarning: 'လင့်ခ်ထုတ်ပြီးပါပြီ။ ဓာတ်ပုံ/ဗီဒီယိုများ မပါဝင်ပါ။',
     itemImported: 'မျှဝေထားသောပစ္စည်းကို ထည့်သွင်းပြီးပါပြီ!',
+    termsAndConditions: 'စည်းမျဉ်းများနှင့် မူဝါဒများ',
+    termsTitle: 'ဒေတာသိမ်းဆည်းမှုနှင့် လုံခြုံရေးမူဝါဒ',
+    termsContent: `
+    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">1. မည်သို့သော Storage ကို အသုံးပြုထားသနည်း?</h3>
+    <p class="mb-4">ဤ Application သည် <strong class="text-gray-900 dark:text-white">IndexedDB</strong> ကို အသုံးပြုထားပါသည်။<br/>
+    ၎င်းသည် ခေတ်မီ Web Browser များတွင် ပါဝင်သော စနစ်တစ်ခုဖြစ်ပြီး ဒေတာများ၊ ဓာတ်ပုံများကို Browser အတွင်း၌ပင် တိုက်ရိုက်သိမ်းဆည်းပေးပါသည်။</p>
+
+    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">2. ဓာတ်ပုံနှင့် ဗီဒီယိုများကို ဘယ်မှာသိမ်းဆည်းသနည်း?</h3>
+    <p class="mb-2"><strong class="text-gray-900 dark:text-white">၎င်းတို့ကို သင့်ဖုန်း/ကွန်ပျူတာထဲတွင်သာ သိမ်းဆည်းပါသည်။</strong></p>
+    <ul class="list-disc pl-5 mb-4 space-y-1">
+      <li><strong class="text-gray-900 dark:text-white">Cloud Server မရှိပါ:</strong> ဤ App သည် သင့်ဓာတ်ပုံများကို အင်တာနက်ပေါ်ရှိ Server များ (AWS, Firebase စသည်) သို့ ပေးပို့ခြင်းမရှိပါ။</li>
+      <li><strong class="text-gray-900 dark:text-white">Local Storage:</strong> သင်ရွေးချယ်လိုက်သော ဖိုင်များသည် သင့် Browser ၏ Database ထဲသို့ တိုက်ရိုက်ရောက်ရှိသွားပါသည်။</li>
+      <li>မှတ်ချက်: "AI Auto-fill" ကိုအသုံးပြုပါက ဓာတ်ပုံကို Google Gemini API သို့ ခေတ္တခဏ ပေးပို့၍ အချက်အလက်ဖတ်ရှုမည်ဖြစ်သော်လည်း အမြဲတမ်းသိမ်းဆည်းထားမည် မဟုတ်ပါ။</li>
+    </ul>
+
+    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">3. လုံခြုံမှုရှိပါသလား?</h3>
+    <p class="mb-2"><strong class="text-gray-900 dark:text-white">ကိုယ်ရေးကိုယ်တာလုံခြုံမှု: ရှိပါသည်။</strong></p>
+    <p class="mb-4">ဒေတာများသည် သင့်စက်ထဲတွင်သာ ရှိသောကြောင့် ဖန်တီးသူ (ကျွန်ုပ်) သော်လည်းကောင်း၊ အခြားသူများသော်လည်းကောင်း သင့်ဒေတာကို မမြင်နိုင်ပါ။</p>
+
+    <p class="mb-2"><strong class="text-gray-900 dark:text-white">ဒေတာပျောက်ဆုံးနိုင်မှု: အသင့်အတင့်ရှိပါသည်။</strong></p>
+    <p class="mb-2">Cloud Backup မရှိသောကြောင့် -</p>
+    <ul class="list-disc pl-5 mb-4 space-y-1">
+      <li>Browser ၏ "Site Data" သို့မဟုတ် "Clear Cache" လုပ်လိုက်ပါက <strong class="text-gray-900 dark:text-white">ဓာတ်ပုံများအပါအဝင် ဒေတာအားလုံး ပျက်သွားပါမည်။</strong></li>
+      <li>ဖုန်းပျောက်သွားပါက (သို့) ပျက်သွားပါက ဒေတာများပြန်ယူ၍ မရနိုင်ပါ။</li>
+      <li>စက်တစ်လုံးနှင့်တစ်လုံး ချိတ်ဆက်ထားခြင်းမရှိပါ (ဥပမာ- ဖုန်းထဲတွင် မှတ်ထားသည်ကို ကွန်ပျူတာတွင် မပေါ်နိုင်ပါ)။</li>
+    </ul>
+
+    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">4. မီဒီယာဖိုင်များ ဘယ်လောက်ကြာကြာခံမည်နည်း?</h3>
+    <p class="mb-2">ပုံမှန်အားဖြင့် <strong class="text-gray-900 dark:text-white">အကန့်အသတ်မရှိ</strong> ခံပါသည်။</p>
+    <ul class="list-disc pl-5 mb-4 space-y-1">
+      <li><strong class="text-gray-900 dark:text-white">Persistence:</strong> သင့်ဖုန်း Storage ပြည့်နေလျှင်တောင် Browser မှ ဒေတာများကို အလိုအလျောက်မဖျက်ရန် App က တောင်းဆိုထားပါသည်။</li>
+      <li><strong class="text-gray-900 dark:text-white">User Action:</strong> သင်ကိုယ်တိုင် မဖျက်မချင်း ရှိနေပါမည်။</li>
+      <li><strong class="text-gray-900 dark:text-white">အမှိုက်ပုံး:</strong> "Recycle Bin" ထဲရောက်နေသော ပစ္စည်းများကို <strong class="text-gray-900 dark:text-white">ရက် ၃၀</strong> ကြာပါက အလိုအလျောက် အပြီးတိုင် ဖျက်ဆီးပါမည်။</li>
+    </ul>
+
+    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">အနှစ်ချုပ်</h3>
+    <p>သင့်ဒေတာများသည် သင့်စက်ထဲတွင်သာ သီးသန့်ရှိနေပါသည်။ သင့်ကိုယ်ရေးကိုယ်တာပုံများကို အင်တာနက်ပေါ်သို့ တင်ခြင်းမရှိပါ။ သို့သော် ဤဆိုက်အတွက် Browser Data များကို ရှင်းလင်းခြင်း (Clear Data) မပြုလုပ်မိရန် သတိပြုပါ။</p>
+    `,
     categories: {
       'Cooking Ingredients': 'ချက်ပြုတ်ပစ္စည်းများ',
       'Food & Drinks': 'အစားအသောက်',
@@ -362,6 +514,44 @@ export const TRANSLATIONS = {
     shareSuccess: '링크가 복사되었습니다!',
     shareWarning: '링크가 생성되었습니다. 주의: 사진/동영상은 공유되지 않습니다.',
     itemImported: '공유된 항목을 가져왔습니다!',
+    termsAndConditions: '이용 약관 및 개인정보',
+    termsTitle: '데이터 저장 및 개인정보 처리방침',
+    termsContent: `
+    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">1. 어떤 종류의 저장소를 사용하나요?</h3>
+    <p class="mb-4">이 애플리케이션은 <strong class="text-gray-900 dark:text-white">IndexedDB</strong>를 사용합니다.<br/>
+    이는 최신 웹 브라우저에서 제공하는 표준 API로, 파일이나 사진을 포함한 구조화된 데이터를 사용자의 브라우저 내부에 직접 저장합니다.</p>
+
+    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">2. 미디어 파일은 어디에 업로드되나요?</h3>
+    <p class="mb-2"><strong class="text-gray-900 dark:text-white">사용자의 기기에 로컬로 저장됩니다.</strong></p>
+    <ul class="list-disc pl-5 mb-4 space-y-1">
+      <li><strong class="text-gray-900 dark:text-white">클라우드 서버 없음:</strong> 이 앱은 사진이나 동영상을 클라우드 서버(AWS, Firebase 등)에 업로드하지 않습니다.</li>
+      <li><strong class="text-gray-900 dark:text-white">로컬 Blob 저장소:</strong> 파일을 선택하면 바이너리 데이터(파일 자체)가 브라우저의 IndexedDB 데이터베이스에 직접 저장됩니다.</li>
+      <li>참고: 한 가지 예외가 있습니다. "AI 자동 완성" 기능을 사용하는 경우, 이미지 분석을 위해 일시적으로 Google Gemini API로 전송되지만, 앱 호스팅 목적으로 영구 저장되지는 않습니다.</li>
+    </ul>
+
+    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">3. 안전한가요?</h3>
+    <p class="mb-2"><strong class="text-gray-900 dark:text-white">개인정보 측면: 예.</strong></p>
+    <p class="mb-4">데이터가 사용자 기기에만 존재하므로 개발자나 다른 사용자가 데이터를 볼 수 없습니다. 전적으로 사용자의 브라우저와 기기에 비공개로 유지됩니다.</p>
+
+    <p class="mb-2"><strong class="text-gray-900 dark:text-white">데이터 보안 측면: 중간 정도의 위험.</strong></p>
+    <p class="mb-2">클라우드 백업이 없기 때문입니다.</p>
+    <ul class="list-disc pl-5 mb-4 space-y-1">
+      <li>브라우저의 "사이트 데이터" 또는 "캐시"를 삭제하면 <strong class="text-gray-900 dark:text-white">사진을 포함한 모든 데이터가 손실됩니다.</strong></li>
+      <li>휴대폰을 분실하거나 컴퓨터가 고장 나면 데이터를 복구할 수 없습니다.</li>
+      <li>기기 간 데이터 동기화가 되지 않습니다(예: 휴대폰에서 추가한 항목이 노트북에 표시되지 않음).</li>
+    </ul>
+
+    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">4. 미디어는 얼마나 오래 보관되나요?</h3>
+    <p class="mb-2">기본적으로 <strong class="text-gray-900 dark:text-white">무기한</strong> 보관되지만 몇 가지 조건이 있습니다.</p>
+    <ul class="list-disc pl-5 mb-4 space-y-1">
+      <li><strong class="text-gray-900 dark:text-white">영구 저장 요청:</strong> 코드가 브라우저에 데이터를 자동 삭제하지 않도록 요청합니다(Persistent Storage). 브라우저가 이를 승인하면 데이터는 매우 안정적으로 유지됩니다.</li>
+      <li><strong class="text-gray-900 dark:text-white">사용자 조치:</strong> 사용자가 직접 항목을 삭제할 때까지 유지됩니다.</li>
+      <li><strong class="text-gray-900 dark:text-white">휴지통 로직:</strong> "휴지통"에 있는 항목은 <strong class="text-gray-900 dark:text-white">30일</strong>이 지나면 자동으로 영구 삭제됩니다.</li>
+    </ul>
+
+    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">사용자 요약</h3>
+    <p>귀하의 데이터는 귀하의 기기에 비공개로 저장됩니다. 개인 사진을 클라우드에 업로드하지 않습니다. 그러나 이 사이트의 브라우저 데이터를 지우면 목록이 손실되므로 주의하십시오.</p>
+    `,
     categories: {
       'Cooking Ingredients': '요리 재료',
       'Food & Drinks': '식음료',

@@ -8,7 +8,7 @@ import {
   Plus, Search, ShoppingBag, Utensils, Coffee, Shirt, Monitor, 
   MoreHorizontal, ListFilter, SlidersHorizontal, Grid3X3, Grid2X2, RectangleHorizontal, 
   CheckCircle2, AlertCircle, PackageCheck, Settings, X, Moon, Sun, MonitorSmartphone, Languages,
-  Coins, Trash2, Undo2, Database, HardDrive, Download, Menu, Sparkles, Palette, Pill
+  Coins, Trash2, Undo2, Database, HardDrive, Download, Menu, Sparkles, Palette, Pill, FileText
 } from 'lucide-react';
 import { TRANSLATIONS, Language, CATEGORY_KEYS, Currency, CURRENCY_OPTIONS } from './constants';
 
@@ -52,6 +52,7 @@ const App: React.FC = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isRecycleBinOpen, setIsRecycleBinOpen] = useState(false);
+  const [isTermsOpen, setIsTermsOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ShoppingItem | null>(null);
   
@@ -821,8 +822,9 @@ const App: React.FC = () => {
                 </div>
               </div>
 
-              {/* Recycle Bin Button */}
-              <div className="pt-2 border-t border-gray-100 dark:border-gray-700">
+              {/* Action Buttons */}
+              <div className="pt-2 border-t border-gray-100 dark:border-gray-700 space-y-2">
+                 {/* Recycle Bin Button */}
                  <button
                    onClick={() => {
                      setIsSettingsOpen(false);
@@ -838,6 +840,15 @@ const App: React.FC = () => {
                       {trashItems.length}
                    </div>
                  </button>
+
+                 {/* Terms & Conditions Button */}
+                 <button
+                   onClick={() => setIsTermsOpen(true)}
+                   className="w-full flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors text-gray-700 dark:text-gray-200 group"
+                 >
+                   <FileText size={18} className="text-gray-500 dark:text-gray-400 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors" />
+                   <span className="text-sm font-medium">{t.termsAndConditions}</span>
+                 </button>
               </div>
             </div>
 
@@ -845,6 +856,49 @@ const App: React.FC = () => {
               <button 
                 onClick={() => setIsSettingsOpen(false)}
                 className="w-full py-2 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors"
+              >
+                {t.close}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Terms & Conditions Modal */}
+      {isTermsOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-black/40 dark:bg-black/70 backdrop-blur-sm"
+            onClick={() => setIsTermsOpen(false)}
+          />
+          <div className="relative w-full max-w-lg bg-white dark:bg-gray-800 rounded-2xl shadow-2xl flex flex-col max-h-[85vh] transform transition-all animate-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="p-5 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <FileText className="text-indigo-600 dark:text-indigo-400" size={20} />
+                {t.termsTitle}
+              </h2>
+              <button 
+                onClick={() => setIsTermsOpen(false)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto p-6">
+              <div 
+                className="prose dark:prose-invert max-w-none text-sm text-gray-600 dark:text-gray-300"
+                dangerouslySetInnerHTML={{ __html: t.termsContent }}
+              />
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-b-2xl">
+              <button
+                onClick={() => setIsTermsOpen(false)}
+                className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition-colors"
               >
                 {t.close}
               </button>
