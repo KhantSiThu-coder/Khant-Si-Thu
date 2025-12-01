@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ShoppingItem, ItemStatus } from './types';
 import { ItemForm } from './components/ItemForm';
 import { ItemCard } from './components/ItemCard';
@@ -78,6 +78,10 @@ const App: React.FC = () => {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState<string>('');
   const [lastDeletedId, setLastDeletedId] = useState<string | null>(null);
+
+  // Scrollbar State
+  const [isMainScrolling, setIsMainScrolling] = useState(false);
+  const mainScrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const t = TRANSLATIONS[language];
   const currencySymbol = CURRENCY_OPTIONS.find(c => c.value === currency)?.symbol || '¥';
@@ -171,6 +175,15 @@ const App: React.FC = () => {
       getStorageEstimate().then(setStorageStats);
     }
   }, [isSettingsOpen]);
+
+  // Cleanup scroll timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (mainScrollTimeoutRef.current) {
+        clearTimeout(mainScrollTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleAddItem = async (itemData: Omit<ShoppingItem, 'id' | 'createdAt'>) => {
     const newItem: ShoppingItem = {
@@ -289,6 +302,20 @@ const App: React.FC = () => {
         : [...prev, status]
     );
   };
+
+  const handleMainScroll = useCallback(() => {
+    if (!isMainScrolling) {
+      setIsMainScrolling(true);
+    }
+    
+    if (mainScrollTimeoutRef.current) {
+      clearTimeout(mainScrollTimeoutRef.current);
+    }
+    
+    mainScrollTimeoutRef.current = setTimeout(() => {
+      setIsMainScrolling(false);
+    }, 3000);
+  }, [isMainScrolling]);
 
   const filteredItems = items.filter((item) => {
     if (item.deletedAt) return false;
@@ -541,7 +568,10 @@ const App: React.FC = () => {
         </header>
 
         {/* Scrollable List */}
-        <main className="flex-1 overflow-y-auto p-3 md:p-8 bg-gray-50/50 dark:bg-gray-900/50 flex flex-col">
+        <main 
+          onScroll={handleMainScroll}
+          className={`flex-1 overflow-y-auto p-3 md:p-8 bg-gray-50/50 dark:bg-gray-900/50 flex flex-col fade-scrollbar ${isMainScrolling ? 'scrolling' : ''}`}
+        >
           {filteredItems.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 text-center min-h-[300px]">
               <ShoppingBag size={48} className="mb-4 opacity-50" />
@@ -678,8 +708,8 @@ const App: React.FC = () => {
             className="absolute inset-0 bg-black/20 dark:bg-black/60 backdrop-blur-sm"
             onClick={() => setIsSettingsOpen(false)}
           />
-          <div className="relative w-full max-w-sm bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 transform transition-all">
-            <div className="flex items-center justify-between mb-6">
+          <div className="relative w-full max-w-sm bg-white dark:bg-gray-800 rounded-2xl shadow-2xl flex flex-col max-h-[90vh] transform transition-all">
+            <div className="flex-shrink-0 flex items-center justify-between p-6 pb-4">
               <h2 className="text-xl font-bold flex items-center gap-2 dark:text-white">
                 <Settings className="text-indigo-600 dark:text-indigo-400" />
                 {t.settings}
@@ -692,7 +722,7 @@ const App: React.FC = () => {
               </button>
             </div>
 
-            <div className="space-y-6">
+            <div className="flex-1 overflow-y-auto p-6 pt-0 space-y-6">
               {/* Storage Stats */}
               <div>
                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
@@ -852,7 +882,7 @@ const App: React.FC = () => {
               </div>
             </div>
 
-            <div className="mt-8">
+            <div className="flex-shrink-0 p-6 pt-4">
               <button 
                 onClick={() => setIsSettingsOpen(false)}
                 className="w-full py-2 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors"

@@ -18,6 +18,42 @@
         },
       }
     </script>
+    <style>
+      /* Custom Fading Scrollbar */
+      .fade-scrollbar::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      .fade-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .fade-scrollbar::-webkit-scrollbar-thumb {
+        background-color: rgba(156, 163, 175, 0); /* transparent */
+        border-radius: 20px;
+        border: 2px solid transparent;
+        background-clip: content-box;
+        transition: background-color 0.5s ease-in-out;
+      }
+      .fade-scrollbar.scrolling::-webkit-scrollbar-thumb {
+        background-color: rgba(156, 163, 175, 0.5); /* gray-400 @ 50% */
+      }
+      .dark .fade-scrollbar.scrolling::-webkit-scrollbar-thumb {
+        background-color: rgba(107, 114, 128, 0.6); /* gray-500 @ 60% */
+      }
+
+      /* Firefox support */
+      .fade-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: transparent transparent;
+        transition: scrollbar-color 0.5s ease-in-out;
+      }
+      .fade-scrollbar.scrolling {
+        scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+      }
+      .dark .fade-scrollbar.scrolling {
+        scrollbar-color: rgba(107, 114, 128, 0.6) transparent;
+      }
+    </style>
   <script type="importmap">
 {
   "imports": {
