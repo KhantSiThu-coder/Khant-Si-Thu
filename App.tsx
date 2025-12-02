@@ -8,7 +8,7 @@ import {
   Plus, Search, ShoppingBag, Utensils, Coffee, Shirt, Monitor, 
   MoreHorizontal, ListFilter, SlidersHorizontal, Grid3X3, Grid2X2, RectangleHorizontal, 
   CheckCircle2, AlertCircle, PackageCheck, Settings, X, Moon, Sun, MonitorSmartphone, Languages,
-  Coins, Trash2, Undo2, Database, HardDrive, Download, Menu, Sparkles, Palette, Pill, FileText
+  Coins, Trash2, Undo2, Database, HardDrive, Download, Menu, Sparkles, Palette, Pill, FileText, Ban, Home
 } from 'lucide-react';
 import { TRANSLATIONS, Language, CATEGORY_KEYS, Currency, CURRENCY_OPTIONS } from './constants';
 
@@ -17,6 +17,7 @@ const getCategoryIcon = (category: string, size: number = 20) => {
   switch (category) {
     case 'Cooking Ingredients': return <Utensils size={size} />;
     case 'Food & Drinks': return <Coffee size={size} />;
+    case 'Household products': return <Home size={size} />;
     case 'Cosmetics': return <Palette size={size} />;
     case 'Medicine': return <Pill size={size} />;
     case 'Clothing': return <Shirt size={size} />;
@@ -499,6 +500,17 @@ const App: React.FC = () => {
                  }`}
                >
                  <PackageCheck size={14} /> {t.inStock}
+               </button>
+
+               <button 
+                 onClick={() => toggleStatusFilter('dont-like')}
+                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                   activeStatuses.includes('dont-like') 
+                   ? 'bg-red-100 border-red-200 text-red-700 dark:bg-red-900/40 dark:border-red-800 dark:text-red-300' 
+                   : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
+                 }`}
+               >
+                 <Ban size={14} /> {t.dontLike}
                </button>
 
                <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1"></div>

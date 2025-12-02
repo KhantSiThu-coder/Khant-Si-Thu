@@ -41,7 +41,7 @@ export const analyzeItemImage = async (imageFile: File, currency: string = 'JPY'
           {
             text: `Analyze this image of a shopping item. 
             Identify the product name.
-            Classify it strictly into one of these groups: 'Cooking Ingredients', 'Food & Drinks', 'Cosmetics', 'Medicine', 'Clothing', 'Electronics', 'Others'.
+            Classify it strictly into one of these groups: 'Cooking Ingredients', 'Food & Drinks', 'Household products', 'Cosmetics', 'Medicine', 'Clothing', 'Electronics', 'Others'.
             Estimate price in ${currency} (numeric only). If price is not visible or unknown, return null.
             Provide a short visual description for notes.`
           }

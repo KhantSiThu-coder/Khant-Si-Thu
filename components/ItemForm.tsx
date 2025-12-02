@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ShoppingItem, MediaItem, ItemStatus } from '../types';
 import { MediaUploader } from './MediaUploader';
 import { analyzeItemImage } from '../services/geminiService';
-import { Loader2, Sparkles, Save, X, Trash2, Share2, Check } from 'lucide-react';
+import { Loader2, Sparkles, Save, X, Trash2, Share2, Check, ThumbsDown } from 'lucide-react';
 import { TRANSLATIONS, Language, CATEGORY_KEYS, Currency } from '../constants';
 
 interface ItemFormProps {
@@ -281,7 +281,7 @@ export const ItemForm: React.FC<ItemFormProps> = ({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t.statusLabel}</label>
-            <div className="flex bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
+            <div className="flex flex-wrap gap-1 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
               <button
                 type="button"
                 onClick={() => setStatus('to-buy')}
@@ -314,6 +314,17 @@ export const ItemForm: React.FC<ItemFormProps> = ({
                 }`}
               >
                 {t.inStock}
+              </button>
+              <button
+                type="button"
+                onClick={() => setStatus('dont-like')}
+                className={`flex-1 py-2 text-xs sm:text-sm font-medium rounded-md transition-all ${
+                  status === 'dont-like' 
+                    ? 'bg-white dark:bg-gray-600 text-red-600 dark:text-red-300 shadow-sm' 
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                }`}
+              >
+                {t.dontLike}
               </button>
             </div>
           </div>

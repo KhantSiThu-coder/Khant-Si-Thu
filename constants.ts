@@ -1,7 +1,7 @@
 
 export type Language = 'en' | 'ja' | 'zh' | 'my' | 'ko';
 
-export const CATEGORY_KEYS = ['Cooking Ingredients', 'Food & Drinks', 'Cosmetics', 'Medicine', 'Clothing', 'Electronics', 'Others'];
+export const CATEGORY_KEYS = ['Cooking Ingredients', 'Food & Drinks', 'Household products', 'Cosmetics', 'Medicine', 'Clothing', 'Electronics', 'Others'];
 
 export type Currency = 'USD' | 'JPY' | 'CNY' | 'MMK' | 'KRW' | 'SGD';
 
@@ -23,6 +23,7 @@ export const TRANSLATIONS = {
     toBuy: 'To Buy',
     low: 'Low Stock',
     inStock: 'In Stock',
+    dontLike: "Don't Like",
     price: 'Price',
     priceRange: 'Price Range',
     min: 'Min',
@@ -118,6 +119,7 @@ export const TRANSLATIONS = {
     categories: {
       'Cooking Ingredients': 'Cooking Ingredients',
       'Food & Drinks': 'Food & Drinks',
+      'Household products': 'Household Products',
       'Cosmetics': 'Cosmetics',
       'Medicine': 'Medicine',
       'Clothing': 'Clothing',
@@ -133,6 +135,7 @@ export const TRANSLATIONS = {
     toBuy: '買うもの',
     low: '残りわずか',
     inStock: '在庫あり',
+    dontLike: "買わない",
     price: '価格',
     min: '最小',
     max: '最大',
@@ -227,6 +230,7 @@ export const TRANSLATIONS = {
     categories: {
       'Cooking Ingredients': '食材',
       'Food & Drinks': '食品・飲料',
+      'Household products': '日用品',
       'Cosmetics': '化粧品',
       'Medicine': '医薬品',
       'Clothing': '衣類',
@@ -242,6 +246,7 @@ export const TRANSLATIONS = {
     toBuy: '待购买',
     low: '库存不足',
     inStock: '有库存',
+    dontLike: "不买/不喜欢",
     price: '价格',
     min: '最小',
     max: '最大',
@@ -336,6 +341,7 @@ export const TRANSLATIONS = {
     categories: {
       'Cooking Ingredients': '烹饪原料',
       'Food & Drinks': '食品饮料',
+      'Household products': '家居用品',
       'Cosmetics': '化妆品',
       'Medicine': '药品',
       'Clothing': '服装',
@@ -351,6 +357,7 @@ export const TRANSLATIONS = {
     toBuy: 'ဝယ်ရန်',
     low: 'လက်ကျန်နည်း',
     inStock: 'ရှိသည်',
+    dontLike: "မဝယ်တော့ပါ",
     price: 'ဈေးနှုန်း',
     min: 'အနည်းဆုံး',
     max: 'အများဆုံး',
@@ -445,6 +452,7 @@ export const TRANSLATIONS = {
     categories: {
       'Cooking Ingredients': 'ချက်ပြုတ်ပစ္စည်းများ',
       'Food & Drinks': 'အစားအသောက်',
+      'Household products': 'အိမ်သုံးပစ္စည်းများ',
       'Cosmetics': 'အလှကုန်',
       'Medicine': 'ဆေးဝါး',
       'Clothing': 'အဝတ်အစား',
@@ -460,6 +468,7 @@ export const TRANSLATIONS = {
     toBuy: '구매 예정',
     low: '재고 부족',
     inStock: '재고 있음',
+    dontLike: "비추천/안 삼",
     price: '가격',
     priceRange: '가격 범위',
     min: '최소',
@@ -555,6 +564,7 @@ export const TRANSLATIONS = {
     categories: {
       'Cooking Ingredients': '요리 재료',
       'Food & Drinks': '식음료',
+      'Household products': '생활용품',
       'Cosmetics': '화장품',
       'Medicine': '의약품',
       'Clothing': '의류',

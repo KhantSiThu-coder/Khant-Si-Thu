@@ -1,6 +1,6 @@
 import React from 'react';
 import { ShoppingItem } from '../types';
-import { MapPin, Check, ShoppingCart, Trash2 } from 'lucide-react';
+import { MapPin, Check, ShoppingCart, Trash2, Ban } from 'lucide-react';
 import { TRANSLATIONS, Language } from '../constants';
 
 interface ItemCardProps {
@@ -36,10 +36,49 @@ export const ItemCard: React.FC<ItemCardProps> = ({
         return <span className={`${baseClasses} ${sizeClasses} bg-green-500/90`}>{t.inStock}</span>;
       case 'low':
         return <span className={`${baseClasses} ${sizeClasses} bg-orange-500/90`}>{t.low}</span>;
+      case 'dont-like':
+        return <span className={`${baseClasses} ${sizeClasses} bg-red-500/90`}>{t.dontLike}</span>;
     }
   };
 
   const getActionButton = () => {
+    if (item.status === 'dont-like') {
+        const baseColor = "bg-red-50 text-red-700 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50";
+        // When clicked, maybe allow moving back to 'to-buy' (re-trying) or just be a static indicator?
+        // Based on app logic, toggling moves it to 'to-buy' by default if not 'to-buy'.
+        // Let's allow restoring it to list.
+        
+        if (size === 'small') {
+            return (
+              <button
+                type="button"
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  e.preventDefault();
+                  onStatusToggle(item.id, item.status); 
+                }}
+                className={`w-full py-1 rounded-md text-[10px] font-medium flex items-center justify-center transition-colors ${baseColor}`}
+                title={t.addList}
+              >
+                <Ban size={12} />
+              </button>
+            );
+        }
+        return (
+            <button
+                type="button"
+                onClick={(e) => { 
+                  e.stopPropagation();
+                  e.preventDefault();
+                  onStatusToggle(item.id, item.status); 
+                }}
+                className={`w-full py-1.5 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-colors ${baseColor}`}
+            >
+                <Ban size={14} /> {t.addList}
+            </button>
+        );
+    }
+
     const isToBuy = item.status === 'to-buy';
     const Label = isToBuy ? t.markBought : t.addList;
     const Icon = isToBuy ? Check : ShoppingCart;
@@ -80,7 +119,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
   };
 
   return (
-    <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow group relative flex flex-col h-full`}>
+    <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow group relative flex flex-col h-full ${item.status === 'dont-like' ? 'opacity-80' : ''}`}>
       <div 
         onClick={() => onClick(item)} 
         className="cursor-pointer flex-1 relative"
@@ -88,9 +127,9 @@ export const ItemCard: React.FC<ItemCardProps> = ({
         <div className={`w-full bg-gray-100 dark:bg-gray-900 relative overflow-hidden ${size === 'large' ? 'aspect-video' : 'aspect-[4/3]'}`}>
           {coverMedia ? (
              coverMedia.type === 'image' ? (
-              <img src={coverMedia.url} alt={item.name} className="w-full h-full object-cover" />
+              <img src={coverMedia.url} alt={item.name} className={`w-full h-full object-cover ${item.status === 'dont-like' ? 'grayscale' : ''}`} />
              ) : (
-               <video src={coverMedia.url} className="w-full h-full object-cover" />
+               <video src={coverMedia.url} className={`w-full h-full object-cover ${item.status === 'dont-like' ? 'grayscale' : ''}`} />
              )
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-300 dark:text-gray-600">

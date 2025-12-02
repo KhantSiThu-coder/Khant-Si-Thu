@@ -1,4 +1,4 @@
-export type ItemStatus = 'to-buy' | 'in-stock' | 'low';
+export type ItemStatus = 'to-buy' | 'in-stock' | 'low' | 'dont-like';
 
 export interface MediaItem {
   id: string;
