@@ -60,7 +60,8 @@ export const TRANSLATIONS = {
     confirmDelete: 'Are you sure you want to delete this item?',
     addMedia: 'Add Media',
     recycleBin: 'Recycle Bin',
-    openRecycleBin: 'Open Recycle Bin',
+    recentlyDeleted: 'Recently Deleted',
+    openRecycleBin: 'Recently Deleted',
     restore: 'Restore',
     deletePermanently: 'Delete Permanently',
     emptyBin: 'Empty Bin',
@@ -80,6 +81,9 @@ export const TRANSLATIONS = {
     itemImported: 'Shared item imported!',
     termsAndConditions: 'Terms & Conditions',
     termsTitle: 'Data Storage & Privacy Policy',
+    daysLeft: 'days left',
+    totalItems: 'Total items',
+    deletionInfo: 'Items show the days remaining before deletion. After that time, items will be permanently deleted.',
     termsContent: `
     <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">1. What kind of storage is used?</h3>
     <p class="mb-4">The application uses <strong class="text-gray-900 dark:text-white">IndexedDB.</strong><br/>
@@ -171,7 +175,8 @@ export const TRANSLATIONS = {
     confirmDelete: '本当に削除しますか？',
     addMedia: 'メディア追加',
     recycleBin: 'ゴミ箱',
-    openRecycleBin: 'ゴミ箱を開く',
+    recentlyDeleted: '最近削除した項目',
+    openRecycleBin: '最近削除した項目',
     restore: '復元',
     deletePermanently: '完全に削除',
     emptyBin: 'ゴミ箱を空にする',
@@ -191,6 +196,9 @@ export const TRANSLATIONS = {
     itemImported: '共有アイテムを読み込みました！',
     termsAndConditions: '利用規約とプライバシー',
     termsTitle: 'データ保存とプライバシーポリシー',
+    daysLeft: '日残り',
+    totalItems: '合計アイテム',
+    deletionInfo: 'アイテムは表示されている残り日数が経過すると完全に削除されます。',
     termsContent: `
     <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">1. どのようなストレージを使用していますか？</h3>
     <p class="mb-4">このアプリケーションは<strong class="text-gray-900 dark:text-white">IndexedDB</strong>を使用しています。<br/>
@@ -282,7 +290,8 @@ export const TRANSLATIONS = {
     confirmDelete: '确定要删除此物品吗？',
     addMedia: '添加媒体',
     recycleBin: '回收站',
-    openRecycleBin: '打开回收站',
+    recentlyDeleted: '最近删除',
+    openRecycleBin: '最近删除',
     restore: '恢复',
     deletePermanently: '永久删除',
     emptyBin: '清空回收站',
@@ -302,6 +311,9 @@ export const TRANSLATIONS = {
     itemImported: '已导入分享的物品！',
     termsAndConditions: '条款与隐私',
     termsTitle: '数据存储与隐私政策',
+    daysLeft: '天剩余',
+    totalItems: '总项目',
+    deletionInfo: '显示的剩余天数归零后，项目将被永久删除。',
     termsContent: `
     <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">1. 使用了什么类型的存储？</h3>
     <p class="mb-4">应用程序使用 <strong class="text-gray-900 dark:text-white">IndexedDB</strong>。<br/>
@@ -393,7 +405,8 @@ export const TRANSLATIONS = {
     confirmDelete: 'ဤပစ္စည်းကို ဖျက်မည်မှာ သေချာပါသလား?',
     addMedia: 'မီဒီယာထည့်ရန်',
     recycleBin: 'အမှိုက်ပုံး',
-    openRecycleBin: 'အမှိုက်ပုံးဖွင့်ရန်',
+    recentlyDeleted: 'မကြာသေးမီက ဖျက်လိုက်သည်များ',
+    openRecycleBin: 'မကြာသေးမီက ဖျက်လိုက်သည်များ',
     restore: 'ပြန်လည်ရယူရန်',
     deletePermanently: 'အပြီးတိုင်ဖျက်ရန်',
     emptyBin: 'အမှိုက်ပုံးရှင်းရန်',
@@ -413,6 +426,9 @@ export const TRANSLATIONS = {
     itemImported: 'မျှဝေထားသောပစ္စည်းကို ထည့်သွင်းပြီးပါပြီ!',
     termsAndConditions: 'စည်းမျဉ်းများနှင့် မူဝါဒများ',
     termsTitle: 'ဒေတာသိမ်းဆည်းမှုနှင့် လုံခြုံရေးမူဝါဒ',
+    daysLeft: 'ရက်ကျန်',
+    totalItems: 'စုစုပေါင်း',
+    deletionInfo: 'ဤအချိန်ကျော်လွန်ပါက ပစ္စည်းများ အပြီးတိုင် ပျက်သွားပါမည်။',
     termsContent: `
     <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">1. မည်သို့သော Storage ကို အသုံးပြုထားသနည်း?</h3>
     <p class="mb-4">ဤ Application သည် <strong class="text-gray-900 dark:text-white">IndexedDB</strong> ကို အသုံးပြုထားပါသည်။<br/>
@@ -505,7 +521,8 @@ export const TRANSLATIONS = {
     confirmDelete: '이 항목을 삭제하시겠습니까?',
     addMedia: '미디어 추가',
     recycleBin: '휴지통',
-    openRecycleBin: '휴지통 열기',
+    recentlyDeleted: '최근 삭제된 항목',
+    openRecycleBin: '최근 삭제된 항목',
     restore: '복원',
     deletePermanently: '영구 삭제',
     emptyBin: '휴지통 비우기',
@@ -525,6 +542,9 @@ export const TRANSLATIONS = {
     itemImported: '공유된 항목을 가져왔습니다!',
     termsAndConditions: '이용 약관 및 개인정보',
     termsTitle: '데이터 저장 및 개인정보 처리방침',
+    daysLeft: '일 남음',
+    totalItems: '총 항목',
+    deletionInfo: '표시된 일수가 지나면 항목이 영구적으로 삭제됩니다.',
     termsContent: `
     <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">1. 어떤 종류의 저장소를 사용하나요?</h3>
     <p class="mb-4">이 애플리케이션은 <strong class="text-gray-900 dark:text-white">IndexedDB</strong>를 사용합니다.<br/>

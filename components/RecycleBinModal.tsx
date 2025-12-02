@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ShoppingItem } from '../types';
 import { TRANSLATIONS, Language } from '../constants';
-import { X, Trash2, RotateCcw, AlertTriangle, Image as ImageIcon } from 'lucide-react';
+import { X, Trash2, RotateCcw, Image as ImageIcon, Info } from 'lucide-react';
 
 interface RecycleBinModalProps {
   isOpen: boolean;
@@ -25,8 +25,28 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
   currencySymbol = '¥'
 }) => {
   const t = TRANSLATIONS[lang];
+  const [showInfo, setShowInfo] = useState(false);
+
+  // Close info tooltip when clicking anywhere
+  useEffect(() => {
+    if (showInfo) {
+      const handleGlobalClick = () => setShowInfo(false);
+      document.addEventListener('click', handleGlobalClick);
+      return () => document.removeEventListener('click', handleGlobalClick);
+    }
+  }, [showInfo]);
 
   if (!isOpen) return null;
+
+  // Function to calculate days remaining (30 days - days in bin)
+  const getDaysRemaining = (deletedAt?: number) => {
+    if (!deletedAt) return 30;
+    const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+    const elapsed = Date.now() - deletedAt;
+    const remaining = THIRTY_DAYS_MS - elapsed;
+    const days = Math.ceil(remaining / (24 * 60 * 60 * 1000));
+    return Math.max(0, days);
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -40,7 +60,7 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
         <div className="p-5 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Trash2 className="text-red-500" size={24} />
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t.recycleBin}</h2>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t.recentlyDeleted}</h2>
           </div>
           <button 
             onClick={onClose}
@@ -59,17 +79,15 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
             </div>
           ) : (
             <div className="space-y-4">
-               <div className="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 rounded-lg text-sm mb-4">
-                  <AlertTriangle size={16} className="mt-0.5 flex-shrink-0" />
-                  <p>{t.trashTip}</p>
-               </div>
-
               {items.map((item) => {
                 const coverMedia = item.media.length > 0 ? item.media[0] : null;
+                const daysLeft = getDaysRemaining(item.deletedAt);
+                const isUrgent = daysLeft <= 5;
+
                 return (
-                  <div key={item.id} className="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-700">
+                  <div key={item.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-700">
                     {/* Thumbnail */}
-                    <div className="w-16 h-16 bg-gray-200 dark:bg-gray-600 rounded-lg overflow-hidden flex-shrink-0">
+                    <div className="w-14 h-14 bg-gray-200 dark:bg-gray-600 rounded-lg overflow-hidden flex-shrink-0">
                       {coverMedia ? (
                         coverMedia.type === 'image' ? (
                           <img src={coverMedia.url} alt={item.name} className="w-full h-full object-cover" />
@@ -86,13 +104,18 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
                     {/* Info */}
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-gray-900 dark:text-white truncate">{item.name}</h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {item.price !== null ? `${currencySymbol}${item.price.toLocaleString()}` : '-'}
-                      </p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                         <span className="text-xs text-gray-500 dark:text-gray-400">
+                            {item.price !== null ? `${currencySymbol}${item.price.toLocaleString()}` : '-'}
+                         </span>
+                         <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${isUrgent ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' : 'bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-300'}`}>
+                           {daysLeft} {t.daysLeft}
+                         </span>
+                      </div>
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                       <button
                         onClick={() => onRestore(item.id)}
                         className="p-2 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
@@ -118,15 +141,40 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
         {/* Footer */}
         {items.length > 0 && (
           <div className="p-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-b-2xl">
-            <button
-              onClick={() => {
-                if(window.confirm(t.confirmDelete)) onEmptyBin();
-              }}
-              className="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
-            >
-              <Trash2 size={18} />
-              {t.emptyBin}
-            </button>
+             <div className="flex flex-col gap-3">
+                 <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {t.totalItems}: {items.length}
+                        </span>
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowInfo(!showInfo);
+                          }}
+                          className="text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
+                        >
+                            <Info size={16} />
+                        </button>
+                    </div>
+                    
+                    {showInfo && (
+                        <div className="absolute bottom-20 left-4 right-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs p-3 rounded-xl shadow-xl z-20 animate-in fade-in slide-in-from-bottom-2">
+                             {t.deletionInfo}
+                        </div>
+                    )}
+                 </div>
+
+                <button
+                onClick={() => {
+                    if(window.confirm(t.confirmDelete)) onEmptyBin();
+                }}
+                className="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
+                >
+                <Trash2 size={18} />
+                {t.emptyBin}
+                </button>
+             </div>
           </div>
         )}
       </div>
