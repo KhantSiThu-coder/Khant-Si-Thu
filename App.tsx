@@ -46,6 +46,22 @@ const generateId = () => {
 type CardSize = 'small' | 'medium' | 'large';
 type Theme = 'light' | 'dark' | 'system';
 
+interface AppSettings {
+  language: Language;
+  theme: Theme;
+  currency: Currency;
+  enableAI: boolean;
+  cardSize: CardSize;
+}
+
+const DEFAULT_SETTINGS: AppSettings = {
+  language: 'en',
+  theme: 'system',
+  currency: 'JPY',
+  enableAI: true,
+  cardSize: 'medium'
+};
+
 const App: React.FC = () => {
   const [items, setItems] = useState<ShoppingItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -57,12 +73,41 @@ const App: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ShoppingItem | null>(null);
   
+  // Load settings from localStorage
+  const loadSettings = (): AppSettings => {
+    if (typeof window === 'undefined') return DEFAULT_SETTINGS;
+    try {
+      const saved = localStorage.getItem('smartshop_settings');
+      return saved ? { ...DEFAULT_SETTINGS, ...JSON.parse(saved) } : DEFAULT_SETTINGS;
+    } catch (e) {
+      console.warn("Failed to load settings", e);
+      return DEFAULT_SETTINGS;
+    }
+  };
+
+  const initialSettings = useRef(loadSettings()).current;
+
   // Settings State
-  const [language, setLanguage] = useState<Language>('en');
-  const [theme, setTheme] = useState<Theme>('system');
-  const [currency, setCurrency] = useState<Currency>('JPY');
-  const [enableAI, setEnableAI] = useState<boolean>(true);
+  const [language, setLanguage] = useState<Language>(initialSettings.language);
+  const [theme, setTheme] = useState<Theme>(initialSettings.theme);
+  const [currency, setCurrency] = useState<Currency>(initialSettings.currency);
+  const [enableAI, setEnableAI] = useState<boolean>(initialSettings.enableAI);
   
+  // View State
+  const [cardSize, setCardSize] = useState<CardSize>(initialSettings.cardSize);
+  
+  // Save settings effect
+  useEffect(() => {
+    const settingsToSave: AppSettings = {
+      language,
+      theme,
+      currency,
+      enableAI,
+      cardSize
+    };
+    localStorage.setItem('smartshop_settings', JSON.stringify(settingsToSave));
+  }, [language, theme, currency, enableAI, cardSize]);
+
   // Storage Stats
   const [storageStats, setStorageStats] = useState<{usage: number, quota: number} | null>(null);
 
@@ -71,9 +116,6 @@ const App: React.FC = () => {
   const [activeStatuses, setActiveStatuses] = useState<ItemStatus[]>([]);
   const [isPriceFilterActive, setIsPriceFilterActive] = useState(false);
   const [priceRange, setPriceRange] = useState<{min: string, max: string}>({min: '', max: ''});
-  
-  // View State
-  const [cardSize, setCardSize] = useState<CardSize>('medium');
 
   // Toast State
   const [showToast, setShowToast] = useState(false);

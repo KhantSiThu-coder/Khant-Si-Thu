@@ -37,6 +37,8 @@ export const ItemForm: React.FC<ItemFormProps> = ({
   const [notes, setNotes] = useState(initialData?.notes || '');
   const [media, setMedia] = useState<MediaItem[]>(initialData?.media || []);
   
+  // Local state for AI toggle, initialized with the global setting
+  const [isAIEnabled, setIsAIEnabled] = useState(enableAI);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [shareFeedback, setShareFeedback] = useState<string | null>(null);
 
@@ -67,7 +69,7 @@ export const ItemForm: React.FC<ItemFormProps> = ({
   };
 
   const handleAutoFill = async (file: File) => {
-    if (!enableAI) return;
+    if (!isAIEnabled) return;
 
     setIsAnalyzing(true);
     try {
@@ -172,7 +174,26 @@ export const ItemForm: React.FC<ItemFormProps> = ({
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t.mediaTitle}</label>
           
-          {enableAI && (
+          {/* AI Auto-fill Toggle */}
+          <div className="flex items-center gap-3 mb-3">
+             <button 
+                type="button"
+                onClick={() => setIsAIEnabled(!isAIEnabled)}
+                className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${isAIEnabled ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-600'}`}
+              >
+                <span 
+                  className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${isAIEnabled ? 'translate-x-5' : 'translate-x-1'}`} 
+                />
+              </button>
+              <span 
+                className="text-sm text-gray-600 dark:text-gray-300 cursor-pointer select-none"
+                onClick={() => setIsAIEnabled(!isAIEnabled)}
+              >
+                {t.enableAI}
+              </span>
+          </div>
+
+          {isAIEnabled && (
             <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-100 dark:border-blue-900/50 mb-4 text-sm text-blue-800 dark:text-blue-300 flex items-start gap-2">
               <Sparkles size={16} className="mt-0.5 flex-shrink-0" />
               <p>{t.uploadTip}</p>
@@ -182,7 +203,7 @@ export const ItemForm: React.FC<ItemFormProps> = ({
           <MediaUploader 
             media={media} 
             onMediaChange={setMedia} 
-            onAnalyzeReq={enableAI ? handleAutoFill : undefined}
+            onAnalyzeReq={isAIEnabled ? handleAutoFill : undefined}
             lang={lang}
           />
           {isAnalyzing && (

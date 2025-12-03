@@ -1,7 +1,8 @@
 import React, { useRef, useState } from 'react';
 import { MediaItem } from '../types';
-import { X, Upload, Image as ImageIcon, Film } from 'lucide-react';
+import { X, Upload, Image as ImageIcon, Film, Loader2 } from 'lucide-react';
 import { TRANSLATIONS, Language } from '../constants';
+import heic2any from 'heic2any';
 
 interface MediaUploaderProps {
   media: MediaItem[];
@@ -13,31 +14,62 @@ interface MediaUploaderProps {
 export const MediaUploader: React.FC<MediaUploaderProps> = ({ media, onMediaChange, onAnalyzeReq, lang = 'en' }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewMedia, setPreviewMedia] = useState<MediaItem | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
   const t = TRANSLATIONS[lang];
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      const files = Array.from(e.target.files) as File[];
-      const newMediaItems: MediaItem[] = files.map((file) => ({
-        id: crypto.randomUUID(),
-        type: file.type.startsWith('video') ? 'video' : 'image',
-        url: URL.createObjectURL(file),
-        file: file,
-      }));
+      setIsProcessing(true);
+      const rawFiles = Array.from(e.target.files) as File[];
+      const processedFiles: File[] = [];
 
-      // Trigger analysis on the first image if requested and it's an image
-      if (onAnalyzeReq && newMediaItems.length > 0) {
-        const firstImage = newMediaItems.find(m => m.type === 'image');
-        if (firstImage && firstImage.file) {
-          onAnalyzeReq(firstImage.file);
+      try {
+        for (const file of rawFiles) {
+          // Check for HEIC (mimetype or extension)
+          if (file.type === 'image/heic' || file.name.toLowerCase().endsWith('.heic')) {
+             try {
+               const result = await heic2any({
+                 blob: file,
+                 toType: 'image/jpeg',
+                 quality: 0.8
+               });
+               const blob = Array.isArray(result) ? result[0] : result;
+               const newFile = new File([blob], file.name.replace(/\.heic$/i, '.jpg'), { type: 'image/jpeg' });
+               processedFiles.push(newFile);
+             } catch (conversionError) {
+               console.error("Failed to convert HEIC:", conversionError);
+               // Fallback to original file if conversion fails, though it might not render
+               processedFiles.push(file);
+             }
+          } else {
+             processedFiles.push(file);
+          }
         }
-      }
+        
+        const newMediaItems: MediaItem[] = processedFiles.map((file) => ({
+          id: crypto.randomUUID(),
+          type: file.type.startsWith('video') ? 'video' : 'image',
+          url: URL.createObjectURL(file),
+          file: file,
+        }));
 
-      onMediaChange([...media, ...newMediaItems]);
-      
-      // Reset input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+        // Trigger analysis on the first image if requested and it's an image
+        if (onAnalyzeReq && newMediaItems.length > 0) {
+          const firstImage = newMediaItems.find(m => m.type === 'image');
+          if (firstImage && firstImage.file) {
+            onAnalyzeReq(firstImage.file);
+          }
+        }
+
+        onMediaChange([...media, ...newMediaItems]);
+      } catch (err) {
+        console.error("Error processing files:", err);
+      } finally {
+        setIsProcessing(false);
+        // Reset input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
       }
     }
   };
@@ -79,11 +111,16 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({ media, onMediaChan
         
         <button
           type="button"
+          disabled={isProcessing}
           onClick={() => fileInputRef.current?.click()}
-          className="aspect-square flex flex-col items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400"
+          className="aspect-square flex flex-col items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <Upload size={24} className="mb-2" />
-          <span className="text-xs font-medium">{t.addMedia}</span>
+          {isProcessing ? (
+             <Loader2 size={24} className="mb-2 animate-spin text-indigo-500" />
+          ) : (
+             <Upload size={24} className="mb-2" />
+          )}
+          <span className="text-xs font-medium">{isProcessing ? 'Processing...' : t.addMedia}</span>
         </button>
       </div>
       
@@ -92,7 +129,7 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({ media, onMediaChan
         ref={fileInputRef}
         onChange={handleFileChange}
         className="hidden"
-        accept="image/*,video/*"
+        accept="image/*,video/*,.heic"
         multiple
       />
 
