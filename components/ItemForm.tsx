@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ShoppingItem, MediaItem, ItemStatus } from '../types';
 import { MediaUploader } from './MediaUploader';
 import { analyzeItemImage } from '../services/geminiService';
-import { Loader2, Sparkles, Save, X, Trash2, Share2, Check, ThumbsDown } from 'lucide-react';
+import { Loader2, Sparkles, Save, X, Trash2, Share2, Check, ThumbsDown, Info } from 'lucide-react';
 import { TRANSLATIONS, Language, CATEGORY_KEYS, Currency } from '../constants';
 
 interface ItemFormProps {
@@ -44,6 +44,9 @@ export const ItemForm: React.FC<ItemFormProps> = ({
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [shareFeedback, setShareFeedback] = useState<string | null>(null);
 
+  // Tooltip state for AI info
+  const [showAITip, setShowAITip] = useState(false);
+
   useEffect(() => {
      if (initialData?.category && !CATEGORY_KEYS.includes(initialData.category)) {
        setCategory('Others');
@@ -56,6 +59,15 @@ export const ItemForm: React.FC<ItemFormProps> = ({
       return () => clearTimeout(timer);
     }
   }, [shareFeedback]);
+
+  // Close AI tooltip when clicking anywhere
+  useEffect(() => {
+    if (showAITip) {
+      const handleGlobalClick = () => setShowAITip(false);
+      document.addEventListener('click', handleGlobalClick);
+      return () => document.removeEventListener('click', handleGlobalClick);
+    }
+  }, [showAITip]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -171,7 +183,7 @@ export const ItemForm: React.FC<ItemFormProps> = ({
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t.mediaTitle}</label>
           
-          <div className="flex items-center gap-3 mb-3">
+          <div className="flex items-center gap-3 mb-3 relative">
              <button 
                 type="button"
                 onClick={() => setIsAIEnabled(!isAIEnabled)}
@@ -187,6 +199,23 @@ export const ItemForm: React.FC<ItemFormProps> = ({
               >
                 {t.enableAI}
               </span>
+              
+              <button 
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowAITip(!showAITip);
+                }}
+                className="text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors ml-1"
+              >
+                <Info size={16} />
+              </button>
+              
+              {showAITip && (
+                <div className="absolute top-8 left-0 z-20 w-64 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs p-3 rounded-xl shadow-xl animate-in fade-in slide-in-from-top-1">
+                  {t.aiLanguageWarning}
+                </div>
+              )}
           </div>
 
           {isAIEnabled && (
@@ -351,7 +380,7 @@ export const ItemForm: React.FC<ItemFormProps> = ({
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              rows={3}
+              rows={6}
               className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               placeholder={t.notePlaceholder}
             />
