@@ -105,10 +105,10 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-gray-900 dark:text-white truncate">{item.name}</h3>
                       <div className="flex items-center gap-2 mt-0.5">
-                         <span className="text-xs text-gray-500 dark:text-gray-400">
+                         <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
                             {item.price !== null ? `${currencySymbol}${item.price.toLocaleString()}` : '-'}
                          </span>
-                         <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${isUrgent ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' : 'bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-300'}`}>
+                         <span className={`text-xs font-medium px-1.5 py-0.5 rounded flex-shrink-0 whitespace-nowrap ${isUrgent ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' : 'bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-300'}`}>
                            {daysLeft} {t.daysLeft}
                          </span>
                       </div>

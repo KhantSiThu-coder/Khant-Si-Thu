@@ -65,7 +65,7 @@ const DEFAULT_SETTINGS: AppSettings = {
 const App: React.FC = () => {
   const [items, setItems] = useState<ShoppingItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(['All']);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isRecycleBinOpen, setIsRecycleBinOpen] = useState(false);
@@ -346,6 +346,17 @@ const App: React.FC = () => {
     );
   };
 
+  const toggleCategory = (cat: string) => {
+    setSelectedCategories(prev => {
+      if (prev.includes('All')) return [cat];
+      if (prev.includes(cat)) {
+        const next = prev.filter(c => c !== cat);
+        return next.length === 0 ? ['All'] : next;
+      }
+      return [...prev, cat];
+    });
+  };
+
   const handleMainScroll = useCallback(() => {
     if (!isMainScrolling) {
       setIsMainScrolling(true);
@@ -366,7 +377,7 @@ const App: React.FC = () => {
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           (item.store && item.store.toLowerCase().includes(searchQuery.toLowerCase()));
     
-    const matchesCategory = selectedCategory === 'All' || item.category === selectedCategory;
+    const matchesCategory = selectedCategories.includes('All') || selectedCategories.includes(item.category);
     const matchesStatus = activeStatuses.length === 0 || activeStatuses.includes(item.status);
 
     let matchesPrice = true;
@@ -386,7 +397,9 @@ const App: React.FC = () => {
   });
 
   const trashItems = items.filter(item => item.deletedAt).sort((a, b) => (b.deletedAt || 0) - (a.deletedAt || 0));
-  const categoriesToShow = selectedCategory === 'All' ? CATEGORY_KEYS : [selectedCategory];
+  const categoriesToShow = selectedCategories.includes('All') 
+    ? CATEGORY_KEYS 
+    : CATEGORY_KEYS.filter(cat => selectedCategories.includes(cat));
 
   // Modified grid columns for smaller view on mobile
   const getGridClasses = () => {
@@ -417,13 +430,13 @@ const App: React.FC = () => {
       {/* Mobile Backdrop for Sidebar - Increased Z-index */}
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm"
+          className="fixed inset-0 bg-black/50 z-[80] md:hidden backdrop-blur-sm"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar (Drawer on Mobile, Static on Desktop) - Increased Z-index */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-transform duration-300 ease-in-out md:translate-x-0 md:static ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <div className={`fixed inset-y-0 left-0 z-[90] w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-transform duration-300 ease-in-out md:translate-x-0 md:static ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-4 flex items-center justify-between">
            <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
              <ShoppingBag size={28} />
@@ -440,9 +453,9 @@ const App: React.FC = () => {
 
         <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
           <button
-            onClick={() => { setSelectedCategory('All'); setIsSidebarOpen(false); }}
+            onClick={() => { setSelectedCategories(['All']); setIsSidebarOpen(false); }}
             className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
-              selectedCategory === 'All' 
+              selectedCategories.includes('All') 
                 ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 font-semibold' 
                 : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
             }`}
@@ -456,9 +469,9 @@ const App: React.FC = () => {
           {CATEGORY_KEYS.map(cat => (
             <button
               key={cat}
-              onClick={() => { setSelectedCategory(cat); setIsSidebarOpen(false); }}
+              onClick={() => toggleCategory(cat)}
               className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
-                selectedCategory === cat 
+                selectedCategories.includes(cat)
                   ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 font-semibold' 
                   : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
               }`}
