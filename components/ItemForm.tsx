@@ -26,7 +26,9 @@ export const ItemForm: React.FC<ItemFormProps> = ({
   currencySymbol = '¥',
   enableAI = true
 }) => {
-  const t = TRANSLATIONS[lang];
+  // Ensure we have a valid translation object, fallback to English if missing
+  const t = TRANSLATIONS[lang] || TRANSLATIONS['en'];
+  
   const [name, setName] = useState(initialData?.name || '');
   const [category, setCategory] = useState(initialData?.category || CATEGORY_KEYS[0]);
   const [price, setPrice] = useState(initialData?.price?.toString() || '');
@@ -98,8 +100,6 @@ export const ItemForm: React.FC<ItemFormProps> = ({
   };
 
   const handleShare = async () => {
-    // Construct payload with short keys to save URL space
-    // n=name, c=category, p=price, s=store, st=status, nt=notes
     const payload = {
       n: name,
       c: category,
@@ -111,12 +111,11 @@ export const ItemForm: React.FC<ItemFormProps> = ({
 
     try {
       const json = JSON.stringify(payload);
-      // encodeURIComponent handles Unicode characters correctly before btoa
       const encoded = btoa(encodeURIComponent(json));
       const url = `${window.location.origin}${window.location.pathname}?share=${encoded}`;
 
       await navigator.clipboard.writeText(url);
-      setShareFeedback(t.shareWarning); // Show warning about media not being shared
+      setShareFeedback(t.shareWarning);
     } catch (err) {
       console.error("Share failed", err);
     }
@@ -159,7 +158,6 @@ export const ItemForm: React.FC<ItemFormProps> = ({
         </div>
       </div>
       
-      {/* Share Feedback Toast inside form */}
       {shareFeedback && (
         <div className="absolute top-[70px] left-0 right-0 mx-4 z-10">
           <div className="bg-indigo-600 text-white text-xs px-3 py-2 rounded-lg shadow-lg flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
@@ -170,11 +168,9 @@ export const ItemForm: React.FC<ItemFormProps> = ({
       )}
 
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
-        {/* Media Section */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t.mediaTitle}</label>
           
-          {/* AI Auto-fill Toggle */}
           <div className="flex items-center gap-3 mb-3">
              <button 
                 type="button"
@@ -196,7 +192,8 @@ export const ItemForm: React.FC<ItemFormProps> = ({
           {isAIEnabled && (
             <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-100 dark:border-blue-900/50 mb-4 text-sm text-blue-800 dark:text-blue-300 flex items-start gap-2">
               <Sparkles size={16} className="mt-0.5 flex-shrink-0" />
-              <p>{t.uploadTip}</p>
+              {/* Added key to force re-render when language changes */}
+              <p key={`tip-${lang}`}>{t.uploadTip}</p>
             </div>
           )}
           
@@ -214,7 +211,6 @@ export const ItemForm: React.FC<ItemFormProps> = ({
           )}
         </div>
 
-        {/* Basic Info */}
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t.nameLabel}</label>
@@ -224,7 +220,7 @@ export const ItemForm: React.FC<ItemFormProps> = ({
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-              placeholder="e.g., Milk, Batteries"
+              placeholder={t.namePlaceholder}
             />
           </div>
 
@@ -281,7 +277,7 @@ export const ItemForm: React.FC<ItemFormProps> = ({
                   onChange={(e) => setStore(e.target.value)}
                   disabled={isStoreUnknown}
                   className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none disabled:bg-gray-100 dark:disabled:bg-gray-600 disabled:text-gray-400 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  placeholder={isStoreUnknown ? "-" : "e.g., Supermarket, Online"}
+                  placeholder={isStoreUnknown ? "-" : t.storePlaceholder}
                 />
               </div>
               <div className="flex items-center h-[42px]">
@@ -357,7 +353,7 @@ export const ItemForm: React.FC<ItemFormProps> = ({
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
               className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-              placeholder="Size, color, quantity, etc."
+              placeholder={t.notePlaceholder}
             />
           </div>
         </div>
