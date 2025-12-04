@@ -3,12 +3,13 @@ import { ShoppingItem, ItemStatus } from './types';
 import { ItemForm } from './components/ItemForm';
 import { ItemCard } from './components/ItemCard';
 import { RecycleBinModal } from './components/RecycleBinModal';
+import { OnboardingModal } from './components/OnboardingModal';
 import { loadItemsFromDB, saveItemToDB, deleteItemFromDB, initStoragePersistence, getStorageEstimate } from './services/storage';
 import { 
   Plus, Search, ShoppingBag, Utensils, Coffee, Shirt, Monitor, 
   MoreHorizontal, ListFilter, SlidersHorizontal, Grid3X3, Grid2X2, RectangleHorizontal, 
   CheckCircle2, AlertCircle, PackageCheck, Settings, X, Moon, Sun, MonitorSmartphone, Languages,
-  Coins, Trash2, Undo2, Database, HardDrive, Download, Menu, Sparkles, Palette, Pill, FileText, Ban, Home
+  Coins, Trash2, Undo2, Database, HardDrive, Download, Menu, Sparkles, Palette, Pill, FileText, Ban, Home, HelpCircle
 } from 'lucide-react';
 import { TRANSLATIONS, Language, CATEGORY_KEYS, Currency, CURRENCY_OPTIONS } from './constants';
 
@@ -71,6 +72,7 @@ const App: React.FC = () => {
   const [isRecycleBinOpen, setIsRecycleBinOpen] = useState(false);
   const [isTermsOpen, setIsTermsOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ShoppingItem | null>(null);
   
   // Load settings from localStorage
@@ -107,6 +109,19 @@ const App: React.FC = () => {
     };
     localStorage.setItem('smartshop_settings', JSON.stringify(settingsToSave));
   }, [language, theme, currency, enableAI, cardSize]);
+
+  // Check for first-time visit
+  useEffect(() => {
+    const hasSeenOnboarding = localStorage.getItem('smartshop_onboarding_seen');
+    if (!hasSeenOnboarding) {
+        setIsOnboardingOpen(true);
+    }
+  }, []);
+
+  const handleCloseOnboarding = () => {
+    localStorage.setItem('smartshop_onboarding_seen', 'true');
+    setIsOnboardingOpen(false);
+  };
 
   // Storage Stats
   const [storageStats, setStorageStats] = useState<{usage: number, quota: number} | null>(null);
@@ -482,8 +497,18 @@ const App: React.FC = () => {
           ))}
         </nav>
 
-        {/* Settings Button in Sidebar */}
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+        {/* Sidebar Footer Buttons */}
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700 space-y-1">
+          {/* Help Button */}
+          <button 
+            onClick={() => { setIsOnboardingOpen(true); setIsSidebarOpen(false); }}
+            className="w-full flex items-center gap-3 p-3 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+          >
+            <HelpCircle size={20} />
+            <span className="text-sm">{t.help}</span>
+          </button>
+
+          {/* Settings Button */}
           <button 
             onClick={() => { setIsSettingsOpen(true); setIsSidebarOpen(false); }}
             className="w-full flex items-center gap-3 p-3 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
@@ -1014,6 +1039,13 @@ const App: React.FC = () => {
         onEmptyBin={handleEmptyBin}
         lang={language}
         currencySymbol={currencySymbol}
+      />
+
+      {/* Onboarding Wizard */}
+      <OnboardingModal
+        isOpen={isOnboardingOpen}
+        onClose={handleCloseOnboarding}
+        lang={language}
       />
     </div>
   );

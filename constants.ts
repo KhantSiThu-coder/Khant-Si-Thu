@@ -29,6 +29,7 @@ export const TRANSLATIONS = {
     min: 'Min',
     max: 'Max',
     settings: 'Settings',
+    help: 'Help & Guide',
     theme: 'Theme',
     language: 'Language',
     currency: 'Currency',
@@ -88,6 +89,19 @@ export const TRANSLATIONS = {
     daysLeft: 'days left',
     totalItems: 'Total items',
     deletionInfo: 'Items show the days remaining before deletion. After that time, items will be permanently deleted.',
+    onboarding: {
+      welcomeTitle: 'Welcome to SmartShop',
+      welcomeDesc: 'The intelligent way to organize your shopping list and home inventory.',
+      aiTitle: 'AI-Powered Entry',
+      aiDesc: 'Simply upload a photo of a product. Our AI will identify the name, category, and even estimate the price for you.',
+      trackTitle: 'Track Status',
+      trackDesc: 'Easily filter items by "To Buy", "In Stock", or "Low Stock". Tap the icon on any item to quickly toggle its status.',
+      privacyTitle: 'Private & Local',
+      privacyDesc: 'Your data and photos are stored directly on your device. We value your privacy. More details can be checked in the Terms & Conditions.',
+      next: 'Next',
+      prev: 'Back',
+      start: 'Get Started'
+    },
     termsContent: `
     <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">1. What kind of storage is used?</h3>
     <p class="mb-4">The application uses <strong class="text-gray-900 dark:text-white">IndexedDB.</strong><br/>
@@ -149,6 +163,7 @@ export const TRANSLATIONS = {
     min: '最小',
     max: '最大',
     settings: '設定',
+    help: 'ヘルプとガイド',
     theme: 'テーマ',
     language: '言語',
     currency: '通貨',
@@ -208,6 +223,19 @@ export const TRANSLATIONS = {
     daysLeft: '日残り',
     totalItems: '合計アイテム',
     deletionInfo: 'アイテムは表示されている残り日数が経過すると完全に削除されます。',
+    onboarding: {
+      welcomeTitle: 'SmartShopへようこそ',
+      welcomeDesc: '買い物リストと家庭の在庫を整理するスマートな方法です。',
+      aiTitle: 'AIによる自動入力',
+      aiDesc: '商品の写真をアップロードするだけです。AIが名前、カテゴリー、価格を自動的に特定します。',
+      trackTitle: 'ステータス管理',
+      trackDesc: '「買うもの」「在庫あり」「残りわずか」で簡単にフィルタリングできます。アイコンをタップして切り替えます。',
+      privacyTitle: 'プライバシーとローカル保存',
+      privacyDesc: 'データと写真はすべてお使いのデバイスに直接保存されます。クラウドには送信されません。詳細は利用規約で確認できます。',
+      next: '次へ',
+      prev: '戻る',
+      start: '始める'
+    },
     termsContent: `
     <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">1. どのようなストレージを使用していますか？</h3>
     <p class="mb-4">このアプリケーションは<strong class="text-gray-900 dark:text-white">IndexedDB</strong>を使用しています。<br/>
@@ -269,6 +297,7 @@ export const TRANSLATIONS = {
     min: '最小',
     max: '最大',
     settings: '设置',
+    help: '帮助与指南',
     theme: '主题',
     language: '语言',
     currency: '货币',
@@ -328,6 +357,19 @@ export const TRANSLATIONS = {
     daysLeft: '天剩余',
     totalItems: '总项目',
     deletionInfo: '显示的剩余天数归零后，项目将被永久删除。',
+    onboarding: {
+      welcomeTitle: '欢迎使用 SmartShop',
+      welcomeDesc: '管理购物清单和家庭库存的智能方式。',
+      aiTitle: 'AI 智能录入',
+      aiDesc: '只需上传产品照片，AI 将为您识别名称、类别甚至估算价格。',
+      trackTitle: '状态追踪',
+      trackDesc: '轻松筛选“待购买”、“有库存”或“库存不足”的物品。点击图标即可快速切换状态。',
+      privacyTitle: '隐私与本地存储',
+      privacyDesc: '您的数据和照片直接存储在您的设备上。我们非常重视您的隐私。更多详情请查看条款与条件。',
+      next: '下一步',
+      prev: '返回',
+      start: '开始使用'
+    },
     termsContent: `
     <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">1. 使用了什么类型的存储？</h3>
     <p class="mb-4">应用程序使用 <strong class="text-gray-900 dark:text-white">IndexedDB</strong>。<br/>
@@ -389,6 +431,7 @@ export const TRANSLATIONS = {
     min: 'အနည်းဆုံး',
     max: 'အများဆုံး',
     settings: 'ဆက်တင်များ',
+    help: 'လမ်းညွှန်',
     theme: 'အသွင်အပြင်',
     language: 'ဘာသာစကား',
     currency: 'ငွေကြေး',
@@ -448,6 +491,19 @@ export const TRANSLATIONS = {
     daysLeft: 'ရက်ကျန်',
     totalItems: 'စုစုပေါင်း',
     deletionInfo: 'ဤအချိန်ကျော်လွန်ပါက ပစ္စည်းများ အပြီးတိုင် ပျက်သွားပါမည်။',
+    onboarding: {
+      welcomeTitle: 'SmartShop မှ ကြိုဆိုပါတယ်',
+      welcomeDesc: 'ဈေးဝယ်စာရင်းနှင့် အိမ်တွင်းပစ္စည်းများကို စနစ်တကျစီမံခန့်ခွဲနိုင်သော Smart Application ဖြစ်ပါသည်။',
+      aiTitle: 'AI အကူအညီ',
+      aiDesc: 'ကုန်ပစ္စည်းဓာတ်ပုံကို တင်လိုက်ရုံဖြင့် အမည်၊ အမျိုးအစားနှင့် ဈေးနှုန်းများကို AI က အလိုအလျောက် ဖြည့်ပေးပါလိမ့်မည်။',
+      trackTitle: 'အခြေအနေစစ်ဆေးခြင်း',
+      trackDesc: '"ဝယ်ရန်"၊ "ရှိသည်"၊ "လက်ကျန်နည်း" စသည်ဖြင့် ခွဲခြားသိမ်းဆည်းနိုင်ပြီး အိုင်ကွန်ကိုနှိပ်၍ လွယ်ကူစွာ ပြောင်းလဲနိုင်ပါသည်။',
+      privacyTitle: 'လုံခြုံမှု',
+      privacyDesc: 'သင့်ဒေတာနှင့် ဓာတ်ပုံများသည် သင့်ဖုန်း/ကွန်ပျူတာထဲတွင်သာ သိမ်းဆည်းထားမည်ဖြစ်၍ လုံခြုံမှုရှိပါသည်။ အသေးစိတ်အချက်အလက်များကို စည်းမျဉ်းများနှင့် မူဝါဒများတွင် ကြည့်ရှုနိုင်ပါသည်။',
+      next: 'ရှေ့သို့',
+      prev: 'နောက်သို့',
+      start: 'စတင်မည်'
+    },
     termsContent: `
     <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">1. မည်သို့သော Storage ကို အသုံးပြုထားသနည်း?</h3>
     <p class="mb-4">ဤ Application သည် <strong class="text-gray-900 dark:text-white">IndexedDB</strong> ကို အသုံးပြုထားပါသည်။<br/>
@@ -509,6 +565,7 @@ export const TRANSLATIONS = {
     min: '최소',
     max: '최대',
     settings: '설정',
+    help: '도움말',
     theme: '테마',
     language: '언어',
     currency: '통화',
@@ -568,6 +625,19 @@ export const TRANSLATIONS = {
     daysLeft: '일 남음',
     totalItems: '총 항목',
     deletionInfo: '표시된 일수가 지나면 항목이 영구적으로 삭제됩니다.',
+    onboarding: {
+      welcomeTitle: 'SmartShop에 오신 것을 환영합니다',
+      welcomeDesc: '쇼핑 목록과 재고를 정리하는 스마트한 방법입니다.',
+      aiTitle: 'AI 기반 입력',
+      aiDesc: '제품 사진을 업로드하기만 하면 AI가 이름, 카테고리, 예상 가격까지 자동으로 입력해 줍니다.',
+      trackTitle: '상태 추적',
+      trackDesc: '"구매 예정", "재고 있음", "재고 부족" 등으로 쉽게 분류하세요. 아이콘을 탭하여 상태를 빠르게 전환할 수 있습니다.',
+      privacyTitle: '철저한 보안',
+      privacyDesc: '모든 데이터와 사진은 기기에 직접 저장됩니다. 클라우드로 전송되지 않습니다. 자세한 내용은 이용 약관에서 확인할 수 있습니다.',
+      next: '다음',
+      prev: '이전',
+      start: '시작하기'
+    },
     termsContent: `
     <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">1. 어떤 종류의 저장소를 사용하나요?</h3>
     <p class="mb-4">이 애플리케이션은 <strong class="text-gray-900 dark:text-white">IndexedDB</strong>를 사용합니다.<br/>
