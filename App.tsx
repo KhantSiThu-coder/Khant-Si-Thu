@@ -4,6 +4,7 @@ import { ItemForm } from './components/ItemForm';
 import { ItemCard } from './components/ItemCard';
 import { RecycleBinModal } from './components/RecycleBinModal';
 import { OnboardingModal } from './components/OnboardingModal';
+import { LanguageSelectorModal } from './components/LanguageSelectorModal';
 import { loadItemsFromDB, saveItemToDB, deleteItemFromDB, initStoragePersistence, getStorageEstimate } from './services/storage';
 import { 
   Plus, Search, ShoppingBag, Utensils, Coffee, Shirt, Monitor, 
@@ -73,6 +74,7 @@ const App: React.FC = () => {
   const [isTermsOpen, setIsTermsOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+  const [isLanguageSelectorOpen, setIsLanguageSelectorOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ShoppingItem | null>(null);
   
   // Load settings from localStorage
@@ -114,9 +116,16 @@ const App: React.FC = () => {
   useEffect(() => {
     const hasSeenOnboarding = localStorage.getItem('smartshop_onboarding_seen');
     if (!hasSeenOnboarding) {
-        setIsOnboardingOpen(true);
+        setIsLanguageSelectorOpen(true);
     }
   }, []);
+
+  const handleLanguageSelect = (selectedLang: Language) => {
+    setLanguage(selectedLang);
+    setIsLanguageSelectorOpen(false);
+    // Slight delay for smooth transition
+    setTimeout(() => setIsOnboardingOpen(true), 100);
+  };
 
   const handleCloseOnboarding = () => {
     localStorage.setItem('smartshop_onboarding_seen', 'true');
@@ -1046,6 +1055,12 @@ const App: React.FC = () => {
         isOpen={isOnboardingOpen}
         onClose={handleCloseOnboarding}
         lang={language}
+      />
+
+      {/* Language Selector Modal */}
+      <LanguageSelectorModal 
+        isOpen={isLanguageSelectorOpen}
+        onSelect={handleLanguageSelect}
       />
     </div>
   );
