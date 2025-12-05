@@ -1,3 +1,4 @@
+
 export type ItemStatus = 'to-buy' | 'in-stock' | 'low' | 'dont-like';
 
 export interface MediaItem {
@@ -18,6 +19,7 @@ export interface ShoppingItem {
   media: MediaItem[];
   createdAt: number;
   deletedAt?: number;
+  expiryDate?: number;
 }
 
 export interface GeminiAnalysisResult {

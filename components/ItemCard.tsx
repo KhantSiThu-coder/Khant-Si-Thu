@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { ShoppingItem } from '../types';
-import { MapPin, Check, ShoppingCart, Trash2, Ban } from 'lucide-react';
+import { MapPin, Check, ShoppingCart, Trash2, Ban, CalendarClock } from 'lucide-react';
 import { TRANSLATIONS, Language } from '../constants';
 
 interface ItemCardProps {
@@ -161,22 +162,27 @@ export const ItemCard: React.FC<ItemCardProps> = ({
           </div>
           
           {size !== 'small' && (
-            <>
-              <div className="space-y-0.5">
-                {item.store && (
-                  <div className="flex items-center text-[10px] text-gray-500 dark:text-gray-400">
-                    <MapPin size={10} className="mr-1" />
-                    <span className="truncate">{item.store}</span>
-                  </div>
-                )}
-              </div>
-              
-              {item.notes && (
-                 <p className={`mt-1 text-[10px] text-gray-500 dark:text-gray-400 line-clamp-2 italic border-l-2 border-gray-200 dark:border-gray-700 pl-1.5 ${size === 'large' ? 'line-clamp-3' : ''}`}>
-                   {item.notes}
-                 </p>
+            <div className="space-y-0.5 mt-1">
+              {item.store && (
+                <div className="flex items-center text-[10px] text-gray-500 dark:text-gray-400">
+                  <MapPin size={10} className="mr-1" />
+                  <span className="truncate">{item.store}</span>
+                </div>
               )}
-            </>
+              {item.expiryDate && (
+                <div className="flex items-center text-[10px] text-gray-500 dark:text-gray-400" title={t.expiryDate}>
+                  <CalendarClock size={10} className="mr-1" />
+                  <span>{new Date(item.expiryDate).toLocaleDateString()}</span>
+                </div>
+              )}
+            </div>
+          )}
+          
+          {/* Notes for large/medium */}
+          {size !== 'small' && item.notes && (
+             <p className={`mt-1 text-[10px] text-gray-500 dark:text-gray-400 line-clamp-2 italic border-l-2 border-gray-200 dark:border-gray-700 pl-1.5 ${size === 'large' ? 'line-clamp-3' : ''}`}>
+               {item.notes}
+             </p>
           )}
         </div>
       </div>
