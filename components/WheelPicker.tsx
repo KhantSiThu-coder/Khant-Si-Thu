@@ -7,7 +7,7 @@ interface WheelPickerProps {
   lang?: string;
 }
 
-const ITEM_HEIGHT = 40;
+const ITEM_HEIGHT = 44; // Slightly taller for better touch target
 
 const Column = ({ 
   items, 
@@ -23,6 +23,7 @@ const Column = ({
   const scrollRef = useRef<HTMLDivElement>(null);
   const isScrollingRef = useRef(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastHapticIndex = useRef<number>(-1);
 
   // Sync scroll position with value
   useEffect(() => {
@@ -30,6 +31,7 @@ const Column = ({
       const index = items.findIndex(i => i.value === selectedValue);
       if (index !== -1) {
         scrollRef.current.scrollTop = index * ITEM_HEIGHT;
+        lastHapticIndex.current = index;
       }
     }
   }, [selectedValue, items]);
@@ -40,7 +42,17 @@ const Column = ({
 
     const target = e.currentTarget;
     const scrollTop = target.scrollTop;
+    
+    // Haptic feedback logic
+    const currentIndex = Math.round(scrollTop / ITEM_HEIGHT);
+    if (currentIndex !== lastHapticIndex.current) {
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate(5); // Ultra short tick
+      }
+      lastHapticIndex.current = currentIndex;
+    }
 
+    // Debounce selection update
     timeoutRef.current = setTimeout(() => {
       isScrollingRef.current = false;
       const index = Math.round(scrollTop / ITEM_HEIGHT);
@@ -51,35 +63,35 @@ const Column = ({
         onSelect(newItem.value);
       }
       
-      // Snap visually
-      target.scrollTo({
-        top: clampedIndex * ITEM_HEIGHT,
-        behavior: 'smooth'
-      });
-    }, 150);
+      // Snap visually to exact center if not already
+      if (target.scrollTop !== clampedIndex * ITEM_HEIGHT) {
+         target.scrollTo({
+           top: clampedIndex * ITEM_HEIGHT,
+           behavior: 'smooth'
+         });
+      }
+    }, 100);
   };
 
   return (
-    <div className={`h-[200px] relative overflow-hidden flex-1 ${className}`}>
+    <div className={`h-[220px] relative overflow-hidden flex-1 ${className}`}>
       <div 
         ref={scrollRef}
-        className="h-full overflow-y-auto snap-y snap-mandatory no-scrollbar"
+        className="h-full overflow-y-auto snap-y snap-mandatory no-scrollbar py-[88px]" // Padding = 2 * ITEM_HEIGHT
         onScroll={handleScroll}
       >
-        <div style={{ height: ITEM_HEIGHT * 2 }} />
         {items.map((item) => (
           <div 
             key={item.value} 
-            className={`h-[40px] flex items-center justify-center snap-center transition-all duration-200 ${
+            className={`h-[44px] flex items-center justify-center snap-center transition-all duration-200 select-none ${
               item.value === selectedValue 
-                ? 'text-indigo-600 dark:text-indigo-400 font-bold text-lg scale-110' 
-                : 'text-gray-400 dark:text-gray-500 text-sm'
+                ? 'text-gray-900 dark:text-white font-medium text-xl opacity-100 scale-100' 
+                : 'text-gray-400 dark:text-gray-500 text-lg opacity-40 scale-95'
             }`}
           >
             {item.label}
           </div>
         ))}
-        <div style={{ height: ITEM_HEIGHT * 2 }} />
       </div>
     </div>
   );
@@ -123,15 +135,15 @@ export const WheelPicker: React.FC<WheelPickerProps> = ({ value, onChange }) => 
   };
 
   return (
-    <div className="relative bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-      {/* Highlight Bar */}
-      <div className="absolute top-1/2 left-0 right-0 h-[40px] -translate-y-1/2 bg-gray-200/50 dark:bg-gray-600/30 pointer-events-none border-y border-gray-300/30 dark:border-gray-500/30 z-0" />
+    <div className="relative bg-white dark:bg-gray-800 rounded-2xl overflow-hidden mt-4">
+      {/* Pill Highlight - Centered */}
+      <div className="absolute top-1/2 left-4 right-4 h-[44px] -translate-y-1/2 bg-gray-100 dark:bg-gray-700 rounded-xl pointer-events-none z-0" />
       
-      {/* Gradient Overlays */}
-      <div className="absolute top-0 left-0 right-0 h-[60px] bg-gradient-to-b from-white dark:from-gray-800 to-transparent z-10 pointer-events-none opacity-80" />
-      <div className="absolute bottom-0 left-0 right-0 h-[60px] bg-gradient-to-t from-white dark:from-gray-800 to-transparent z-10 pointer-events-none opacity-80" />
+      {/* Gradient Overlays for Fade Effect */}
+      <div className="absolute top-0 left-0 right-0 h-[80px] bg-gradient-to-b from-white dark:from-gray-800 via-white/80 dark:via-gray-800/80 to-transparent z-10 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 right-0 h-[80px] bg-gradient-to-t from-white dark:from-gray-800 via-white/80 dark:via-gray-800/80 to-transparent z-10 pointer-events-none" />
 
-      <div className="flex justify-between relative z-0">
+      <div className="flex justify-between relative z-20 px-4">
         <Column 
           items={years} 
           selectedValue={currentYear} 
