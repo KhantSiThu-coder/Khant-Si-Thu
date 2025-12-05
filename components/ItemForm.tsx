@@ -2,8 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { ShoppingItem, MediaItem, ItemStatus } from '../types';
 import { MediaUploader } from './MediaUploader';
+import { WheelPicker } from './WheelPicker';
 import { analyzeItemImage } from '../services/geminiService';
-import { Loader2, Sparkles, Save, X, Trash2, Share2, Check, ThumbsDown, Info, Calendar } from 'lucide-react';
+import { Loader2, Sparkles, Save, X, Trash2, Share2, Check, Info, Calendar, ChevronDown, ChevronUp } from 'lucide-react';
 import { TRANSLATIONS, Language, CATEGORY_KEYS, Currency } from '../constants';
 
 interface ItemFormProps {
@@ -27,7 +28,6 @@ export const ItemForm: React.FC<ItemFormProps> = ({
   currencySymbol = '¥',
   enableAI = true
 }) => {
-  // Ensure we have a valid translation object, fallback to English if missing
   const t = TRANSLATIONS[lang] || TRANSLATIONS['en'];
   
   const [name, setName] = useState(initialData?.name || '');
@@ -40,15 +40,9 @@ export const ItemForm: React.FC<ItemFormProps> = ({
   const [notes, setNotes] = useState(initialData?.notes || '');
   const [media, setMedia] = useState<MediaItem[]>(initialData?.media || []);
   
-  // Expiration Date State - formatted as YYYY-MM-DD for input
-  const [expiryDate, setExpiryDate] = useState(
-    initialData?.expiryDate 
-      ? new Date(initialData.expiryDate).toISOString().split('T')[0] 
-      : ''
-  );
-  
-  // To show custom placeholder "yy/mm/dd", we start as 'text' if empty, and switch to 'date' on focus
-  const [dateInputType, setDateInputType] = useState(initialData?.expiryDate ? 'date' : 'text');
+  // Expiration Date State - Stores timestamp number or undefined
+  const [expiryDate, setExpiryDate] = useState<number | undefined>(initialData?.expiryDate);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   
   // Local state for AI toggle, initialized with the global setting
   const [isAIEnabled, setIsAIEnabled] = useState(enableAI);
@@ -87,12 +81,8 @@ export const ItemForm: React.FC<ItemFormProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Parse expiry date string to timestamp (local midnight)
-    let expiryTimestamp: number | undefined;
-    if (showExpiryDate && expiryDate) {
-      const [y, m, d] = expiryDate.split('-').map(Number);
-      expiryTimestamp = new Date(y, m - 1, d).getTime();
-    }
+    // For expiryDate, we only save if the category supports it and it is set
+    const finalExpiryDate = showExpiryDate ? expiryDate : undefined;
 
     onSubmit({
       name,
@@ -102,7 +92,7 @@ export const ItemForm: React.FC<ItemFormProps> = ({
       status,
       notes,
       media,
-      expiryDate: expiryTimestamp,
+      expiryDate: finalExpiryDate,
     });
   };
 
@@ -156,6 +146,11 @@ export const ItemForm: React.FC<ItemFormProps> = ({
       console.error("Share failed", err);
     }
   };
+
+  // Format date for display button
+  const formattedExpiryDate = expiryDate 
+    ? new Date(expiryDate).toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '/')
+    : '';
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col h-full bg-white dark:bg-gray-800 transition-colors relative">
@@ -291,22 +286,57 @@ export const ItemForm: React.FC<ItemFormProps> = ({
           </div>
 
           {showExpiryDate && (
-            <div className="animate-in fade-in slide-in-from-top-1">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-1.5">
+            <div className="animate-in fade-in slide-in-from-top-1 space-y-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
                 <Calendar size={14} className="text-gray-500 dark:text-gray-400" />
                 {t.expiryDate}
               </label>
-              <input
-                type={dateInputType}
-                value={expiryDate}
-                onChange={(e) => setExpiryDate(e.target.value)}
-                onFocus={() => setDateInputType('date')}
-                onBlur={() => {
-                   if (!expiryDate) setDateInputType('text');
+              
+              <button 
+                type="button"
+                onClick={() => {
+                   setShowDatePicker(!showDatePicker);
+                   if (!expiryDate && !showDatePicker) {
+                       // If opening and empty, set to today
+                       setExpiryDate(Date.now());
+                   }
                 }}
-                placeholder="yy/mm/dd"
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white appearance-none placeholder-gray-400 dark:placeholder-gray-500"
-              />
+                className={`w-full px-3 py-2.5 border rounded-lg outline-none flex items-center justify-between transition-colors ${
+                  showDatePicker 
+                    ? 'border-indigo-500 ring-2 ring-indigo-500/20 bg-indigo-50 dark:bg-indigo-900/10' 
+                    : 'bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-600'
+                }`}
+              >
+                <span className={expiryDate ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'}>
+                   {expiryDate ? formattedExpiryDate : 'yy/mm/dd'}
+                </span>
+                {showDatePicker ? (
+                    <ChevronUp size={16} className="text-indigo-500" />
+                ) : (
+                    <ChevronDown size={16} className="text-gray-400" />
+                )}
+              </button>
+
+              {showDatePicker && (
+                <div className="animate-in slide-in-from-top-2 fade-in duration-200">
+                    <WheelPicker 
+                        value={expiryDate} 
+                        onChange={setExpiryDate}
+                    />
+                    <div className="flex justify-end mt-2">
+                       <button
+                         type="button"
+                         onClick={() => {
+                             setExpiryDate(undefined);
+                             setShowDatePicker(false);
+                         }}
+                         className="text-xs text-red-500 hover:text-red-600 hover:underline px-2 py-1"
+                       >
+                         Clear
+                       </button>
+                    </div>
+                </div>
+              )}
             </div>
           )}
 
