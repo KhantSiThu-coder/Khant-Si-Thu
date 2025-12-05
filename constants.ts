@@ -16,7 +16,7 @@ export const CURRENCY_OPTIONS: {value: Currency, label: string, symbol: string}[
 
 export const TRANSLATIONS = {
   en: {
-    appName: 'SmartShop',
+    appName: 'SmartStack',
     all: 'All Items',
     search: 'Search items...',
     filter: 'Filter:',
@@ -90,7 +90,7 @@ export const TRANSLATIONS = {
     totalItems: 'Total items',
     deletionInfo: 'Items show the days remaining before deletion. After that time, items will be permanently deleted.',
     onboarding: {
-      welcomeTitle: 'Welcome to SmartShop',
+      welcomeTitle: 'Welcome to SmartStack',
       welcomeDesc: 'The intelligent way to organize your shopping list and home inventory.',
       aiTitle: 'AI-Powered Entry',
       aiDesc: 'Simply upload a photo of a product. Our AI will identify the name, category, and even estimate the price for you.',
@@ -111,7 +111,7 @@ export const TRANSLATIONS = {
     <p class="mb-2"><strong class="text-gray-900 dark:text-white">They are stored locally on the user's device.</strong></p>
     <ul class="list-disc pl-5 mb-4 space-y-1">
       <li><strong class="text-gray-900 dark:text-white">No Cloud Server:</strong> The app does not upload your photos or videos to a cloud server (like AWS S3, Firebase, or a dedicated backend).</li>
-      <li><strong class="text-gray-900 dark:text-white">Local Blob Storage:</strong> When a user selects a file, the binary data (the file itself) is saved directly into the browser's IndexedDB database under the store name SmartShopDB.</li>
+      <li><strong class="text-gray-900 dark:text-white">Local Blob Storage:</strong> When a user selects a file, the binary data (the file itself) is saved directly into the browser's IndexedDB database under the store name SmartStackDB.</li>
       <li>Note: There is one exception. If the user uses the "AI Auto-fill" feature, the image is temporarily sent to Google's Gemini API for analysis, but it is not stored there permanently for the app's hosting purposes.</li>
     </ul>
 
@@ -150,7 +150,7 @@ export const TRANSLATIONS = {
     }
   },
   ja: {
-    appName: 'SmartShop',
+    appName: 'SmartStack',
     all: 'すべて',
     search: '検索...',
     filter: 'フィルター:',
@@ -224,7 +224,7 @@ export const TRANSLATIONS = {
     totalItems: '合計アイテム',
     deletionInfo: 'アイテムは表示されている残り日数が経過すると完全に削除されます。',
     onboarding: {
-      welcomeTitle: 'SmartShopへようこそ',
+      welcomeTitle: 'SmartStackへようこそ',
       welcomeDesc: '買い物リストと家庭の在庫を整理するスマートな方法です。',
       aiTitle: 'AIによる自動入力',
       aiDesc: '商品の写真をアップロードするだけです。AIが名前、カテゴリー、価格を自動的に特定します。',
@@ -245,7 +245,7 @@ export const TRANSLATIONS = {
     <p class="mb-2"><strong class="text-gray-900 dark:text-white">すべて「ユーザーのデバイス内」に保存されます。</strong></p>
     <ul class="list-disc pl-5 mb-4 space-y-1">
       <li><strong class="text-gray-900 dark:text-white">クラウドサーバーなし:</strong> このアプリは、写真や動画をAWSやFirebaseなどのクラウドサーバーにアップロードしません。</li>
-      <li><strong class="text-gray-900 dark:text-white">ローカル保存:</strong> ユーザーがファイルを選択すると、そのデータはブラウザ内のIndexedDBに直接保存されます。</li>
+      <li><strong class="text-gray-900 dark:text-white">ローカル保存:</strong> ユーザーがファイルを選択すると、そのデータはブラウザ内のIndexedDBに直接保存されます。ストア名は SmartStackDB です。</li>
       <li>注意: 「AI自動入力」機能を使用する場合のみ、画像分析のために一時的にGoogle Gemini APIに送信されますが、アプリのホスティング目的で永続的に保存されることはありません。</li>
     </ul>
 
@@ -256,35 +256,35 @@ export const TRANSLATIONS = {
     <p class="mb-2"><strong class="text-gray-900 dark:text-white">データの安全性の観点: 中程度のリスク。</strong></p>
     <p class="mb-2">クラウドバックアップがないため、以下の点にご注意ください。</p>
     <ul class="list-disc pl-5 mb-4 space-y-1">
-      <li>ブラウザの「サイトデータ」や「キャッシュ」を削除すると、<strong class="text-gray-900 dark:text-white">写真を含むすべてのデータが消えます。</strong></li>
-      <li>スマートフォンを紛失したり、故障した場合、データの復旧はできません。
-      <li>デバイス間（スマホとPCなど）でのデータ同期は行われません。</li>
+      <li>ユーザーがブラウザの「サイトデータ」や「キャッシュ」を削除すると、<strong class="text-gray-900 dark:text-white">すべてのデータ（写真を含む）が失われます。</strong></li>
+      <li>スマホを紛失したり、パソコンが故障した場合、データの復旧はできません。</li>
+      <li>デバイス間でのデータ同期（例：スマホで追加したアイテムがPCに表示されるなど）は行われません。</li>
     </ul>
 
     <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">4. データはいつまで保存されますか？</h3>
-    <p class="mb-2">基本的に<strong class="text-gray-900 dark:text-white">無期限</strong>ですが、いくつかの条件があります。</p>
+    <p class="mb-2">基本的には<strong class="text-gray-900 dark:text-white">無期限</strong>ですが、いくつかの条件があります。</p>
     <ul class="list-disc pl-5 mb-4 space-y-1">
-      <li><strong class="text-gray-900 dark:text-white">永続化リクエスト:</strong> アプリはブラウザに対してデータを自動削除しないよう要求しています。許可されれば、データは安定して保持されます。</li>
-      <li><strong class="text-gray-900 dark:text-white">ユーザーの操作:</strong> ユーザーが削除しない限り残ります。</li>
+      <li><strong class="text-gray-900 dark:text-white">永続化リクエスト:</strong> コードは storage.ts 内の initStoragePersistence() を呼び出しています。これはブラウザに対してデータを自動削除しないよう要求しています。許可されれば、データは安定して保持されます。</li>
+      <li><strong class="text-gray-900 dark:text-white">ユーザー操作:</strong> ユーザーが削除しない限り残ります。</li>
       <li><strong class="text-gray-900 dark:text-white">ゴミ箱のロジック:</strong> 「ゴミ箱」に入れたアイテムは、<strong class="text-gray-900 dark:text-white">30日</strong>経過すると自動的に完全に削除されます。</li>
     </ul>
 
-    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">ユーザーへの要約</h3>
-    <p>あなたのデータは、あなたのデバイス内にプライベートに保存されています。個人の写真をクラウドにアップロードすることはありません。ただし、ブラウザのデータをクリアするとリストが失われるため、ご注意ください。</p>
+    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">ユーザーへのまとめ</h3>
+    <p>あなたのデータは機密に保存されています。私たちはあなたの個人的な写真をクラウドにアップロードしません。ただし、このサイトのブラウザデータを削除しないでください。削除するとリストが失われます。</p>
     `,
     categories: {
-      'Cooking Ingredients': '食材',
+      'Cooking Ingredients': '料理の材料',
       'Food & Drinks': '食品・飲料',
       'Household products': '日用品',
       'Cosmetics': '化粧品',
-      'Medicine': '医薬品',
+      'Medicine': '薬品',
       'Clothing': '衣類',
-      'Electronics': '家電',
+      'Electronics': '電子製品',
       'Others': 'その他'
     }
   },
   zh: {
-    appName: 'SmartShop',
+    appName: 'SmartStack',
     all: '所有物品',
     search: '搜索...',
     filter: '筛选:',
@@ -302,7 +302,7 @@ export const TRANSLATIONS = {
     language: '语言',
     currency: '货币',
     enableAI: '启用 AI 自动填充',
-    aiLanguageWarning: 'AI 自动填充仅支持英语。',
+    aiLanguageWarning: 'AI 自动填充功能目前仅支持英语。',
     light: '浅色',
     dark: '深色',
     system: '跟随系统',
@@ -313,7 +313,7 @@ export const TRANSLATIONS = {
     edit: '编辑',
     create: '新建物品',
     mediaTitle: '照片与视频',
-    uploadTip: '上传照片，AI将自动填写详情！',
+    uploadTip: '上传照片，AI将自动填充详情！',
     analyzing: '分析中...',
     nameLabel: '名称',
     namePlaceholder: '例如：牛奶、电池',
@@ -350,18 +350,18 @@ export const TRANSLATIONS = {
     footerClickHere: '点击这里',
     share: '分享',
     shareSuccess: '链接已复制！',
-    shareWarning: '链接已生成。注意：照片/视频无法共享。',
+    shareWarning: '链接已生成。注意：照片/视频无法分享。',
     itemImported: '已导入分享的物品！',
     termsAndConditions: '条款与隐私',
     termsTitle: '数据存储与隐私政策',
     daysLeft: '天剩余',
     totalItems: '总项目',
-    deletionInfo: '显示的剩余天数归零后，项目将被永久删除。',
+    deletionInfo: '显示的倒计时结束后，项目将被永久删除。',
     onboarding: {
-      welcomeTitle: '欢迎使用 SmartShop',
+      welcomeTitle: '欢迎使用 SmartStack',
       welcomeDesc: '管理购物清单和家庭库存的智能方式。',
-      aiTitle: 'AI 智能录入',
-      aiDesc: '只需上传产品照片，AI 将为您识别名称、类别甚至估算价格。',
+      aiTitle: 'AI 智能导入',
+      aiDesc: '只需上传产品照片，AI 将为您识别名称、类别，甚至估算价格。',
       trackTitle: '状态追踪',
       trackDesc: '轻松筛选“待购买”、“有库存”或“库存不足”的物品。点击图标即可快速切换状态。',
       privacyTitle: '隐私与本地存储',
@@ -371,32 +371,32 @@ export const TRANSLATIONS = {
       start: '开始使用'
     },
     termsContent: `
-    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">1. 使用了什么类型的存储？</h3>
+    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">1. 使用了什么样的存储？</h3>
     <p class="mb-4">应用程序使用 <strong class="text-gray-900 dark:text-white">IndexedDB</strong>。<br/>
-    这是现代网络浏览器提供的标准底层 API，用于直接在用户浏览器中存储大量结构化数据（包括文件/图像）。</p>
+    这是现代Web浏览器提供的标准API，用于在用户浏览器内直接存储大量结构化数据（包括文件/图片）。</p>
 
     <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">2. 媒体文件上传到了哪里？</h3>
-    <p class="mb-2"><strong class="text-gray-900 dark:text-white">它们存储在用户设备的本地。</strong></p>
+    <p class="mb-2"><strong class="text-gray-900 dark:text-white">它们存储在用户的设备本地。</strong></p>
     <ul class="list-disc pl-5 mb-4 space-y-1">
-      <li><strong class="text-gray-900 dark:text-white">无云端服务器：</strong> 此应用不会将您的照片或视频上传到云服务器（如 AWS S3、Firebase 或专用后端）。</li>
-      <li><strong class="text-gray-900 dark:text-white">本地 Blob 存储：</strong> 当用户选择文件时，二进制数据（文件本身）直接保存到浏览器的 IndexedDB 数据库中。</li>
+      <li><strong class="text-gray-900 dark:text-white">无云服务器：</strong> 此应用不会将您的照片或视频上传到云服务器（如 AWS S3、Firebase 或专用后端）。</li>
+      <li><strong class="text-gray-900 dark:text-white">本地 Blob 存储：</strong> 当用户选择文件时，二进制数据（文件本身）直接保存到浏览器的 IndexedDB 数据库中，存储名称为 SmartStackDB。</li>
       <li>注意：有一个例外。如果用户使用“AI 自动填充”功能，图像会临时发送到 Google Gemini API 进行分析，但不会为了应用的托管目的而永久存储。</li>
     </ul>
 
     <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">3. 安全吗？</h3>
     <p class="mb-2"><strong class="text-gray-900 dark:text-white">隐私方面：是的。</strong></p>
-    <p class="mb-4">由于数据存储在用户设备上，开发者和其他用户无法查看您的数据。它对于特定的浏览器和设备是完全私密的。</p>
+    <p class="mb-4">由于数据存储在用户设备上，开发者和其他用户无法查看您的数据。它对特定的浏览器和设备是完全保密的。</p>
 
     <p class="mb-2"><strong class="text-gray-900 dark:text-white">数据安全方面：中等风险。</strong></p>
     <p class="mb-2">因为没有云备份：</p>
     <ul class="list-disc pl-5 mb-4 space-y-1">
-      <li>如果用户清除浏览器的“站点数据”或“缓存”，<strong class="text-gray-900 dark:text-white">所有数据（包括照片）都将丢失。</strong></li>
+      <li>如果用户清除浏览器的“站点数据”或“缓存”，<strong class="text-gray-900 dark:text-white">所有数据（包括照片）将会丢失。</strong></li>
       <li>如果手机丢失或电脑崩溃，数据将无法恢复。</li>
-      <li>数据不会在设备之间同步（例如，在手机上添加的物品不会显示在电脑上）。</li>
+      <li>数据不会在设备间同步（例如，在手机上添加的物品不会显示在电脑上）。</li>
     </ul>
 
     <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">4. 媒体文件能保存多久？</h3>
-    <p class="mb-2">媒体文件将<strong class="text-gray-900 dark:text-white">无限期</strong>保存，但有特定条件：</p>
+    <p class="mb-2">媒体文件会<strong class="text-gray-900 dark:text-white">无限期</strong>保存，但有特定条件：</p>
     <ul class="list-disc pl-5 mb-4 space-y-1">
       <li><strong class="text-gray-900 dark:text-white">持久化请求：</strong> 代码调用了 storage.ts 中的 initStoragePersistence()。这请求浏览器不要自动删除数据，即使设备存储空间不足。如果浏览器批准，数据将非常稳定。</li>
       <li><strong class="text-gray-900 dark:text-white">用户操作：</strong> 除非用户明确删除物品，否则媒体将一直保留。</li>
@@ -404,7 +404,7 @@ export const TRANSLATIONS = {
     </ul>
 
     <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">给用户的总结</h3>
-    <p>您的数据私密地存储在您的设备上。我们不会将您的个人照片上传到云端。但是，请不要清除此网站的浏览器数据，否则您的清单将会丢失。</p>
+    <p>您的数据私密地存储在您的设备上。我们不会将您的个人照片上传到云端。但是，请不要清除此网站的浏览器数据（Clear Data），否则您将丢失清单。</p>
     `,
     categories: {
       'Cooking Ingredients': '烹饪原料',
@@ -418,141 +418,141 @@ export const TRANSLATIONS = {
     }
   },
   my: {
-    appName: 'SmartShop',
+    appName: 'SmartStack',
     all: 'ပစ္စည်းအားလုံး',
-    search: 'ရှာဖွေရန်...',
-    filter: 'စစ်ထုတ်ရန်:',
+    search: 'ရှာဖွေပါ...',
+    filter: 'စစ်ထုတ်ပါ:',
     toBuy: 'ဝယ်ရန်',
-    low: 'လက်ကျန်နည်း',
-    inStock: 'ရှိသည်',
-    dontLike: "မဝယ်တော့ပါ",
-    price: 'ဈေးနှုန်း',
-    priceRange: 'ဈေးနှုန်း အကွာအဝေး',
+    low: 'လက်ကျန်နည်းနေ',
+    inStock: 'လက်ကျန်ရှိ',
+    dontLike: "မကြိုက်ပါ",
+    price: 'စျေးနှုန်း',
+    priceRange: 'စျေးနှုန်း အတိုင်းအတာ',
     min: 'အနည်းဆုံး',
     max: 'အများဆုံး',
     settings: 'ဆက်တင်များ',
-    help: 'လမ်းညွှန်',
-    theme: 'အသွင်အပြင်',
+    help: 'အကူအညီ',
+    theme: 'ဒီဇိုင်း',
     language: 'ဘာသာစကား',
     currency: 'ငွေကြေး',
-    enableAI: 'AI အလိုအလျောက်ဖြည့်သွင်းမှုကို ဖွင့်ရန်',
-    aiLanguageWarning: 'AI ဖြင့် အချက်အလက်ဖြည့်သွင်းခြင်းကို အင်္ဂလိပ်စာဖြင့်သာ ရရှိနိုင်ပါသည်။',
+    enableAI: 'AI အလိုအလျောက်ဖြည့်သွင်းခြင်း',
+    aiLanguageWarning: 'AI အသုံးပြု၍ အသေးစိတ်ဖြည့်သွင်းခြင်းသည် အင်္ဂလိပ်ဘာသာဖြင့်သာ ရရှိနိုင်ပါသည်။',
     light: 'အလင်း',
     dark: 'အမှောင်',
     system: 'System အတိုင်း',
-    close: 'ပိတ်ရန်',
-    save: 'သိမ်းဆည်းရန်',
-    delete: 'ဖျက်ရန်',
+    close: 'ပိတ်မည်',
+    save: 'သိမ်းဆည်းမည်',
+    delete: 'ဖျက်မည်',
     cancel: 'မလုပ်တော့ပါ',
-    edit: 'ပြင်ဆင်ရန်',
-    create: 'အသစ်ဖန်တီးရန်',
-    mediaTitle: 'ဓာတ်ပုံနှင့်ဗီဒီယိုများ',
-    uploadTip: 'ဓာတ်ပုံတင်ပြီး AI ဖြင့်အချက်အလက်များကို အလိုအလျောက်ဖြည့်ပါ!',
-    analyzing: 'လေ့လာဆန်းစစ်နေသည်...',
-    nameLabel: 'ပစ္စည်းအမည်',
-    namePlaceholder: 'ဥပမာ - နို့၊ ဓာတ်ခဲ',
+    edit: 'ပြင်ဆင်မည်',
+    create: 'အသစ်ဖန်တီးမည်',
+    mediaTitle: 'ပုံများနှင့် ဗီဒီယိုများ',
+    uploadTip: 'ပုံကိုတင်လိုက်ပါ၊ AI မှ အလိုအလျောက် ဖြည့်သွင်းပေးပါလိမ့်မည်!',
+    analyzing: 'လေ့လာဆန်းစစ်နေပါသည်...',
+    nameLabel: 'အမည်',
+    namePlaceholder: 'ဥပမာ - နွားနို့၊ ဓာတ်ခဲ',
     catLabel: 'အမျိုးအစား',
-    priceLabel: 'ဈေးနှုန်း',
+    priceLabel: 'စျေးနှုန်း',
     storeLabel: 'ဆိုင် / နေရာ',
-    storePlaceholder: 'ဥပမာ - စူပါမားကတ်၊ အွန်လိုင်း',
+    storePlaceholder: 'ဥပမာ - ဆူပါမားကတ်၊ အွန်လိုင်း',
     statusLabel: 'အခြေအနေ',
-    noteLabel: 'မှတ်ချက်များ',
+    noteLabel: 'မှတ်ချက်',
     notePlaceholder: 'အရွယ်အစား၊ အရောင်၊ အရေအတွက် စသည်',
     dontKnow: "မသိပါ",
-    noItems: 'ပစ္စည်းမတွေ့ပါ',
-    emptyState: 'စစ်ထုတ်မှုများ သို့မဟုတ် ရှာဖွေမှုကို ပြင်ဆင်ကြည့်ပါ။',
-    createFirst: 'ပထမဆုံးပစ္စည်းကို ဖန်တီးပါ',
-    markBought: 'ဝယ်ပြီးကြောင်းမှတ်သားမည်',
-    addList: 'စာရင်းထဲထည့်မည်',
+    noItems: 'ပစ္စည်းမရှိပါ',
+    emptyState: 'စစ်ထုတ်မှု သို့မဟုတ် ရှာဖွေမှုကို ပြောင်းလဲကြည့်ပါ။',
+    createFirst: 'ပထမဆုံး ပစ္စည်းကို ဖန်တီးမည်',
+    markBought: 'ဝယ်ပြီးကြောင်း မှတ်သားမည်',
+    addList: 'စာရင်းထဲ ထည့်မည်',
     confirmDelete: 'ဤပစ္စည်းကို ဖျက်မည်မှာ သေချာပါသလား?',
-    addMedia: 'မီဒီယာထည့်ရန်',
+    addMedia: 'မီဒီယာထည့်မည်',
     recycleBin: 'အမှိုက်ပုံး',
-    recentlyDeleted: 'မကြာသေးမီက ဖျက်လိုက်သည်များ',
-    openRecycleBin: 'မကြာသေးမီက ဖျက်လိုက်သည်များ',
-    restore: 'ပြန်လည်ရယူရန်',
-    deletePermanently: 'အပြီးတိုင်ဖျက်ရန်',
-    emptyBin: 'အမှိုက်ပုံးရှင်းရန်',
-    noTrashItems: 'အမှိုက်ပုံး ရှင်းနေပါသည်',
-    trashTip: 'ပစ္စည်းများကို ရက် ၃၀ ကြာလျှင် အလိုအလျောက် ဖျက်ပါမည်။',
+    recentlyDeleted: 'မကြာသေးမီက ဖျက်ခဲ့သည်များ',
+    openRecycleBin: 'မကြာသေးမီက ဖျက်ခဲ့သည်များ',
+    restore: 'ပြန်ယူမည်',
+    deletePermanently: 'အပြီးတိုင်ဖျက်မည်',
+    emptyBin: 'အမှိုက်ပုံး ရှင်းမည်',
+    noTrashItems: 'အမှိုက်ပုံးမှာ ဘာမှမရှိပါ',
+    trashTip: 'ပစ္စည်းများသည် ရက် ၃၀ ကြာလျှင် အလိုအလျောက် ဖျက်သိမ်းသွားပါမည်။',
     itemMovedToTrash: 'ပစ္စည်းကို အမှိုက်ပုံးသို့ ရွှေ့လိုက်ပါပြီ',
-    undo: 'ပြန်သွားရန်',
+    undo: 'ပြန်ပြင်မည်',
     storage: 'သိုလှောင်ခန်း',
     used: 'သုံးပြီး',
-    available: 'ကျန်ရှိ',
+    available: 'အလွတ်ကျန်',
     footerCreatedBy: 'ဖန်တီးသူ -',
-    footerEmailPrompt: 'ဤ Web App အတွက် အကြံဉာဏ်များရှိပါက ကျွန်ုပ်ထံ အီးမေးလ်ပေးပို့နိုင်ပါသည်။',
-    footerClickHere: 'ဒီမှာနှိပ်ပါ',
-    share: 'မျှဝေရန်',
-    shareSuccess: 'လင့်ခ်ကို ကူးယူပြီးပါပြီ!',
-    shareWarning: 'လင့်ခ်ထုတ်ပြီးပါပြီ။ ဓာတ်ပုံ/ဗီဒီယိုများ မပါဝင်ပါ။',
-    itemImported: 'မျှဝေထားသောပစ္စည်းကို ထည့်သွင်းပြီးပါပြီ!',
-    termsAndConditions: 'စည်းမျဉ်းများနှင့် မူဝါဒများ',
-    termsTitle: 'ဒေတာသိမ်းဆည်းမှုနှင့် လုံခြုံရေးမူဝါဒ',
+    footerEmailPrompt: 'ဤ Web App အတွက် အကြံဉာဏ်များရှိပါက အီးမေးလ်ပို့နိုင်ပါသည်။',
+    footerClickHere: 'ဒီနေရာကိုနှိပ်ပါ။',
+    share: 'မျှဝေမည်',
+    shareSuccess: 'လင့်ခ်ကို ကူးယူလိုက်ပါပြီ!',
+    shareWarning: 'လင့်ခ်ထုတ်ပြီးပါပြီ။ သတိပြုရန်: ဓာတ်ပုံ/ဗီဒီယိုများ မပါဝင်ပါ။',
+    itemImported: 'မျှဝေထားသော ပစ္စည်းကို ထည့်သွင်းလိုက်ပါပြီ!',
+    termsAndConditions: 'စည်းကမ်းနှင့်မူဝါဒ',
+    termsTitle: 'ဒေတာသိမ်းဆည်းမှုနှင့် ကိုယ်ရေးအချက်အလက် မူဝါဒ',
     daysLeft: 'ရက်ကျန်',
     totalItems: 'စုစုပေါင်း',
-    deletionInfo: 'ဤအချိန်ကျော်လွန်ပါက ပစ္စည်းများ အပြီးတိုင် ပျက်သွားပါမည်။',
+    deletionInfo: 'ပြထားသော ရက်အရေအတွက် ကုန်ဆုံးပြီးနောက်၊ ပစ္စည်းများ အပြီးတိုင် ဖျက်သိမ်းသွားပါမည်။',
     onboarding: {
-      welcomeTitle: 'SmartShop မှ ကြိုဆိုပါတယ်',
-      welcomeDesc: 'ဈေးဝယ်စာရင်းနှင့် အိမ်တွင်းပစ္စည်းများကို စနစ်တကျစီမံခန့်ခွဲနိုင်သော Smart Application ဖြစ်ပါသည်။',
+      welcomeTitle: 'SmartStack မှ ကြိုဆိုပါ၏',
+      welcomeDesc: 'စျေးဝယ်စာရင်းနှင့် အိမ်တွင်းပစ္စည်းများကို စီမံခန့်ခွဲမည့် စမတ်ကျသောနည်းလမ်း ဖြစ်ပါသည်။',
       aiTitle: 'AI အကူအညီ',
-      aiDesc: 'ကုန်ပစ္စည်းဓာတ်ပုံကို တင်လိုက်ရုံဖြင့် အမည်၊ အမျိုးအစားနှင့် ဈေးနှုန်းများကို AI က အလိုအလျောက် ဖြည့်ပေးပါလိမ့်မည်။',
-      trackTitle: 'အခြေအနေစစ်ဆေးခြင်း',
-      trackDesc: '"ဝယ်ရန်"၊ "ရှိသည်"၊ "လက်ကျန်နည်း" စသည်ဖြင့် ခွဲခြားသိမ်းဆည်းနိုင်ပြီး အိုင်ကွန်ကိုနှိပ်၍ လွယ်ကူစွာ ပြောင်းလဲနိုင်ပါသည်။',
-      privacyTitle: 'လုံခြုံမှု',
-      privacyDesc: 'သင့်ဒေတာနှင့် ဓာတ်ပုံများသည် သင့်ဖုန်း/ကွန်ပျူတာထဲတွင်သာ သိမ်းဆည်းထားမည်ဖြစ်၍ လုံခြုံမှုရှိပါသည်။ အသေးစိတ်အချက်အလက်များကို စည်းမျဉ်းများနှင့် မူဝါဒများတွင် ကြည့်ရှုနိုင်ပါသည်။',
+      aiDesc: 'ကုန်ပစ္စည်းပုံကို တင်လိုက်ရုံပါပဲ။ AI က အမည်၊ အမျိုးအစား၊ စျေးနှုန်းတို့ကို အလိုအလျောက် ခန့်မှန်းပေးပါလိမ့်မည်။',
+      trackTitle: 'အခြေအနေစောင့်ကြည့်',
+      trackDesc: '"ဝယ်ရန်"၊ "လက်ကျန်ရှိ"၊ "လက်ကျန်နည်း" စသည်ဖြင့် လွယ်ကူစွာ စစ်ထုတ်နိုင်ပါသည်။ အိုင်ကွန်ကိုနှိပ်၍ အခြေအနေ အမြန်ပြောင်းနိုင်ပါသည်။',
+      privacyTitle: 'လုံခြုံစိတ်ချမှု',
+      privacyDesc: 'ဒေတာနှင့်ပုံများကို သင့်ဖုန်းထဲမှာပဲ သိမ်းဆည်းထားပါသည်။ သင့်ကိုယ်ရေးလုံခြုံမှုကို ကျွန်ုပ်တို့ လေးစားပါသည်။ အသေးစိတ်ကို စည်းကမ်းချက်များတွင် ကြည့်ရှုနိုင်ပါသည်။',
       next: 'ရှေ့သို့',
       prev: 'နောက်သို့',
       start: 'စတင်မည်'
     },
     termsContent: `
-    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">1. မည်သို့သော Storage ကို အသုံးပြုထားသနည်း?</h3>
+    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">1. ဘယ်လို Storage ကို အသုံးပြုထားသလဲ?</h3>
     <p class="mb-4">ဤ Application သည် <strong class="text-gray-900 dark:text-white">IndexedDB</strong> ကို အသုံးပြုထားပါသည်။<br/>
-    ၎င်းသည် ခေတ်မီ Web Browser များတွင် ပါဝင်သော စနစ်တစ်ခုဖြစ်ပြီး ဒေတာများ၊ ဓာတ်ပုံများကို Browser အတွင်း၌ပင် တိုက်ရိုက်သိမ်းဆည်းပေးပါသည်။</p>
+    ဒါဟာ ခေတ်မီ Web Browser များက ပေးစွမ်းသော စံပြု API ဖြစ်ပြီး၊ ဖိုင်များနှင့် ပုံများအပါအဝင် ဖွဲ့စည်းပုံကျသော ဒေတာများကို သုံးစွဲသူ၏ Browser အတွင်း၌ တိုက်ရိုက်သိမ်းဆည်းပေးသည့် နည်းလမ်းဖြစ်ပါသည်။</p>
 
-    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">2. ဓာတ်ပုံနှင့် ဗီဒီယိုများကို ဘယ်မှာသိမ်းဆည်းသနည်း?</h3>
-    <p class="mb-2"><strong class="text-gray-900 dark:text-white">၎င်းတို့ကို သင့်ဖုန်း/ကွန်ပျူတာထဲတွင်သာ သိမ်းဆည်းပါသည်။</strong></p>
+    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">2. မီဒီယာဖိုင်တွေကို ဘယ်မှာ Upload လုပ်သလဲ?</h3>
+    <p class="mb-2"><strong class="text-gray-900 dark:text-white">သူတို့ကို သုံးစွဲသူ၏ စက်အတွင်းမှာပဲ သိမ်းဆည်းပါသည်။</strong></p>
     <ul class="list-disc pl-5 mb-4 space-y-1">
-      <li><strong class="text-gray-900 dark:text-white">Cloud Server မရှိပါ:</strong> ဤ App သည် သင့်ဓာတ်ပုံများကို အင်တာနက်ပေါ်ရှိ Server များ (AWS, Firebase စသည်) သို့ ပေးပို့ခြင်းမရှိပါ။</li>
-      <li><strong class="text-gray-900 dark:text-white">Local Storage:</strong> သင်ရွေးချယ်လိုက်သော ဖိုင်များသည် သင့် Browser ၏ Database ထဲသို့ တိုက်ရိုက်ရောက်ရှိသွားပါသည်။</li>
-      <li>မှတ်ချက်: "AI Auto-fill" ကိုအသုံးပြုပါက ဓာတ်ပုံကို Google Gemini API သို့ ခေတ္တခဏ ပေးပို့၍ အချက်အလက်ဖတ်ရှုမည်ဖြစ်သော်လည်း အမြဲတမ်းသိမ်းဆည်းထားမည် မဟုတ်ပါ။</li>
+      <li><strong class="text-gray-900 dark:text-white">Cloud Server မရှိပါ:</strong> ဤ App သည် ဓာတ်ပုံနှင့် ဗီဒီယိုများကို Cloud Server (AWS, Firebase စသည်) သို့ Upload မလုပ်ပါ။</li>
+      <li><strong class="text-gray-900 dark:text-white">Local Blob သိမ်းဆည်းမှု:</strong> သုံးစွဲသူက ဖိုင်ကို ရွေးချယ်လိုက်သောအခါ၊ ထိုဒေတာ (ဖိုင်ကိုယ်တိုင်) သည် Browser ၏ IndexedDB ဒေတာဘေ့စ် (SmartStackDB) အတွင်းသို့ တိုက်ရိုက်သိမ်းဆည်းသွားပါသည်။</li>
+      <li>မှတ်ချက်: တစ်ခုတည်းသော ခြွင်းချက်မှာ အကယ်၍ သုံးစွဲသူက "AI အလိုအလျောက်ဖြည့်သွင်းခြင်း" လုပ်ဆောင်ချက်ကို သုံးလျှင် ပုံရိပ်ခွဲခြမ်းစိတ်ဖြာမှုအတွက် ယာယီအားဖြင့် Google Gemini API သို့ ပေးပို့ရသော်လည်း၊ အက်ပ်၏ Hosting ရည်ရွယ်ချက်အတွက် အမြဲတမ်းသိမ်းဆည်းထားခြင်း မရှိပါ။</li>
     </ul>
 
-    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">3. လုံခြုံမှုရှိပါသလား?</h3>
-    <p class="mb-2"><strong class="text-gray-900 dark:text-white">ကိုယ်ရေးကိုယ်တာလုံခြုံမှု: ရှိပါသည်။</strong></p>
-    <p class="mb-4">ဒေတာများသည် သင့်စက်ထဲတွင်သာ ရှိသောကြောင့် ဖန်တီးသူ (ကျွန်ုပ်) သော်လည်းကောင်း၊ အခြားသူများသော်လည်းကောင်း သင့်ဒေတာကို မမြင်နိုင်ပါ။</p>
+    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">3. စိတ်ချရပါသလား?</h3>
+    <p class="mb-2"><strong class="text-gray-900 dark:text-white">ကိုယ်ရေးလုံခြုံမှုအတွက်: စိတ်ချရပါသည်။</strong></p>
+    <p class="mb-4">ဒေတာသည် သုံးစွဲသူ၏ စက်ထဲမှာသာ ရှိနေသောကြောင့်၊ Developer နှင့် အခြားသူများက သင့်ဒေတာကို မမြင်နိုင်ပါ။ သီးသန့် လုံခြုံမှုရှိပါသည်။</p>
 
-    <p class="mb-2"><strong class="text-gray-900 dark:text-white">ဒေတာပျောက်ဆုံးနိုင်မှု: အသင့်အတင့်ရှိပါသည်။</strong></p>
+    <p class="mb-2"><strong class="text-gray-900 dark:text-white">ဒေတာလုံခြုံမှုအတွက်: အတော်အသင့် သတိပြုရပါမည်။</strong></p>
     <p class="mb-2">Cloud Backup မရှိသောကြောင့် -</p>
     <ul class="list-disc pl-5 mb-4 space-y-1">
-      <li>Browser ၏ "Site Data" သို့မဟုတ် "Clear Cache" လုပ်လိုက်ပါက <strong class="text-gray-900 dark:text-white">ဓာတ်ပုံများအပါအဝင် ဒေတာအားလုံး ပျက်သွားပါမည်။</strong></li>
-      <li>ဖုန်းပျောက်သွားပါက (သို့) ပျက်သွားပါက ဒေတာများပြန်ယူ၍ မရနိုင်ပါ။</li>
-      <li>စက်တစ်လုံးနှင့်တစ်လုံး ချိတ်ဆက်ထားခြင်းမရှိပါ (ဥပမာ- ဖုန်းထဲတွင် မှတ်ထားသည်ကို ကွန်ပျူတာတွင် မပေါ်နိုင်ပါ)။</li>
+      <li>Browser ၏ "Site Data" သို့မဟုတ် "Cache" ကို ရှင်းလိုက်လျှင် <strong class="text-gray-900 dark:text-white">ဒေတာအားလုံး (ဓာတ်ပုံများအပါအဝင်) ပျက်စီးသွားပါမည်။</strong></li>
+      <li>ဖုန်းပျောက်သွားလျှင် သို့မဟုတ် ကွန်ပျူတာ ပျက်သွားလျှင် ဒေတာကို ပြန်ယူ၍ မရနိုင်ပါ။</li>
+      <li>စက်ပစ္စည်းအချင်းချင်း ဒေတာ ချိတ်ဆက်မှု မရှိပါ (ဥပမာ - ဖုန်းမှာထည့်ထားသော ပစ္စည်းသည် ကွန်ပျူတာပေါ်တွင် ပေါ်လာမည်မဟုတ်ပါ)။</li>
     </ul>
 
-    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">4. မီဒီယာဖိုင်များ ဘယ်လောက်ကြာကြာခံမည်နည်း?</h3>
-    <p class="mb-2">ပုံမှန်အားဖြင့် <strong class="text-gray-900 dark:text-white">အကန့်အသတ်မရှိ</strong> ခံပါသည်။</p>
+    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">4. မီဒီယာတွေ ဘယ်လောက်ကြာကြာ ခံမလဲ?</h3>
+    <p class="mb-2">ပုံမှန်အားဖြင့် <strong class="text-gray-900 dark:text-white">အကန့်အသတ်မရှိ</strong> ခံနိုင်ပေမယ့်၊ အချက်အလက်အချို့ ရှိပါသည် -</p>
     <ul class="list-disc pl-5 mb-4 space-y-1">
-      <li><strong class="text-gray-900 dark:text-white">Persistence:</strong> သင့်ဖုန်း Storage ပြည့်နေလျှင်တောင် Browser မှ ဒေတာများကို အလိုအလျောက်မဖျက်ရန် App က တောင်းဆိုထားပါသည်။</li>
-      <li><strong class="text-gray-900 dark:text-white">User Action:</strong> သင်ကိုယ်တိုင် မဖျက်မချင်း ရှိနေပါမည်။</li>
-      <li><strong class="text-gray-900 dark:text-white">အမှိုက်ပုံး:</strong> "Recycle Bin" ထဲရောက်နေသော ပစ္စည်းများကို <strong class="text-gray-900 dark:text-white">ရက် ၃၀</strong> ကြာပါက အလိုအလျောက် အပြီးတိုင် ဖျက်ဆီးပါမည်။</li>
+      <li><strong class="text-gray-900 dark:text-white">Persistence Request:</strong> ကုဒ်က Browser ထံ ဒေတာကို အလိုအလျောက် မဖျက်ပါနဲ့လို့ တောင်းဆိုထားပါတယ် (Persistent Storage)။ Browser က ဒါကို ခွင့်ပြုရင် ဒေတာက အလွန် တည်ငြိမ်နေမှာပါ။</li>
+      <li><strong class="text-gray-900 dark:text-white">User Action:</strong> သုံးစွဲသူက သီးခြား ဖျက်မပစ်မချင်း မီဒီယာတွေ ရှိနေပါမည်။</li>
+      <li><strong class="text-gray-900 dark:text-white">အမှိုက်ပုံး လောဂျစ်:</strong> "Recycle Bin" ထဲ ရောက်နေသော ပစ္စည်းများသည် <strong class="text-gray-900 dark:text-white">ရက် ၃၀</strong> ကျော်လွန်ပါက အလိုအလျောက် အပြီးတိုင် ဖျက်သိမ်းသွားပါမည်။</li>
     </ul>
 
     <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">အနှစ်ချုပ်</h3>
-    <p>သင့်ဒေတာများသည် သင့်စက်ထဲတွင်သာ သီးသန့်ရှိနေပါသည်။ သင့်ကိုယ်ရေးကိုယ်တာပုံများကို အင်တာနက်ပေါ်သို့ တင်ခြင်းမရှိပါ။ သို့သော် ဤဆိုက်အတွက် Browser Data များကို ရှင်းလင်းခြင်း (Clear Data) မပြုလုပ်မိရန် သတိပြုပါ။</p>
+    <p>သင့်ဒေတာသည် သင့်စက်ထဲတွင် လုံခြုံစွာ သိမ်းဆည်းထားပါသည်။ သင့်ကိုယ်ရေးကိုယ်တာ ဓာတ်ပုံများကို Cloud ပေါ်သို့ မတင်ပါ။ သို့သော် Browser Data (Clear Data) ကို မရှင်းမိပါစေနှင့်၊ ရှင်းလိုက်ပါက စာရင်းများ ပျက်သွားပါလိမ့်မည်။</p>
     `,
     categories: {
-      'Cooking Ingredients': 'ချက်ပြုတ်ပစ္စည်းများ',
+      'Cooking Ingredients': 'ဟင်းချက် ပစ္စည်းများ',
       'Food & Drinks': 'အစားအသောက်',
-      'Household products': 'အိမ်သုံးပစ္စည်းများ',
+      'Household products': 'အိမ်သုံးပစ္စည်း',
       'Cosmetics': 'အလှကုန်',
       'Medicine': 'ဆေးဝါး',
-      'Clothing': 'အဝတ်အစား',
+      'Clothing': 'အဝတ်အထည်',
       'Electronics': 'လျှပ်စစ်ပစ္စည်း',
       'Others': 'အခြား'
     }
   },
   ko: {
-    appName: 'SmartShop',
+    appName: 'SmartStack',
     all: '모든 항목',
     search: '검색...',
     filter: '필터:',
@@ -594,7 +594,7 @@ export const TRANSLATIONS = {
     notePlaceholder: '크기, 색상, 수량 등',
     dontKnow: "모름",
     noItems: '항목을 찾을 수 없습니다',
-    emptyState: '필터나 검색어를 조정해 보세요.',
+    emptyState: '필터나 검색어를 조절해 보세요.',
     createFirst: '첫 번째 항목 만들기',
     markBought: '구매 완료 표시',
     addList: '목록에 추가',
@@ -608,12 +608,12 @@ export const TRANSLATIONS = {
     emptyBin: '휴지통 비우기',
     noTrashItems: '휴지통이 비어 있습니다',
     trashTip: '항목은 30일 후 자동으로 삭제됩니다.',
-    itemMovedToTrash: '항목이 휴지통으로 이동되었습니다',
+    itemMovedToTrash: '항목이 휴지통으로 이동했습니다',
     undo: '실행 취소',
     storage: '저장 공간',
     used: '사용됨',
     available: '사용 가능',
-    footerCreatedBy: '제작:',
+    footerCreatedBy: '제작자:',
     footerEmailPrompt: '이 앱에 대한 아이디어가 있으시면 언제든지 이메일을 보내주세요.',
     footerClickHere: '여기를 클릭하세요',
     share: '공유',
@@ -626,28 +626,28 @@ export const TRANSLATIONS = {
     totalItems: '총 항목',
     deletionInfo: '표시된 일수가 지나면 항목이 영구적으로 삭제됩니다.',
     onboarding: {
-      welcomeTitle: 'SmartShop에 오신 것을 환영합니다',
+      welcomeTitle: 'SmartStack에 오신 것을 환영합니다',
       welcomeDesc: '쇼핑 목록과 재고를 정리하는 스마트한 방법입니다.',
       aiTitle: 'AI 기반 입력',
       aiDesc: '제품 사진을 업로드하기만 하면 AI가 이름, 카테고리, 예상 가격까지 자동으로 입력해 줍니다.',
       trackTitle: '상태 추적',
       trackDesc: '"구매 예정", "재고 있음", "재고 부족" 등으로 쉽게 분류하세요. 아이콘을 탭하여 상태를 빠르게 전환할 수 있습니다.',
-      privacyTitle: '철저한 보안',
+      privacyTitle: '안전한 보안',
       privacyDesc: '모든 데이터와 사진은 기기에 직접 저장됩니다. 클라우드로 전송되지 않습니다. 자세한 내용은 이용 약관에서 확인할 수 있습니다.',
       next: '다음',
       prev: '이전',
       start: '시작하기'
     },
     termsContent: `
-    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">1. 어떤 종류의 저장소를 사용하나요?</h3>
+    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">1. 어떤 저장소를 사용하나요?</h3>
     <p class="mb-4">이 애플리케이션은 <strong class="text-gray-900 dark:text-white">IndexedDB</strong>를 사용합니다.<br/>
     이는 최신 웹 브라우저에서 제공하는 표준 API로, 파일이나 사진을 포함한 구조화된 데이터를 사용자의 브라우저 내부에 직접 저장합니다.</p>
 
     <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">2. 미디어 파일은 어디에 업로드되나요?</h3>
-    <p class="mb-2"><strong class="text-gray-900 dark:text-white">사용자의 기기에 로컬로 저장됩니다.</strong></p>
+    <p class="mb-2"><strong class="text-gray-900 dark:text-white">사용자의 기기 내에만 저장됩니다.</strong></p>
     <ul class="list-disc pl-5 mb-4 space-y-1">
       <li><strong class="text-gray-900 dark:text-white">클라우드 서버 없음:</strong> 이 앱은 사진이나 동영상을 클라우드 서버(AWS, Firebase 등)에 업로드하지 않습니다.</li>
-      <li><strong class="text-gray-900 dark:text-white">로컬 Blob 저장소:</strong> 파일을 선택하면 바이너리 데이터(파일 자체)가 브라우저의 IndexedDB 데이터베이스에 직접 저장됩니다.</li>
+      <li><strong class="text-gray-900 dark:text-white">로컬 Blob 저장소:</strong> 파일을 선택하면 바이너리 데이터(파일 자체)가 브라우저의 IndexedDB 데이터베이스(SmartStackDB)에 직접 저장됩니다.</li>
       <li>참고: 한 가지 예외가 있습니다. "AI 자동 완성" 기능을 사용하는 경우, 이미지 분석을 위해 일시적으로 Google Gemini API로 전송되지만, 앱 호스팅 목적으로 영구 저장되지는 않습니다.</li>
     </ul>
 
