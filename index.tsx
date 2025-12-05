@@ -7,6 +7,15 @@ if (!rootElement) {
   throw new Error("Could not find root element to mount to");
 }
 
+// Unregister existing service workers to prevent 404 errors in development/preview
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    for (const registration of registrations) {
+      registration.unregister();
+    }
+  });
+}
+
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>

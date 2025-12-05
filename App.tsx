@@ -112,18 +112,27 @@ const App: React.FC = () => {
     localStorage.setItem('smartshop_settings', JSON.stringify(settingsToSave));
   }, [language, theme, currency, enableAI, cardSize]);
 
-  // Check for first-time visit
+  // Check for first-time visit logic
   useEffect(() => {
+    const hasSelectedLanguage = localStorage.getItem('smartshop_language_selected');
     const hasSeenOnboarding = localStorage.getItem('smartshop_onboarding_seen');
-    if (!hasSeenOnboarding) {
+    
+    // If language hasn't been explicitly selected (fresh install), show selector
+    if (!hasSelectedLanguage) {
         setIsLanguageSelectorOpen(true);
+    } 
+    // If language is set but onboarding hasn't been seen, show onboarding
+    else if (!hasSeenOnboarding) {
+        setIsOnboardingOpen(true);
     }
   }, []);
 
   const handleLanguageSelect = (selectedLang: Language) => {
     setLanguage(selectedLang);
+    // Mark language as selected immediately so reload doesn't trigger it again
+    localStorage.setItem('smartshop_language_selected', 'true');
     setIsLanguageSelectorOpen(false);
-    // Slight delay for smooth transition
+    // Slight delay for smooth transition to onboarding
     setTimeout(() => setIsOnboardingOpen(true), 100);
   };
 
