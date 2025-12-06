@@ -172,7 +172,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
               {item.expiryDate && (
                 <div className="flex items-center text-[10px] text-gray-500 dark:text-gray-400" title={t.expiryDate}>
                   <CalendarClock size={10} className="mr-1" />
-                  <span>{new Date(item.expiryDate).toLocaleDateString()}</span>
+                  <span>{new Date(item.expiryDate).toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' })}</span>
                 </div>
               )}
             </div>
