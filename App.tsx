@@ -181,8 +181,10 @@ const App: React.FC = () => {
     const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
     if (isDark) {
       root.classList.add('dark');
+      root.style.colorScheme = 'dark';
     } else {
       root.classList.remove('dark');
+      root.style.colorScheme = 'light';
     }
   }, [theme]);
 
@@ -756,7 +758,7 @@ const App: React.FC = () => {
                       value={priceRange.min}
                       onChange={(e) => setPriceRange({...priceRange, min: e.target.value})}
                       placeholder={t.min}
-                      className="w-20 px-2 py-1 text-sm border dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 outline-none dark:bg-gray-700 dark:text-white"
+                      className="w-20 px-2 py-1 text-sm border bg-white text-gray-900 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 outline-none dark:bg-gray-700 dark:text-white"
                     />
                     <span className="text-gray-400">-</span>
                     <input 
@@ -764,7 +766,7 @@ const App: React.FC = () => {
                       value={priceRange.max}
                       onChange={(e) => setPriceRange({...priceRange, max: e.target.value})}
                       placeholder={t.max}
-                      className="w-20 px-2 py-1 text-sm border dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 outline-none dark:bg-gray-700 dark:text-white"
+                      className="w-20 px-2 py-1 text-sm border bg-white text-gray-900 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 outline-none dark:bg-gray-700 dark:text-white"
                     />
                   </div>
                 </div>
@@ -777,7 +779,7 @@ const App: React.FC = () => {
                     type="date" 
                     value={expiryFilterDate}
                     onChange={(e) => setExpiryFilterDate(e.target.value)}
-                    className="px-2 py-1 text-sm border dark:border-gray-600 rounded focus:ring-2 focus:ring-purple-500 outline-none dark:bg-gray-700 dark:text-white"
+                    className="px-2 py-1 text-sm border bg-white text-gray-900 dark:border-gray-600 rounded focus:ring-2 focus:ring-purple-500 outline-none dark:bg-gray-700 dark:text-white"
                   />
                 </div>
               )}
