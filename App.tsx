@@ -262,45 +262,49 @@ const App: React.FC = () => {
 
   // Check for upcoming expirations once items are loaded
   useEffect(() => {
-    if (!isLoading && items.length > 0 && !hasCheckedExpiryRef.current) {
+    // Only run if loading is finished and we haven't checked yet
+    if (!isLoading && !hasCheckedExpiryRef.current) {
       
-      const now = new Date();
-      // Normalize today to start of day for accurate comparison
-      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-      
-      // Calculate date 3 days from now (inclusive range: today, +1, +2, +3)
-      const thresholdDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 3);
-      thresholdDate.setHours(23, 59, 59, 999);
-      const threshold = thresholdDate.getTime();
-
-      const upcoming = items.filter(item => {
-        // Exclude deleted items
-        if (item.deletedAt) return false;
-        
-        // Only verify items that are 'owned' (in-stock or low stock)
-        // Usually 'to-buy' items don't expire until purchased, but we can relax this check if user sets dates on 'to-buy'
-        // For now, strict checking for in-stock/low makes sense for inventory tracking
-        if (item.status !== 'in-stock' && item.status !== 'low') return false;
-        
-        // Skip items without date
-        if (!item.expiryDate) return false;
-
-        // Check if date is within [Today, Today+3] range
-        // Also check if item is already expired (before today) but not deleted? 
-        // The prompt asks for "upcoming... within 3 days". 
-        // We assume expired items should also be flagged if they haven't been dealt with.
-        // Let's stick to the prompt: 12/08 and 12/09 should appear if today is 12/06.
-        return item.expiryDate >= todayStart && item.expiryDate <= threshold;
-      });
-
-      if (upcoming.length > 0) {
-        // Sort by expiry date (soonest first)
-        upcoming.sort((a, b) => (a.expiryDate || 0) - (b.expiryDate || 0));
-        setExpiringItems(upcoming);
-        setIsExpiryAlertOpen(true);
-      }
-      
+      // Mark as checked immediately to ensure it doesn't run again when items update (e.g. first add)
       hasCheckedExpiryRef.current = true;
+
+      if (items.length > 0) {
+        const now = new Date();
+        // Normalize today to start of day for accurate comparison
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        
+        // Calculate date 3 days from now (inclusive range: today, +1, +2, +3)
+        const thresholdDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 3);
+        thresholdDate.setHours(23, 59, 59, 999);
+        const threshold = thresholdDate.getTime();
+
+        const upcoming = items.filter(item => {
+          // Exclude deleted items
+          if (item.deletedAt) return false;
+          
+          // Only verify items that are 'owned' (in-stock or low stock)
+          // Usually 'to-buy' items don't expire until purchased, but we can relax this check if user sets dates on 'to-buy'
+          // For now, strict checking for in-stock/low makes sense for inventory tracking
+          if (item.status !== 'in-stock' && item.status !== 'low') return false;
+          
+          // Skip items without date
+          if (!item.expiryDate) return false;
+
+          // Check if date is within [Today, Today+3] range
+          // Also check if item is already expired (before today) but not deleted? 
+          // The prompt asks for "upcoming... within 3 days". 
+          // We assume expired items should also be flagged if they haven't been dealt with.
+          // Let's stick to the prompt: 12/08 and 12/09 should appear if today is 12/06.
+          return item.expiryDate >= todayStart && item.expiryDate <= threshold;
+        });
+
+        if (upcoming.length > 0) {
+          // Sort by expiry date (soonest first)
+          upcoming.sort((a, b) => (a.expiryDate || 0) - (b.expiryDate || 0));
+          setExpiringItems(upcoming);
+          setIsExpiryAlertOpen(true);
+        }
+      }
     }
   }, [isLoading, items]);
 
