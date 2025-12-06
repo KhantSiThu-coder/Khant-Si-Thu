@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ShoppingItem, ItemStatus } from './types';
 import { ItemForm } from './components/ItemForm';
@@ -5,12 +6,13 @@ import { ItemCard } from './components/ItemCard';
 import { RecycleBinModal } from './components/RecycleBinModal';
 import { OnboardingModal } from './components/OnboardingModal';
 import { LanguageSelectorModal } from './components/LanguageSelectorModal';
+import { ExpirationAlertModal } from './components/ExpirationAlertModal';
 import { loadItemsFromDB, saveItemToDB, deleteItemFromDB, initStoragePersistence, getStorageEstimate } from './services/storage';
 import { 
   Plus, Search, ShoppingBag, Utensils, Coffee, Shirt, Monitor, 
   MoreHorizontal, ListFilter, SlidersHorizontal, Grid3X3, Grid2X2, RectangleHorizontal, 
   CheckCircle2, AlertCircle, PackageCheck, Settings, X, Moon, Sun, MonitorSmartphone, Languages,
-  Coins, Trash2, Undo2, Database, HardDrive, Download, Menu, Sparkles, Palette, Pill, FileText, Ban, Home, HelpCircle
+  Coins, Trash2, Undo2, Database, HardDrive, Download, Menu, Sparkles, Palette, Pill, FileText, Ban, Home, HelpCircle, Calendar
 } from 'lucide-react';
 import { TRANSLATIONS, Language, CATEGORY_KEYS, Currency, CURRENCY_OPTIONS } from './constants';
 
@@ -147,8 +149,19 @@ const App: React.FC = () => {
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState('');
   const [activeStatuses, setActiveStatuses] = useState<ItemStatus[]>([]);
+  
+  // Price Filter
   const [isPriceFilterActive, setIsPriceFilterActive] = useState(false);
   const [priceRange, setPriceRange] = useState<{min: string, max: string}>({min: '', max: ''});
+
+  // Expiration Filter
+  const [isExpiryFilterActive, setIsExpiryFilterActive] = useState(false);
+  const [expiryFilterDate, setExpiryFilterDate] = useState<string>(new Date().toISOString().split('T')[0]);
+
+  // Expiration Alert State
+  const hasCheckedExpiryRef = useRef(false);
+  const [isExpiryAlertOpen, setIsExpiryAlertOpen] = useState(false);
+  const [expiringItems, setExpiringItems] = useState<ShoppingItem[]>([]);
 
   // Toast State
   const [showToast, setShowToast] = useState(false);
@@ -244,6 +257,50 @@ const App: React.FC = () => {
     };
     loadData();
   }, []);
+
+  // Check for upcoming expirations once items are loaded
+  useEffect(() => {
+    if (!isLoading && items.length > 0 && !hasCheckedExpiryRef.current) {
+      
+      const now = new Date();
+      // Normalize today to start of day for accurate comparison
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+      
+      // Calculate date 3 days from now (inclusive range: today, +1, +2, +3)
+      const thresholdDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 3);
+      thresholdDate.setHours(23, 59, 59, 999);
+      const threshold = thresholdDate.getTime();
+
+      const upcoming = items.filter(item => {
+        // Exclude deleted items
+        if (item.deletedAt) return false;
+        
+        // Only verify items that are 'owned' (in-stock or low stock)
+        // Usually 'to-buy' items don't expire until purchased, but we can relax this check if user sets dates on 'to-buy'
+        // For now, strict checking for in-stock/low makes sense for inventory tracking
+        if (item.status !== 'in-stock' && item.status !== 'low') return false;
+        
+        // Skip items without date
+        if (!item.expiryDate) return false;
+
+        // Check if date is within [Today, Today+3] range
+        // Also check if item is already expired (before today) but not deleted? 
+        // The prompt asks for "upcoming... within 3 days". 
+        // We assume expired items should also be flagged if they haven't been dealt with.
+        // Let's stick to the prompt: 12/08 and 12/09 should appear if today is 12/06.
+        return item.expiryDate >= todayStart && item.expiryDate <= threshold;
+      });
+
+      if (upcoming.length > 0) {
+        // Sort by expiry date (soonest first)
+        upcoming.sort((a, b) => (a.expiryDate || 0) - (b.expiryDate || 0));
+        setExpiringItems(upcoming);
+        setIsExpiryAlertOpen(true);
+      }
+      
+      hasCheckedExpiryRef.current = true;
+    }
+  }, [isLoading, items]);
 
   // Update storage stats when settings open
   useEffect(() => {
@@ -425,8 +482,23 @@ const App: React.FC = () => {
         matchesPrice = p >= min && p <= max;
       }
     }
+
+    let matchesExpiry = true;
+    if (isExpiryFilterActive && expiryFilterDate) {
+       if (!item.expiryDate) {
+         matchesExpiry = false;
+       } else {
+         const itemDate = new Date(item.expiryDate);
+         itemDate.setHours(0,0,0,0);
+         const filterDate = new Date(expiryFilterDate);
+         filterDate.setHours(0,0,0,0);
+         
+         // Display item if it expires ON or BEFORE the filter date
+         matchesExpiry = itemDate.getTime() <= filterDate.getTime();
+       }
+    }
     
-    return matchesSearch && matchesCategory && matchesStatus && matchesPrice;
+    return matchesSearch && matchesCategory && matchesStatus && matchesPrice && matchesExpiry;
   });
 
   const trashItems = items.filter(item => item.deletedAt).sort((a, b) => (b.deletedAt || 0) - (a.deletedAt || 0));
@@ -563,118 +635,153 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          {/* Filter & View Controls Bar */}
-          <div className="px-4 pb-3 flex flex-wrap items-center gap-3 border-t border-gray-100 dark:border-gray-700 pt-3">
-            <div className="flex items-center gap-2 mr-auto overflow-x-auto no-scrollbar mask-gradient">
-               {/* Status Filters */}
-               <button 
-                 onClick={() => toggleStatusFilter('to-buy')}
-                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
-                   activeStatuses.includes('to-buy') 
-                   ? 'bg-indigo-100 border-indigo-200 text-indigo-700 dark:bg-indigo-900/40 dark:border-indigo-800 dark:text-indigo-300' 
-                   : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
-                 }`}
-               >
-                 <CheckCircle2 size={14} /> {t.toBuy}
-               </button>
+          {/* Filter & View Controls Bar - Reorganized for Mobile Rows */}
+          <div className="px-4 pb-3 border-t border-gray-100 dark:border-gray-700 pt-3">
+             <div className="flex flex-col md:flex-row md:items-center gap-3">
                
-               <button 
-                 onClick={() => toggleStatusFilter('low')}
-                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
-                   activeStatuses.includes('low') 
-                   ? 'bg-orange-100 border-orange-200 text-orange-700 dark:bg-orange-900/40 dark:border-orange-800 dark:text-orange-300' 
-                   : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
-                 }`}
-               >
-                 <AlertCircle size={14} /> {t.low}
-               </button>
+               {/* Group 1: Status Filters (Row 1 on Mobile - Grid layout to avoid scroll) */}
+               <div className="grid grid-cols-4 gap-2 w-full md:w-auto md:flex md:items-center md:gap-1.5">
+                  <button 
+                    onClick={() => toggleStatusFilter('to-buy')}
+                    className={`w-full md:w-auto justify-center flex items-center gap-1 px-2 py-2 md:py-1.5 rounded-lg md:rounded-full text-[9px] sm:text-xs font-medium border transition-all ${
+                      activeStatuses.includes('to-buy') 
+                      ? 'bg-indigo-100 border-indigo-200 text-indigo-700 dark:bg-indigo-900/40 dark:border-indigo-800 dark:text-indigo-300' 
+                      : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
+                    }`}
+                  >
+                    <CheckCircle2 size={16} strokeWidth={2.5} /> <span className="truncate">{t.toBuy}</span>
+                  </button>
+                  
+                  <button 
+                    onClick={() => toggleStatusFilter('low')}
+                    className={`w-full md:w-auto justify-center flex items-center gap-1 px-2 py-2 md:py-1.5 rounded-lg md:rounded-full text-[9px] sm:text-xs font-medium border transition-all ${
+                      activeStatuses.includes('low') 
+                      ? 'bg-orange-100 border-orange-200 text-orange-700 dark:bg-orange-900/40 dark:border-orange-800 dark:text-orange-300' 
+                      : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
+                    }`}
+                  >
+                    <AlertCircle size={16} strokeWidth={2.5} /> <span className="truncate">{t.low}</span>
+                  </button>
 
-               <button 
-                 onClick={() => toggleStatusFilter('in-stock')}
-                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
-                   activeStatuses.includes('in-stock') 
-                   ? 'bg-green-100 border-green-200 text-green-700 dark:bg-green-900/40 dark:border-green-800 dark:text-green-300' 
-                   : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
-                 }`}
-               >
-                 <PackageCheck size={14} /> {t.inStock}
-               </button>
+                  <button 
+                    onClick={() => toggleStatusFilter('in-stock')}
+                    className={`w-full md:w-auto justify-center flex items-center gap-1 px-2 py-2 md:py-1.5 rounded-lg md:rounded-full text-[9px] sm:text-xs font-medium border transition-all ${
+                      activeStatuses.includes('in-stock') 
+                      ? 'bg-green-100 border-green-200 text-green-700 dark:bg-green-900/40 dark:border-green-800 dark:text-green-300' 
+                      : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
+                    }`}
+                  >
+                    <PackageCheck size={16} strokeWidth={2.5} /> <span className="truncate">{t.inStock}</span>
+                  </button>
 
-               <button 
-                 onClick={() => toggleStatusFilter('dont-like')}
-                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
-                   activeStatuses.includes('dont-like') 
-                   ? 'bg-red-100 border-red-200 text-red-700 dark:bg-red-900/40 dark:border-red-800 dark:text-red-300' 
-                   : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
-                 }`}
-               >
-                 <Ban size={14} /> {t.dontLike}
-               </button>
+                  <button 
+                    onClick={() => toggleStatusFilter('dont-like')}
+                    className={`w-full md:w-auto justify-center flex items-center gap-1 px-2 py-2 md:py-1.5 rounded-lg md:rounded-full text-[9px] sm:text-xs font-medium border transition-all ${
+                      activeStatuses.includes('dont-like') 
+                      ? 'bg-red-100 border-red-200 text-red-700 dark:bg-red-900/40 dark:border-red-800 dark:text-red-300' 
+                      : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
+                    }`}
+                  >
+                    <Ban size={16} strokeWidth={2.5} /> <span className="truncate">{t.dontLike}</span>
+                  </button>
+               </div>
 
-               <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1"></div>
+               {/* Divider for Desktop */}
+               <div className="hidden md:block w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1"></div>
 
-               {/* Price Filter Toggle */}
-               <button 
-                 onClick={() => setIsPriceFilterActive(!isPriceFilterActive)}
-                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
-                   isPriceFilterActive 
-                   ? 'bg-blue-100 border-blue-200 text-blue-700 dark:bg-blue-900/40 dark:border-blue-800 dark:text-blue-300' 
-                   : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
-                 }`}
-               >
-                 <SlidersHorizontal size={14} /> {t.price}
-               </button>
-            </div>
+               {/* Group 2: Secondary Filters & View Controls (Row 2 on Mobile) */}
+               <div className="flex items-center justify-between flex-1 gap-3">
+                   <div className="flex items-center gap-2">
+                       {/* Price Filter Toggle */}
+                       <button 
+                         onClick={() => setIsPriceFilterActive(!isPriceFilterActive)}
+                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                           isPriceFilterActive 
+                           ? 'bg-blue-100 border-blue-200 text-blue-700 dark:bg-blue-900/40 dark:border-blue-800 dark:text-blue-300' 
+                           : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
+                         }`}
+                       >
+                         <SlidersHorizontal size={14} /> {t.price}
+                       </button>
 
-            {/* View Size Controls */}
-            <div className="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5 ml-auto">
-              <button 
-                onClick={() => setCardSize('small')}
-                className={`p-1.5 rounded-md transition-all ${cardSize === 'small' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-800 dark:text-white' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}`}
-                title="Small View"
-              >
-                <Grid3X3 size={16} />
-              </button>
-              <button 
-                onClick={() => setCardSize('medium')}
-                className={`p-1.5 rounded-md transition-all ${cardSize === 'medium' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-800 dark:text-white' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}`}
-                title="Medium View"
-              >
-                <Grid2X2 size={16} />
-              </button>
-              <button 
-                onClick={() => setCardSize('large')}
-                className={`p-1.5 rounded-md transition-all ${cardSize === 'large' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-800 dark:text-white' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}`}
-                title="Large View"
-              >
-                <RectangleHorizontal size={16} />
-              </button>
-            </div>
-          </div>
+                       {/* Expiration Date Filter Toggle */}
+                       <button 
+                         onClick={() => setIsExpiryFilterActive(!isExpiryFilterActive)}
+                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                           isExpiryFilterActive 
+                           ? 'bg-purple-100 border-purple-200 text-purple-700 dark:bg-purple-900/40 dark:border-purple-800 dark:text-purple-300' 
+                           : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
+                         }`}
+                       >
+                         <Calendar size={14} /> {t.expiryDate}
+                       </button>
+                   </div>
 
-          {/* Expandable Price Range Panel */}
-          {isPriceFilterActive && (
-             <div className="px-4 pb-3 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700 flex items-center gap-4 animate-in slide-in-from-top-2 fade-in duration-200">
-               <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">{t.priceRange} ({currencySymbol}):</span>
-               <div className="flex items-center gap-2">
-                 <input 
-                   type="number" 
-                   value={priceRange.min}
-                   onChange={(e) => setPriceRange({...priceRange, min: e.target.value})}
-                   placeholder={t.min}
-                   className="w-20 px-2 py-1 text-sm border dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 outline-none dark:bg-gray-700 dark:text-white"
-                 />
-                 <span className="text-gray-400">-</span>
-                 <input 
-                   type="number" 
-                   value={priceRange.max}
-                   onChange={(e) => setPriceRange({...priceRange, max: e.target.value})}
-                   placeholder={t.max}
-                   className="w-20 px-2 py-1 text-sm border dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 outline-none dark:bg-gray-700 dark:text-white"
-                 />
+                   {/* View Size Controls */}
+                   <div className="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5 ml-auto">
+                      <button 
+                        onClick={() => setCardSize('small')}
+                        className={`p-1.5 rounded-md transition-all ${cardSize === 'small' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-800 dark:text-white' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}`}
+                        title="Small View"
+                      >
+                        <Grid3X3 size={16} />
+                      </button>
+                      <button 
+                        onClick={() => setCardSize('medium')}
+                        className={`p-1.5 rounded-md transition-all ${cardSize === 'medium' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-800 dark:text-white' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}`}
+                        title="Medium View"
+                      >
+                        <Grid2X2 size={16} />
+                      </button>
+                      <button 
+                        onClick={() => setCardSize('large')}
+                        className={`p-1.5 rounded-md transition-all ${cardSize === 'large' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-800 dark:text-white' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}`}
+                        title="Large View"
+                      >
+                        <RectangleHorizontal size={16} />
+                      </button>
+                   </div>
                </div>
              </div>
-          )}
+          </div>
+
+          {/* Expandable Price/Expiry Panels - Stacked if both open */}
+          <div className="flex flex-col">
+              {isPriceFilterActive && (
+                <div className="px-4 pb-3 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700 flex items-center gap-4 animate-in slide-in-from-top-2 fade-in duration-200">
+                  <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">{t.priceRange} ({currencySymbol}):</span>
+                  <div className="flex items-center gap-2">
+                    <input 
+                      type="number" 
+                      value={priceRange.min}
+                      onChange={(e) => setPriceRange({...priceRange, min: e.target.value})}
+                      placeholder={t.min}
+                      className="w-20 px-2 py-1 text-sm border dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 outline-none dark:bg-gray-700 dark:text-white"
+                    />
+                    <span className="text-gray-400">-</span>
+                    <input 
+                      type="number" 
+                      value={priceRange.max}
+                      onChange={(e) => setPriceRange({...priceRange, max: e.target.value})}
+                      placeholder={t.max}
+                      className="w-20 px-2 py-1 text-sm border dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 outline-none dark:bg-gray-700 dark:text-white"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {isExpiryFilterActive && (
+                <div className="px-4 pb-3 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700 flex items-center gap-4 animate-in slide-in-from-top-2 fade-in duration-200">
+                  <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">{t.expiryDate} (&le;):</span>
+                  <input 
+                    type="date" 
+                    value={expiryFilterDate}
+                    onChange={(e) => setExpiryFilterDate(e.target.value)}
+                    className="px-2 py-1 text-sm border dark:border-gray-600 rounded focus:ring-2 focus:ring-purple-500 outline-none dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+              )}
+          </div>
         </header>
 
         {/* Scrollable List */}
@@ -1057,6 +1164,14 @@ const App: React.FC = () => {
         onEmptyBin={handleEmptyBin}
         lang={language}
         currencySymbol={currencySymbol}
+      />
+
+      {/* Expiration Alert Modal */}
+      <ExpirationAlertModal
+        isOpen={isExpiryAlertOpen}
+        onClose={() => setIsExpiryAlertOpen(false)}
+        items={expiringItems}
+        lang={language}
       />
 
       {/* Onboarding Wizard */}

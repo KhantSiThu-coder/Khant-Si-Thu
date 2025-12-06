@@ -1,4 +1,5 @@
 
+
 export type Language = 'en' | 'ja' | 'zh' | 'my' | 'ko';
 
 export const CATEGORY_KEYS = ['Cooking Ingredients', 'Food & Drinks', 'Household products', 'Cosmetics', 'Medicine', 'Clothing', 'Electronics', 'Others'];
@@ -90,6 +91,9 @@ export const TRANSLATIONS = {
     daysLeft: 'days left',
     totalItems: 'Total items',
     deletionInfo: 'Items show the days remaining before deletion. After that time, items will be permanently deleted.',
+    expiryAlertTitle: 'Expiration Alert',
+    expiryAlertDesc: 'The following items are expiring within 3 days:',
+    dismiss: 'Dismiss',
     onboarding: {
       welcomeTitle: 'Welcome to SmartStack',
       welcomeDesc: 'The intelligent way to organize your shopping list and home inventory.',
@@ -225,6 +229,9 @@ export const TRANSLATIONS = {
     daysLeft: '日残り',
     totalItems: '合計アイテム',
     deletionInfo: 'アイテムは表示されている残り日数が経過すると完全に削除されます。',
+    expiryAlertTitle: '期限切れアラート',
+    expiryAlertDesc: '以下のアイテムは3日以内に期限切れになります：',
+    dismiss: '閉じる',
     onboarding: {
       welcomeTitle: 'SmartStackへようこそ',
       welcomeDesc: '買い物リストと家庭の在庫を整理するスマートな方法です。',
@@ -360,6 +367,9 @@ export const TRANSLATIONS = {
     daysLeft: '天剩余',
     totalItems: '总项目',
     deletionInfo: '显示的倒计时结束后，项目将被永久删除。',
+    expiryAlertTitle: '过期提醒',
+    expiryAlertDesc: '以下物品将在3天内过期：',
+    dismiss: '关闭',
     onboarding: {
       welcomeTitle: '欢迎使用 SmartStack',
       welcomeDesc: '管理购物清单和家庭库存的智能方式。',
@@ -495,6 +505,9 @@ export const TRANSLATIONS = {
     daysLeft: 'ရက်ကျန်',
     totalItems: 'စုစုပေါင်း',
     deletionInfo: 'ပြထားသော ရက်အရေအတွက် ကုန်ဆုံးပြီးနောက်၊ ပစ္စည်းများ အပြီးတိုင် ဖျက်သိမ်းသွားပါမည်။',
+    expiryAlertTitle: 'သက်တမ်းကုန်ဆုံးမည့် သတိပေးချက်',
+    expiryAlertDesc: 'အောက်ပါပစ္စည်းများသည် ၃ ရက်အတွင်း သက်တမ်းကုန်ဆုံးပါမည် -',
+    dismiss: 'ပိတ်မည်',
     onboarding: {
       welcomeTitle: 'SmartStack မှ ကြိုဆိုပါ၏',
       welcomeDesc: 'စျေးဝယ်စာရင်းနှင့် အိမ်တွင်းပစ္စည်းများကို စီမံခန့်ခွဲမည့် စမတ်ကျသောနည်းလမ်း ဖြစ်ပါသည်။',
@@ -630,6 +643,9 @@ export const TRANSLATIONS = {
     daysLeft: '일 남음',
     totalItems: '총 항목',
     deletionInfo: '표시된 일수가 지나면 항목이 영구적으로 삭제됩니다.',
+    expiryAlertTitle: '만료 알림',
+    expiryAlertDesc: '다음 항목은 3일 이내에 만료됩니다:',
+    dismiss: '닫기',
     onboarding: {
       welcomeTitle: 'SmartStack에 오신 것을 환영합니다',
       welcomeDesc: '쇼핑 목록과 재고를 정리하는 스마트한 방법입니다.',
