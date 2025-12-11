@@ -2,7 +2,7 @@
 import React from 'react';
 import { ShoppingItem } from '../types';
 import { MapPin, Check, ShoppingCart, Trash2, Ban, CalendarClock } from 'lucide-react';
-import { TRANSLATIONS, Language } from '../constants';
+import { TRANSLATIONS, Language, CURRENCY_OPTIONS } from '../constants';
 
 interface ItemCardProps {
   item: ShoppingItem;
@@ -11,7 +11,6 @@ interface ItemCardProps {
   onClick: (item: ShoppingItem) => void;
   size?: 'small' | 'medium' | 'large';
   lang?: Language;
-  currencySymbol?: string;
 }
 
 export const ItemCard: React.FC<ItemCardProps> = ({ 
@@ -21,10 +20,13 @@ export const ItemCard: React.FC<ItemCardProps> = ({
   onClick, 
   size = 'medium', 
   lang = 'en',
-  currencySymbol = '¥'
 }) => {
   const t = TRANSLATIONS[lang];
   const coverMedia = item.media.length > 0 ? item.media[0] : null;
+
+  // Determine currency symbol
+  // Default to JPY/¥ if undefined (migration case)
+  const currencySymbol = CURRENCY_OPTIONS.find(c => c.value === item.currency)?.symbol || '¥';
 
   const getStatusBadge = () => {
     const baseClasses = "rounded-md font-semibold backdrop-blur-md text-white shadow-sm";
@@ -45,9 +47,6 @@ export const ItemCard: React.FC<ItemCardProps> = ({
   const getActionButton = () => {
     if (item.status === 'dont-like') {
         const baseColor = "bg-red-50 text-red-700 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50";
-        // When clicked, maybe allow moving back to 'to-buy' (re-trying) or just be a static indicator?
-        // Based on app logic, toggling moves it to 'to-buy' by default if not 'to-buy'.
-        // Let's allow restoring it to list.
         
         if (size === 'small') {
             return (
@@ -157,7 +156,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
             <span className={`font-medium whitespace-nowrap ${
               item.price === null ? 'text-gray-400 dark:text-gray-500 italic text-[10px]' : 'text-gray-900 dark:text-gray-200'
             } ${size === 'large' ? 'text-sm' : 'text-xs'}`}>
-              {item.price !== null ? `${currencySymbol}${item.price.toLocaleString()}` : 'Unk.'}
+              {item.price !== null ? `${currencySymbol}${item.price.toLocaleString(undefined, { maximumFractionDigits: 2 })}` : 'Unk.'}
             </span>
           </div>
           

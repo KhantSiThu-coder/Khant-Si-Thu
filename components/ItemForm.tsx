@@ -5,7 +5,7 @@ import { MediaUploader } from './MediaUploader';
 import { WheelPicker } from './WheelPicker';
 import { analyzeItemImage } from '../services/geminiService';
 import { Loader2, Sparkles, Save, X, Trash2, Share2, Check, Info, Calendar, ChevronDown, ChevronUp } from 'lucide-react';
-import { TRANSLATIONS, Language, CATEGORY_KEYS, Currency } from '../constants';
+import { TRANSLATIONS, Language, CATEGORY_KEYS, CURRENCY_OPTIONS } from '../constants';
 
 interface ItemFormProps {
   initialData?: Partial<ShoppingItem>;
@@ -13,8 +13,6 @@ interface ItemFormProps {
   onCancel: () => void;
   onDelete?: (id: string) => void;
   lang?: Language;
-  currencyCode?: Currency;
-  currencySymbol?: string;
   enableAI?: boolean;
 }
 
@@ -24,8 +22,6 @@ export const ItemForm: React.FC<ItemFormProps> = ({
   onCancel, 
   onDelete,
   lang = 'en', 
-  currencyCode = 'JPY',
-  currencySymbol = '¥',
   enableAI = true
 }) => {
   const t = TRANSLATIONS[lang] || TRANSLATIONS['en'];
@@ -33,6 +29,7 @@ export const ItemForm: React.FC<ItemFormProps> = ({
   const [name, setName] = useState(initialData?.name || '');
   const [category, setCategory] = useState(initialData?.category || CATEGORY_KEYS[0]);
   const [price, setPrice] = useState(initialData?.price?.toString() || '');
+  const [currency, setCurrency] = useState(initialData?.currency || 'JPY');
   const [isPriceUnknown, setIsPriceUnknown] = useState(initialData?.price === null);
   const [store, setStore] = useState(initialData?.store || '');
   const [isStoreUnknown, setIsStoreUnknown] = useState(initialData?.store === null);
@@ -88,6 +85,7 @@ export const ItemForm: React.FC<ItemFormProps> = ({
       name,
       category,
       price: isPriceUnknown ? null : (parseFloat(price) || 0),
+      currency,
       store: isStoreUnknown ? null : store,
       status,
       notes,
@@ -101,7 +99,8 @@ export const ItemForm: React.FC<ItemFormProps> = ({
 
     setIsAnalyzing(true);
     try {
-      const result = await analyzeItemImage(file, currencyCode);
+      // Pass the currently selected currency to Gemini
+      const result = await analyzeItemImage(file, currency);
       setName(result.name);
       
       const matchedCat = CATEGORY_KEYS.find(c => c.toLowerCase() === result.category.toLowerCase()) || 'Others';
@@ -341,20 +340,33 @@ export const ItemForm: React.FC<ItemFormProps> = ({
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t.priceLabel} ({currencySymbol})</label>
-            <div className="flex items-start gap-4">
-              <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t.priceLabel}</label>
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-2">
+                <select
+                  value={currency}
+                  onChange={(e) => setCurrency(e.target.value)}
+                  disabled={isPriceUnknown}
+                  className="w-24 px-2 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white disabled:opacity-50"
+                >
+                  {CURRENCY_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.value} ({opt.symbol})
+                    </option>
+                  ))}
+                </select>
                 <input
                   type="number"
                   min="0"
+                  step="0.01"
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   disabled={isPriceUnknown}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none disabled:bg-gray-100 dark:disabled:bg-gray-600 disabled:text-gray-400 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  placeholder={isPriceUnknown ? "-" : "0"}
+                  className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none disabled:bg-gray-100 dark:disabled:bg-gray-600 disabled:text-gray-400 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  placeholder={isPriceUnknown ? "-" : "0.00"}
                 />
               </div>
-              <div className="flex items-center h-[42px]">
+              <div className="flex items-center">
                  <input 
                   type="checkbox" 
                   id="unknownPrice" 

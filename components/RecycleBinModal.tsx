@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { ShoppingItem } from '../types';
-import { TRANSLATIONS, Language } from '../constants';
+import { TRANSLATIONS, Language, CURRENCY_OPTIONS } from '../constants';
 import { X, Trash2, RotateCcw, Image as ImageIcon, Info } from 'lucide-react';
 
 interface RecycleBinModalProps {
@@ -11,7 +12,6 @@ interface RecycleBinModalProps {
   onDeletePermanent: (id: string) => void;
   onEmptyBin: () => void;
   lang?: Language;
-  currencySymbol?: string;
 }
 
 export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
@@ -21,8 +21,7 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
   onRestore,
   onDeletePermanent,
   onEmptyBin,
-  lang = 'en',
-  currencySymbol = '¥'
+  lang = 'en'
 }) => {
   const t = TRANSLATIONS[lang];
   const [showInfo, setShowInfo] = useState(false);
@@ -83,6 +82,7 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
                 const coverMedia = item.media.length > 0 ? item.media[0] : null;
                 const daysLeft = getDaysRemaining(item.deletedAt);
                 const isUrgent = daysLeft <= 5;
+                const currencySymbol = CURRENCY_OPTIONS.find(c => c.value === item.currency)?.symbol || '¥';
 
                 return (
                   <div key={item.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-700">
@@ -106,7 +106,7 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
                       <h3 className="font-semibold text-gray-900 dark:text-white truncate">{item.name}</h3>
                       <div className="flex items-center gap-2 mt-0.5">
                          <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                            {item.price !== null ? `${currencySymbol}${item.price.toLocaleString()}` : '-'}
+                            {item.price !== null ? `${currencySymbol}${item.price.toLocaleString(undefined, { maximumFractionDigits: 2 })}` : '-'}
                          </span>
                          <span className={`text-xs font-medium px-1.5 py-0.5 rounded flex-shrink-0 whitespace-nowrap ${isUrgent ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' : 'bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-300'}`}>
                            {daysLeft} {t.daysLeft}

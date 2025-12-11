@@ -12,9 +12,9 @@ import {
   Plus, Search, ShoppingBag, Utensils, Coffee, Shirt, Monitor, 
   MoreHorizontal, ListFilter, SlidersHorizontal, Grid3X3, Grid2X2, RectangleHorizontal, 
   CheckCircle2, AlertCircle, PackageCheck, Settings, X, Moon, Sun, MonitorSmartphone, Languages,
-  Coins, Trash2, Undo2, Database, HardDrive, Download, Menu, Sparkles, Palette, Pill, FileText, Ban, Home, HelpCircle, Calendar
+  Trash2, Undo2, Database, HardDrive, Download, Menu, Sparkles, Palette, Pill, FileText, Ban, Home, HelpCircle, Calendar
 } from 'lucide-react';
-import { TRANSLATIONS, Language, CATEGORY_KEYS, Currency, CURRENCY_OPTIONS } from './constants';
+import { TRANSLATIONS, Language, CATEGORY_KEYS } from './constants';
 
 // Helper to get icon for category
 const getCategoryIcon = (category: string, size: number = 20) => {
@@ -53,7 +53,6 @@ type Theme = 'light' | 'dark' | 'system';
 interface AppSettings {
   language: Language;
   theme: Theme;
-  currency: Currency;
   enableAI: boolean;
   cardSize: CardSize;
 }
@@ -61,7 +60,6 @@ interface AppSettings {
 const DEFAULT_SETTINGS: AppSettings = {
   language: 'en',
   theme: 'system',
-  currency: 'JPY',
   enableAI: true,
   cardSize: 'medium'
 };
@@ -96,7 +94,6 @@ const App: React.FC = () => {
   // Settings State
   const [language, setLanguage] = useState<Language>(initialSettings.language);
   const [theme, setTheme] = useState<Theme>(initialSettings.theme);
-  const [currency, setCurrency] = useState<Currency>(initialSettings.currency);
   const [enableAI, setEnableAI] = useState<boolean>(initialSettings.enableAI);
   
   // View State
@@ -107,12 +104,11 @@ const App: React.FC = () => {
     const settingsToSave: AppSettings = {
       language,
       theme,
-      currency,
       enableAI,
       cardSize
     };
     localStorage.setItem('smartshop_settings', JSON.stringify(settingsToSave));
-  }, [language, theme, currency, enableAI, cardSize]);
+  }, [language, theme, enableAI, cardSize]);
 
   // Check for first-time visit logic
   useEffect(() => {
@@ -173,7 +169,6 @@ const App: React.FC = () => {
   const mainScrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const t = TRANSLATIONS[language];
-  const currencySymbol = CURRENCY_OPTIONS.find(c => c.value === currency)?.symbol || '¥';
 
   // Apply Theme
   useEffect(() => {
@@ -206,6 +201,7 @@ const App: React.FC = () => {
              name: data.n || '',
              category: data.c || CATEGORY_KEYS[0],
              price: data.p || null,
+             currency: 'JPY', // Default for imported items if not present
              store: data.s || null,
              status: data.st || 'to-buy',
              notes: data.nt || '',
@@ -240,7 +236,11 @@ const App: React.FC = () => {
         
         // Filter out items that have been in trash for > 30 days
         const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
-        const validItems = storedItems.filter(item => {
+        const validItems = storedItems.map(item => ({
+          ...item,
+          // Migration: Ensure currency exists
+          currency: item.currency || 'JPY'
+        })).filter(item => {
           if (!item.deletedAt) return true;
           if (Date.now() - item.deletedAt > THIRTY_DAYS_MS) {
             // Cleanup: remove very old items from DB entirely
@@ -283,18 +283,11 @@ const App: React.FC = () => {
           if (item.deletedAt) return false;
           
           // Only verify items that are 'owned' (in-stock or low stock)
-          // Usually 'to-buy' items don't expire until purchased, but we can relax this check if user sets dates on 'to-buy'
-          // For now, strict checking for in-stock/low makes sense for inventory tracking
           if (item.status !== 'in-stock' && item.status !== 'low') return false;
           
           // Skip items without date
           if (!item.expiryDate) return false;
 
-          // Check if date is within [Today, Today+3] range
-          // Also check if item is already expired (before today) but not deleted? 
-          // The prompt asks for "upcoming... within 3 days". 
-          // We assume expired items should also be flagged if they haven't been dealt with.
-          // Let's stick to the prompt: 12/08 and 12/09 should appear if today is 12/06.
           return item.expiryDate >= todayStart && item.expiryDate <= threshold;
         });
 
@@ -512,14 +505,10 @@ const App: React.FC = () => {
     ? CATEGORY_KEYS 
     : CATEGORY_KEYS.filter(cat => selectedCategories.includes(cat));
 
-  // Modified grid columns for smaller view on mobile
   const getGridClasses = () => {
     switch (cardSize) {
-      // Small: 3 cols on mobile, 4 on tablet, 6 on desktop
       case 'small': return "grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6";
-      // Medium: 2 cols on mobile, 3 on tablet, 4 on desktop
       case 'medium': return "grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4";
-      // Large: 1 col on mobile, 2 on tablet, 3 on desktop
       case 'large': return "grid-cols-1 md:grid-cols-2 lg:grid-cols-3";
     }
   };
@@ -538,7 +527,7 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col md:flex-row font-sans text-gray-900 dark:text-white transition-colors duration-200">
       
-      {/* Mobile Backdrop for Sidebar - Increased Z-index */}
+      {/* Mobile Backdrop for Sidebar */}
       {isSidebarOpen && (
         <div 
           className="fixed inset-0 bg-black/50 z-[80] md:hidden backdrop-blur-sm"
@@ -546,14 +535,13 @@ const App: React.FC = () => {
         />
       )}
 
-      {/* Sidebar (Drawer on Mobile, Static on Desktop) - Increased Z-index */}
+      {/* Sidebar */}
       <div className={`fixed inset-y-0 left-0 z-[90] w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-transform duration-300 ease-in-out md:translate-x-0 md:static ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-4 flex items-center justify-between">
            <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
              <ShoppingBag size={28} />
              <h1 className="text-2xl font-bold tracking-tight">{t.appName}</h1>
            </div>
-           {/* Close button for mobile sidebar */}
            <button 
              onClick={() => setIsSidebarOpen(false)}
              className="md:hidden p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
@@ -595,7 +583,6 @@ const App: React.FC = () => {
 
         {/* Sidebar Footer Buttons */}
         <div className="p-4 border-t border-gray-200 dark:border-gray-700 space-y-1">
-          {/* Help Button */}
           <button 
             onClick={() => { setIsOnboardingOpen(true); setIsSidebarOpen(false); }}
             className="w-full flex items-center gap-3 p-3 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
@@ -604,7 +591,6 @@ const App: React.FC = () => {
             <span className="text-sm">{t.help}</span>
           </button>
 
-          {/* Settings Button */}
           <button 
             onClick={() => { setIsSettingsOpen(true); setIsSidebarOpen(false); }}
             className="w-full flex items-center gap-3 p-3 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
@@ -617,11 +603,9 @@ const App: React.FC = () => {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
-        {/* Header - Increased Z-index */}
+        {/* Header */}
         <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30 flex flex-col transition-colors duration-200">
-          {/* Top Row */}
           <div className="p-4 flex items-center justify-between gap-4">
-            {/* Hamburger Menu Button (Mobile Only) */}
             <button 
               onClick={() => setIsSidebarOpen(true)}
               className="md:hidden p-2 -ml-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
@@ -641,11 +625,9 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          {/* Filter & View Controls Bar - Reorganized for Mobile Rows */}
           <div className="px-4 pb-3 border-t border-gray-100 dark:border-gray-700 pt-3">
              <div className="flex flex-col md:flex-row md:items-center gap-3">
                
-               {/* Group 1: Status Filters (Row 1 on Mobile - Grid layout to avoid scroll) */}
                <div className="grid grid-cols-4 gap-2 w-full md:w-auto md:flex md:items-center md:gap-1.5">
                   <button 
                     onClick={() => toggleStatusFilter('to-buy')}
@@ -692,13 +674,10 @@ const App: React.FC = () => {
                   </button>
                </div>
 
-               {/* Divider for Desktop */}
                <div className="hidden md:block w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1"></div>
 
-               {/* Group 2: Secondary Filters & View Controls (Row 2 on Mobile) */}
                <div className="flex items-center justify-between flex-1 gap-3">
                    <div className="flex items-center gap-2">
-                       {/* Price Filter Toggle */}
                        <button 
                          onClick={() => setIsPriceFilterActive(!isPriceFilterActive)}
                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
@@ -710,7 +689,6 @@ const App: React.FC = () => {
                          <SlidersHorizontal size={14} /> {t.price}
                        </button>
 
-                       {/* Expiration Date Filter Toggle */}
                        <button 
                          onClick={() => setIsExpiryFilterActive(!isExpiryFilterActive)}
                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
@@ -723,7 +701,6 @@ const App: React.FC = () => {
                        </button>
                    </div>
 
-                   {/* View Size Controls */}
                    <div className="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5 ml-auto">
                       <button 
                         onClick={() => setCardSize('small')}
@@ -751,11 +728,10 @@ const App: React.FC = () => {
              </div>
           </div>
 
-          {/* Expandable Price/Expiry Panels - Stacked if both open */}
           <div className="flex flex-col">
               {isPriceFilterActive && (
                 <div className="px-4 pb-3 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700 flex items-center gap-4 animate-in slide-in-from-top-2 fade-in duration-200">
-                  <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">{t.priceRange} ({currencySymbol}):</span>
+                  <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">{t.priceRange}:</span>
                   <div className="flex items-center gap-2">
                     <input 
                       type="number" 
@@ -835,7 +811,6 @@ const App: React.FC = () => {
                           onDelete={handleDeleteItem}
                           onClick={(i) => { setEditingItem(i); setIsFormOpen(true); }}
                           lang={language}
-                          currencySymbol={currencySymbol}
                         />
                       ))}
                     </div>
@@ -860,7 +835,6 @@ const App: React.FC = () => {
           </footer>
         </main>
 
-        {/* Floating Action Button (Glass Liquid Style & Smaller) */}
         {!isFormOpen && !isSettingsOpen && (
           <button
             onClick={() => { setEditingItem(null); setIsFormOpen(true); }}
@@ -875,7 +849,6 @@ const App: React.FC = () => {
           </button>
         )}
 
-        {/* Notification Toast */}
         {showToast && (
           <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900/90 dark:bg-white/90 text-white dark:text-gray-900 px-5 py-3 rounded-xl shadow-xl z-[100] flex items-center gap-4 animate-in fade-in slide-in-from-bottom-2 backdrop-blur-sm">
              {toastMessage === t.itemImported ? (
@@ -902,7 +875,6 @@ const App: React.FC = () => {
         )}
       </div>
 
-      {/* Slide-over Form */}
       {isFormOpen && (
         <div className="fixed inset-0 z-50 flex justify-end">
           <div 
@@ -916,15 +888,12 @@ const App: React.FC = () => {
               onCancel={() => setIsFormOpen(false)}
               onDelete={handleDeleteItem}
               lang={language}
-              currencyCode={currency}
-              currencySymbol={currencySymbol}
               enableAI={enableAI}
             />
           </div>
         </div>
       )}
 
-      {/* Settings Modal */}
       {isSettingsOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div 
@@ -946,7 +915,6 @@ const App: React.FC = () => {
             </div>
 
             <div className="flex-1 overflow-y-auto p-6 pt-0 space-y-6">
-              {/* Storage Stats */}
               <div>
                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
                    <HardDrive size={16} />
@@ -976,7 +944,6 @@ const App: React.FC = () => {
                  </div>
               </div>
 
-              {/* AI Enable Toggle */}
               <div>
                 <label className="flex items-center justify-between text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   <div className="flex items-center gap-2">
@@ -994,7 +961,6 @@ const App: React.FC = () => {
                 </label>
               </div>
 
-              {/* Language Setting */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
                   <Languages size={16} />
@@ -1013,26 +979,6 @@ const App: React.FC = () => {
                 </select>
               </div>
 
-              {/* Currency Setting */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                  <Coins size={16} />
-                  {t.currency}
-                </label>
-                <select
-                  value={currency}
-                  onChange={(e) => setCurrency(e.target.value as Currency)}
-                  className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900 dark:text-white"
-                >
-                  {CURRENCY_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Theme Setting */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
                   <MonitorSmartphone size={16} />
@@ -1075,9 +1021,7 @@ const App: React.FC = () => {
                 </div>
               </div>
 
-              {/* Action Buttons */}
               <div className="pt-2 border-t border-gray-100 dark:border-gray-700 space-y-2">
-                 {/* Recycle Bin Button */}
                  <button
                    onClick={() => {
                      setIsSettingsOpen(false);
@@ -1094,7 +1038,6 @@ const App: React.FC = () => {
                    </div>
                  </button>
 
-                 {/* Terms & Conditions Button */}
                  <button
                    onClick={() => setIsTermsOpen(true)}
                    className="w-full flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors text-gray-700 dark:text-gray-200 group"
@@ -1117,7 +1060,6 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {/* Terms & Conditions Modal */}
       {isTermsOpen && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
           <div 
@@ -1125,7 +1067,6 @@ const App: React.FC = () => {
             onClick={() => setIsTermsOpen(false)}
           />
           <div className="relative w-full max-w-lg bg-white dark:bg-gray-800 rounded-2xl shadow-2xl flex flex-col max-h-[85vh] transform transition-all animate-in zoom-in-95 duration-200">
-            {/* Header */}
             <div className="p-5 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
               <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <FileText className="text-indigo-600 dark:text-indigo-400" size={20} />
@@ -1139,7 +1080,6 @@ const App: React.FC = () => {
               </button>
             </div>
 
-            {/* Content */}
             <div className="flex-1 overflow-y-auto p-6">
               <div 
                 className="prose dark:prose-invert max-w-none text-sm text-gray-600 dark:text-gray-300"
@@ -1147,7 +1087,6 @@ const App: React.FC = () => {
               />
             </div>
 
-            {/* Footer */}
             <div className="p-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-b-2xl">
               <button
                 onClick={() => setIsTermsOpen(false)}
@@ -1160,7 +1099,6 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {/* Recycle Bin Modal */}
       <RecycleBinModal
         isOpen={isRecycleBinOpen}
         onClose={() => setIsRecycleBinOpen(false)}
@@ -1169,10 +1107,8 @@ const App: React.FC = () => {
         onDeletePermanent={handlePermanentDelete}
         onEmptyBin={handleEmptyBin}
         lang={language}
-        currencySymbol={currencySymbol}
       />
 
-      {/* Expiration Alert Modal */}
       <ExpirationAlertModal
         isOpen={isExpiryAlertOpen}
         onClose={() => setIsExpiryAlertOpen(false)}
@@ -1180,14 +1116,12 @@ const App: React.FC = () => {
         lang={language}
       />
 
-      {/* Onboarding Wizard */}
       <OnboardingModal
         isOpen={isOnboardingOpen}
         onClose={handleCloseOnboarding}
         lang={language}
       />
 
-      {/* Language Selector Modal */}
       <LanguageSelectorModal 
         isOpen={isLanguageSelectorOpen}
         onSelect={handleLanguageSelect}
