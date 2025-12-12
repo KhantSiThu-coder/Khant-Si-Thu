@@ -1,3 +1,4 @@
+
 import React, { useRef, useState } from 'react';
 import { MediaItem } from '../types';
 import { X, Upload, Image as ImageIcon, Film, Loader2 } from 'lucide-react';
@@ -10,6 +11,18 @@ interface MediaUploaderProps {
   onAnalyzeReq?: (file: File) => void;
   lang?: Language;
 }
+
+// Robust ID generator
+const generateId = () => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    try {
+      return crypto.randomUUID();
+    } catch (e) {
+      // Fallback if randomUUID fails (e.g. non-secure context)
+    }
+  }
+  return Date.now().toString(36) + Math.random().toString(36).substring(2);
+};
 
 export const MediaUploader: React.FC<MediaUploaderProps> = ({ media, onMediaChange, onAnalyzeReq, lang = 'en' }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -38,7 +51,7 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({ media, onMediaChan
                processedFiles.push(newFile);
              } catch (conversionError) {
                console.error("Failed to convert HEIC:", conversionError);
-               // Fallback to original file if conversion fails, though it might not render
+               // Fallback to original file if conversion fails
                processedFiles.push(file);
              }
           } else {
@@ -47,7 +60,7 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({ media, onMediaChan
         }
         
         const newMediaItems: MediaItem[] = processedFiles.map((file) => ({
-          id: crypto.randomUUID(),
+          id: generateId(),
           type: file.type.startsWith('video') ? 'video' : 'image',
           url: URL.createObjectURL(file),
           file: file,
@@ -89,21 +102,22 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({ media, onMediaChan
             title="Click to expand"
           >
             {item.type === 'image' ? (
-              <img src={item.url} alt="Preview" className="w-full h-full object-cover" />
+              <img src={item.url} alt="Preview" className="absolute inset-0 w-full h-full object-cover" />
             ) : (
-              <video src={item.url} className="w-full h-full object-cover" />
+              <video src={item.url} className="absolute inset-0 w-full h-full object-cover" muted loop autoPlay playsInline />
             )}
+            
             <button
               type="button"
               onClick={(e) => { 
                 e.stopPropagation(); 
                 removeMedia(item.id);
               }}
-              className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity z-10 hover:bg-red-600"
+              className="absolute top-1 right-1 bg-red-500/90 text-white rounded-full p-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10 hover:bg-red-600 shadow-sm"
             >
               <X size={14} />
             </button>
-            <div className="absolute bottom-1 left-1 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded flex items-center gap-1 pointer-events-none">
+            <div className="absolute bottom-1 left-1 bg-black/50 backdrop-blur-sm text-white text-[10px] px-1.5 py-0.5 rounded flex items-center gap-1 pointer-events-none">
                {item.type === 'image' ? <ImageIcon size={10} /> : <Film size={10} />}
             </div>
           </div>
@@ -113,7 +127,7 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({ media, onMediaChan
           type="button"
           disabled={isProcessing}
           onClick={() => fileInputRef.current?.click()}
-          className="aspect-square flex flex-col items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="aspect-square flex flex-col items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-transparent"
         >
           {isProcessing ? (
              <Loader2 size={24} className="mb-2 animate-spin text-indigo-500" />
@@ -167,6 +181,7 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({ media, onMediaChan
                 className="max-w-full max-h-full object-contain rounded-md shadow-2xl pointer-events-auto" 
                 controls 
                 autoPlay 
+                playsInline
                 onClick={(e) => e.stopPropagation()}
               />
             )}

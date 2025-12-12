@@ -54,7 +54,7 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
         onClick={onClose}
       />
       
-      <div className="relative w-full max-w-lg bg-white dark:bg-gray-800 rounded-2xl shadow-2xl flex flex-col max-h-[85vh] transform transition-all">
+      <div className="relative w-full max-w-lg bg-white dark:bg-gray-800 rounded-2xl shadow-2xl flex flex-col max-h-[85vh] transform transition-all animate-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="p-5 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -87,15 +87,22 @@ export const RecycleBinModal: React.FC<RecycleBinModalProps> = ({
                 return (
                   <div key={item.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-700">
                     {/* Thumbnail */}
-                    <div className="w-14 h-14 bg-gray-200 dark:bg-gray-600 rounded-lg overflow-hidden flex-shrink-0">
+                    <div className="w-14 h-14 bg-gray-200 dark:bg-gray-600 rounded-lg overflow-hidden flex-shrink-0 relative">
                       {coverMedia ? (
                         coverMedia.type === 'image' ? (
-                          <img src={coverMedia.url} alt={item.name} className="w-full h-full object-cover" />
+                          <img src={coverMedia.url} alt={item.name} className="absolute inset-0 w-full h-full object-cover" />
                         ) : (
-                          <video src={coverMedia.url} className="w-full h-full object-cover" />
+                          <video 
+                            src={coverMedia.url} 
+                            className="absolute inset-0 w-full h-full object-cover"
+                            muted
+                            loop
+                            autoPlay
+                            playsInline
+                          />
                         )
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                        <div className="absolute inset-0 flex items-center justify-center text-gray-400">
                           <ImageIcon size={20} />
                         </div>
                       )}

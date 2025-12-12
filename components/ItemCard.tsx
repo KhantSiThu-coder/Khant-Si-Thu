@@ -29,7 +29,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
   const currencySymbol = CURRENCY_OPTIONS.find(c => c.value === item.currency)?.symbol || '¥';
 
   const getStatusBadge = () => {
-    const baseClasses = "rounded-md font-semibold backdrop-blur-md text-white shadow-sm";
+    const baseClasses = "rounded-md font-semibold backdrop-blur-md text-white shadow-sm z-20";
     const sizeClasses = size === 'small' ? "px-1.5 py-0.5 text-[9px]" : "px-2 py-1 text-[10px]";
     
     switch (item.status) {
@@ -122,23 +122,37 @@ export const ItemCard: React.FC<ItemCardProps> = ({
     <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow group relative flex flex-col h-full ${item.status === 'dont-like' ? 'opacity-80' : ''}`}>
       <div 
         onClick={() => onClick(item)} 
-        className="cursor-pointer flex-1 relative"
+        className="cursor-pointer flex-1 relative flex flex-col"
       >
         <div className={`w-full bg-gray-100 dark:bg-gray-900 relative overflow-hidden ${size === 'large' ? 'aspect-video' : 'aspect-[4/3]'}`}>
           {coverMedia ? (
              coverMedia.type === 'image' ? (
-              <img src={coverMedia.url} alt={item.name} className={`w-full h-full object-cover ${item.status === 'dont-like' ? 'grayscale' : ''}`} />
+              <img 
+                src={coverMedia.url} 
+                alt={item.name} 
+                loading="lazy"
+                className={`absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${item.status === 'dont-like' ? 'grayscale' : ''}`} 
+              />
              ) : (
-               <video src={coverMedia.url} className={`w-full h-full object-cover ${item.status === 'dont-like' ? 'grayscale' : ''}`} />
+               <video 
+                 src={coverMedia.url} 
+                 muted 
+                 loop 
+                 autoPlay 
+                 playsInline
+                 className={`absolute inset-0 w-full h-full object-cover pointer-events-none ${item.status === 'dont-like' ? 'grayscale' : ''}`} 
+               />
              )
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-300 dark:text-gray-600">
-              <ShoppingCart size={size === 'small' ? 20 : 28} />
+            <div className="absolute inset-0 flex items-center justify-center text-gray-300 dark:text-gray-600 bg-gray-50 dark:bg-gray-800/50">
+              <ShoppingCart size={size === 'small' ? 20 : 32} />
             </div>
           )}
           
+          {/* Gradients for text visibility if needed, but text is below */}
+          
           {item.media.length > 1 && (
-            <div className="absolute bottom-2 right-2 bg-black/60 text-white text-[9px] px-1 py-0.5 rounded flex items-center gap-1 z-10">
+            <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-sm text-white text-[9px] px-1.5 py-0.5 rounded-md flex items-center gap-1 z-10 font-medium">
               +{item.media.length - 1}
             </div>
           )}
@@ -148,9 +162,9 @@ export const ItemCard: React.FC<ItemCardProps> = ({
           </div>
         </div>
 
-        <div className={`${size === 'small' ? 'p-1.5' : 'p-3'}`}>
+        <div className={`${size === 'small' ? 'p-2' : 'p-3'} flex-1 flex flex-col`}>
           <div className="flex justify-between items-start mb-0.5 gap-1.5">
-            <h3 className={`font-semibold text-gray-900 dark:text-white line-clamp-1 ${size === 'large' ? 'text-base' : 'text-xs'}`}>
+            <h3 className={`font-semibold text-gray-900 dark:text-white line-clamp-1 ${size === 'large' ? 'text-base' : 'text-xs'}`} title={item.name}>
               {item.name}
             </h3>
             <span className={`font-medium whitespace-nowrap ${
@@ -161,16 +175,16 @@ export const ItemCard: React.FC<ItemCardProps> = ({
           </div>
           
           {size !== 'small' && (
-            <div className="space-y-0.5 mt-1">
+            <div className="space-y-1 mt-1">
               {item.store && (
                 <div className="flex items-center text-[10px] text-gray-500 dark:text-gray-400">
-                  <MapPin size={10} className="mr-1" />
+                  <MapPin size={10} className="mr-1 flex-shrink-0" />
                   <span className="truncate">{item.store}</span>
                 </div>
               )}
               {item.expiryDate && (
                 <div className="flex items-center text-[10px] text-gray-500 dark:text-gray-400" title={t.expiryDate}>
-                  <CalendarClock size={10} className="mr-1" />
+                  <CalendarClock size={10} className="mr-1 flex-shrink-0" />
                   <span>{new Date(item.expiryDate).toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' })}</span>
                 </div>
               )}
@@ -179,7 +193,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
           
           {/* Notes for large/medium */}
           {size !== 'small' && item.notes && (
-             <p className={`mt-1 text-[10px] text-gray-500 dark:text-gray-400 line-clamp-2 italic border-l-2 border-gray-200 dark:border-gray-700 pl-1.5 ${size === 'large' ? 'line-clamp-3' : ''}`}>
+             <p className={`mt-2 text-[10px] text-gray-500 dark:text-gray-400 line-clamp-2 italic border-l-2 border-gray-200 dark:border-gray-700 pl-2 ${size === 'large' ? 'line-clamp-3' : ''}`}>
                {item.notes}
              </p>
           )}
@@ -190,7 +204,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
         {getActionButton()}
       </div>
 
-      {/* Delete Button - Placed at end of container and with z-10 to ensure it is clickable but below header/sidebar */}
+      {/* Delete Button */}
       <button 
         type="button"
         onClick={(e) => { 
@@ -198,7 +212,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
           e.preventDefault();
           onDelete(item.id);
         }}
-        className={`absolute top-1.5 right-1.5 z-10 bg-white/95 dark:bg-gray-800/95 hover:bg-red-100 dark:hover:bg-red-900/80 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded-full shadow-sm border border-gray-100 dark:border-gray-700 transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 cursor-pointer ${size === 'small' ? 'p-1.5' : 'p-2'}`}
+        className={`absolute top-1.5 right-1.5 z-20 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm hover:bg-red-100 dark:hover:bg-red-900/80 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded-full shadow-sm border border-gray-100 dark:border-gray-700 transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 cursor-pointer ${size === 'small' ? 'p-1.5' : 'p-2'}`}
         title={t.delete}
         aria-label={t.delete}
       >

@@ -72,15 +72,22 @@ export const ExpirationAlertModal: React.FC<ExpirationAlertModalProps> = ({
                 return (
                   <div key={item.id} className="flex items-center gap-3 p-3 bg-red-50 dark:bg-red-900/10 rounded-xl border border-red-100 dark:border-red-900/30">
                     {/* Thumbnail */}
-                    <div className="w-12 h-12 bg-gray-200 dark:bg-gray-600 rounded-lg overflow-hidden flex-shrink-0">
+                    <div className="w-12 h-12 bg-gray-200 dark:bg-gray-600 rounded-lg overflow-hidden flex-shrink-0 relative">
                       {coverMedia ? (
                         coverMedia.type === 'image' ? (
-                          <img src={coverMedia.url} alt={item.name} className="w-full h-full object-cover" />
+                          <img src={coverMedia.url} alt={item.name} className="absolute inset-0 w-full h-full object-cover" />
                         ) : (
-                          <video src={coverMedia.url} className="w-full h-full object-cover" />
+                          <video 
+                            src={coverMedia.url} 
+                            className="absolute inset-0 w-full h-full object-cover"
+                            muted
+                            loop
+                            autoPlay
+                            playsInline
+                          />
                         )
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                        <div className="absolute inset-0 flex items-center justify-center text-gray-400">
                           <ImageIcon size={18} />
                         </div>
                       )}
