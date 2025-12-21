@@ -1,8 +1,9 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="overflow-x-hidden">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>SmartStack AI</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -19,6 +20,13 @@
       }
     </script>
     <style>
+      /* Prevent horizontal overflow globally */
+      body {
+        overflow-x: hidden;
+        width: 100vw;
+        position: relative;
+      }
+
       /* Custom Fading Scrollbar */
       .fade-scrollbar::-webkit-scrollbar {
         width: 8px;
@@ -53,6 +61,15 @@
       .dark .fade-scrollbar.scrolling {
         scrollbar-color: rgba(107, 114, 128, 0.6) transparent;
       }
+
+      /* Hide default scrollbars for wheel picker and other clean areas */
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
     </style>
   <script type="importmap">
 {
@@ -72,7 +89,7 @@
 }
 </script>
 </head>
-  <body>
+  <body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
     <div id="root"></div>
     <script type="module" src="./index.tsx"></script>
   </body>

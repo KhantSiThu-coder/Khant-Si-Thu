@@ -28,8 +28,8 @@ export const ItemCard: React.FC<ItemCardProps> = ({
   const currencySymbol = CURRENCY_OPTIONS.find(c => c.value === item.currency)?.symbol || '¥';
 
   const getStatusBadge = (isList: boolean = false) => {
-    const baseClasses = "rounded-md font-semibold backdrop-blur-md text-white shadow-sm z-20 transition-all";
-    const sizeClasses = isList ? "px-2 py-1 text-[10px]" : (size === 'medium' ? "px-1.5 py-0.5 text-[9px]" : "px-2 py-1 text-[10px]");
+    const baseClasses = "rounded-md font-semibold backdrop-blur-md text-white shadow-sm z-20 transition-all whitespace-nowrap";
+    const sizeClasses = isList ? "px-1.5 py-0.5 text-[8px] sm:text-[10px]" : (size === 'medium' ? "px-1.5 py-0.5 text-[9px]" : "px-2 py-1 text-[10px]");
     
     switch (item.status) {
       case 'to-buy':
@@ -62,10 +62,10 @@ export const ItemCard: React.FC<ItemCardProps> = ({
             e.stopPropagation(); 
             onStatusToggle(item.id, item.status); 
           }}
-          className={`p-1.5 rounded-lg transition-colors shadow-sm border border-black/5 dark:border-white/5 ${colorClasses}`}
+          className={`p-1 sm:p-1.5 rounded-lg transition-colors shadow-sm border border-black/5 dark:border-white/5 flex-shrink-0 ${colorClasses}`}
           title={Label}
         >
-          <Icon size={18} />
+          <Icon size={16} className="sm:w-[18px] sm:h-[18px]" />
         </button>
       );
     }
@@ -101,14 +101,15 @@ export const ItemCard: React.FC<ItemCardProps> = ({
 
   // NEW: SMALL VIEW (List / Details)
   // Re-laid out as: [Thumbnail] [Icon + Status] [Details (Name/Price/Meta)] [Delete]
+  // Optimized for mobile viewport to prevent horizontal scroll
   if (size === 'small') {
     return (
       <div 
         onClick={() => onClick(item)}
-        className="group relative flex items-center gap-3 p-3 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-all first:rounded-t-xl last:rounded-b-xl last:border-b-0"
+        className="group relative flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-all first:rounded-t-xl last:rounded-b-xl last:border-b-0 w-full max-w-full overflow-hidden"
       >
         {/* Thumbnail on the far left */}
-        <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex-shrink-0 border border-gray-200 dark:border-gray-700">
+        <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex-shrink-0 border border-gray-200 dark:border-gray-700">
           {coverMedia ? (
              coverMedia.type === 'image' ? (
               <img src={coverMedia.url} alt={item.name} className="absolute inset-0 w-full h-full object-cover" />
@@ -117,54 +118,56 @@ export const ItemCard: React.FC<ItemCardProps> = ({
              )
           ) : (
             <div className="absolute inset-0 flex items-center justify-center text-gray-400">
-              <ShoppingCart size={20} />
+              <ShoppingCart size={18} />
             </div>
           )}
         </div>
 
         {/* Action and Status Indicator Grouped on the Left Side */}
-        <div className="flex items-center gap-2 min-w-[110px] sm:min-w-[130px]">
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
            {getActionButton(true)}
-           {getStatusBadge(true)}
+           <div className="hidden min-[360px]:block">
+             {getStatusBadge(true)}
+           </div>
         </div>
 
         {/* Details Area on the Right */}
-        <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center gap-1 md:gap-4">
+        <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center gap-0.5 md:gap-4 overflow-hidden">
           <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-sm text-gray-900 dark:text-white truncate" title={item.name}>
+            <h3 className="font-bold text-[12px] sm:text-sm text-gray-900 dark:text-white truncate" title={item.name}>
               {item.name}
             </h3>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">
-              <span className="bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded font-bold text-gray-600 dark:text-gray-300">
+            <div className="flex items-center flex-nowrap gap-x-2 text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400">
+              <span className="bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded font-bold text-gray-600 dark:text-gray-300 truncate max-w-[60px] sm:max-w-none">
                 {item.category}
               </span>
+              <span className={`font-bold whitespace-nowrap flex-shrink-0 ${item.price === null ? 'text-gray-400 italic font-normal' : 'text-gray-900 dark:text-gray-200'}`}>
+                {item.price !== null ? `${currencySymbol}${item.price.toLocaleString()}` : '—'}
+             </span>
+            </div>
+          </div>
+
+          <div className="hidden sm:flex items-center flex-wrap gap-x-3 gap-y-0.5 text-[10px] text-gray-500 dark:text-gray-400">
               {item.store && (
-                <span className="flex items-center gap-0.5">
+                <span className="flex items-center gap-0.5 truncate max-w-[80px]">
                   <MapPin size={10} /> {item.store}
                 </span>
               )}
               {item.expiryDate && (
-                <span className="flex items-center gap-0.5">
+                <span className="flex items-center gap-0.5 flex-shrink-0">
                   <CalendarClock size={10} /> {new Date(item.expiryDate).toLocaleDateString()}
                 </span>
               )}
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between md:justify-end gap-4 mt-1 md:mt-0">
-             <span className={`text-sm font-bold whitespace-nowrap ${item.price === null ? 'text-gray-400 italic font-normal' : 'text-gray-900 dark:text-gray-200'}`}>
-                {item.price !== null ? `${currencySymbol}${item.price.toLocaleString()}` : '—'}
-             </span>
           </div>
         </div>
 
         {/* Delete on the far right */}
         <button 
           onClick={(e) => { e.stopPropagation(); onDelete(item.id); }}
-          className="p-2 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors rounded-full hover:bg-red-50 dark:hover:bg-red-900/20"
+          className="p-1.5 sm:p-2 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 flex-shrink-0"
           title={t.delete}
         >
-          <Trash2 size={18} />
+          <Trash2 size={16} className="sm:w-[18px] sm:h-[18px]" />
         </button>
       </div>
     );

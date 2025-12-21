@@ -507,7 +507,7 @@ const App: React.FC = () => {
 
   const getGridClasses = () => {
     switch (cardSize) {
-      case 'small': return "grid-cols-1 gap-2"; // Details/List View
+      case 'small': return "grid-cols-1 gap-2 w-full max-w-full overflow-x-hidden"; // Details/List View
       case 'medium': return "grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3"; // Compact Grid (old Small)
       case 'large': return "grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-4"; // Standard Grid (old Medium)
     }
@@ -525,7 +525,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col md:flex-row font-sans text-gray-900 dark:text-white transition-colors duration-200">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col md:flex-row font-sans text-gray-900 dark:text-white transition-colors duration-200 w-full max-w-full overflow-x-hidden">
       
       {/* Mobile Backdrop for Sidebar */}
       {isSidebarOpen && (
@@ -602,9 +602,9 @@ const App: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden relative w-full max-w-full">
         {/* Header */}
-        <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30 flex flex-col transition-colors duration-200">
+        <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30 flex flex-col transition-colors duration-200 w-full">
           <div className="p-4 flex items-center justify-between gap-4">
             <button 
               onClick={() => setIsSidebarOpen(true)}
@@ -728,7 +728,7 @@ const App: React.FC = () => {
              </div>
           </div>
 
-          <div className="flex flex-col">
+          <div className="flex flex-col w-full overflow-hidden">
               {isPriceFilterActive && (
                 <div className="px-4 pb-3 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700 flex items-center gap-4 animate-in slide-in-from-top-2 fade-in duration-200">
                   <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">{t.priceRange}:</span>
@@ -769,7 +769,7 @@ const App: React.FC = () => {
         {/* Scrollable List */}
         <main 
           onScroll={handleMainScroll}
-          className={`flex-1 overflow-y-auto p-3 md:p-8 bg-gray-50/50 dark:bg-gray-900/50 flex flex-col fade-scrollbar ${isMainScrolling ? 'scrolling' : ''}`}
+          className={`flex-1 overflow-y-auto p-3 md:p-8 bg-gray-50/50 dark:bg-gray-900/50 flex flex-col fade-scrollbar ${isMainScrolling ? 'scrolling' : ''} w-full max-w-full overflow-x-hidden`}
         >
           {filteredItems.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 text-center min-h-[300px]">
@@ -786,13 +786,13 @@ const App: React.FC = () => {
               )}
             </div>
           ) : (
-            <div className="space-y-6 flex-1">
+            <div className="space-y-6 flex-1 w-full max-w-full">
               {categoriesToShow.map((cat) => {
                 const categoryItems = filteredItems.filter(i => i.category === cat);
                 if (categoryItems.length === 0) return null;
 
                 return (
-                  <div key={cat} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <div key={cat} className="animate-in fade-in slide-in-from-bottom-2 duration-300 w-full max-w-full">
                     <h2 className="text-base font-bold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
                       {getCategoryIcon(cat, 18)}
                       {t.categories[cat as keyof typeof t.categories] || cat}
@@ -801,7 +801,7 @@ const App: React.FC = () => {
                       </span>
                       <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700 ml-4"></div>
                     </h2>
-                    <div className={`grid ${getGridClasses()}`}>
+                    <div className={`grid w-full ${getGridClasses()}`}>
                       {categoryItems.map((item) => (
                         <ItemCard 
                           key={item.id} 
@@ -850,11 +850,11 @@ const App: React.FC = () => {
         )}
 
         {showToast && (
-          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900/90 dark:bg-white/90 text-white dark:text-gray-900 px-5 py-3 rounded-xl shadow-xl z-[100] flex items-center gap-4 animate-in fade-in slide-in-from-bottom-2 backdrop-blur-sm">
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900/90 dark:bg-white/90 text-white dark:text-gray-900 px-5 py-3 rounded-xl shadow-xl z-[100] flex items-center gap-4 animate-in fade-in slide-in-from-bottom-2 backdrop-blur-sm max-w-[90vw]">
              {toastMessage === t.itemImported ? (
                 <Download size={16} />
              ) : (
-                <span className="font-medium">{toastMessage}</span>
+                <span className="font-medium truncate">{toastMessage}</span>
              )}
              
              {toastMessage === t.itemMovedToTrash ? (
@@ -862,7 +862,7 @@ const App: React.FC = () => {
                  <div className="h-4 w-px bg-white/20 dark:bg-black/20"></div>
                  <button 
                   onClick={handleUndoDelete} 
-                  className="flex items-center gap-1.5 text-indigo-400 dark:text-indigo-600 font-bold hover:underline"
+                  className="flex items-center gap-1.5 text-indigo-400 dark:text-indigo-600 font-bold hover:underline whitespace-nowrap"
                 >
                   <Undo2 size={16} />
                   {t.undo}
