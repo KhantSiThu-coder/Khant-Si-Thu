@@ -10,7 +10,7 @@ import { ExpirationAlertModal } from './components/ExpirationAlertModal';
 import { loadItemsFromDB, saveItemToDB, deleteItemFromDB, initStoragePersistence, getStorageEstimate } from './services/storage';
 import { 
   Plus, Search, ShoppingBag, Utensils, Coffee, Shirt, Monitor, 
-  MoreHorizontal, ListFilter, SlidersHorizontal, Grid3X3, Grid2X2, RectangleHorizontal, 
+  MoreHorizontal, ListFilter, SlidersHorizontal, Grid3X3, Grid2X2, LayoutList, 
   CheckCircle2, AlertCircle, PackageCheck, Settings, X, Moon, Sun, MonitorSmartphone, Languages,
   Trash2, Undo2, Database, HardDrive, Download, Menu, Sparkles, Palette, Pill, FileText, Ban, Home, HelpCircle, Calendar
 } from 'lucide-react';
@@ -507,9 +507,9 @@ const App: React.FC = () => {
 
   const getGridClasses = () => {
     switch (cardSize) {
-      case 'small': return "grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6";
-      case 'medium': return "grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4";
-      case 'large': return "grid-cols-1 md:grid-cols-2 lg:grid-cols-3";
+      case 'small': return "grid-cols-1 gap-2"; // Details/List View
+      case 'medium': return "grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3"; // Compact Grid (old Small)
+      case 'large': return "grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-4"; // Standard Grid (old Medium)
     }
   };
 
@@ -705,23 +705,23 @@ const App: React.FC = () => {
                       <button 
                         onClick={() => setCardSize('small')}
                         className={`p-1.5 rounded-md transition-all ${cardSize === 'small' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-800 dark:text-white' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}`}
-                        title="Small View"
+                        title="List View"
                       >
-                        <Grid3X3 size={16} />
+                        <LayoutList size={16} />
                       </button>
                       <button 
                         onClick={() => setCardSize('medium')}
                         className={`p-1.5 rounded-md transition-all ${cardSize === 'medium' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-800 dark:text-white' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}`}
-                        title="Medium View"
+                        title="Medium Grid View"
                       >
-                        <Grid2X2 size={16} />
+                        <Grid3X3 size={16} />
                       </button>
                       <button 
                         onClick={() => setCardSize('large')}
                         className={`p-1.5 rounded-md transition-all ${cardSize === 'large' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-800 dark:text-white' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}`}
-                        title="Large View"
+                        title="Large Grid View"
                       >
-                        <RectangleHorizontal size={16} />
+                        <Grid2X2 size={16} />
                       </button>
                    </div>
                </div>
@@ -792,7 +792,7 @@ const App: React.FC = () => {
                 if (categoryItems.length === 0) return null;
 
                 return (
-                  <div key={cat}>
+                  <div key={cat} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                     <h2 className="text-base font-bold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
                       {getCategoryIcon(cat, 18)}
                       {t.categories[cat as keyof typeof t.categories] || cat}
@@ -801,7 +801,7 @@ const App: React.FC = () => {
                       </span>
                       <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700 ml-4"></div>
                     </h2>
-                    <div className={`grid gap-3 ${getGridClasses()}`}>
+                    <div className={`grid ${getGridClasses()}`}>
                       {categoryItems.map((item) => (
                         <ItemCard 
                           key={item.id} 
