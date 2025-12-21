@@ -31,6 +31,9 @@ const Column = ({
       if (index !== -1) {
         scrollRef.current.scrollTop = index * ITEM_HEIGHT;
         lastHapticIndex.current = index;
+      } else if (items.length > 0) {
+        // Fallback to first item if selected value not in range
+        scrollRef.current.scrollTop = 0;
       }
     }
   }, [selectedValue, items]);
@@ -97,12 +100,15 @@ export const WheelPicker: React.FC<WheelPickerProps> = ({ value, onChange, mode 
   const now = new Date();
   const date = value ? new Date(value) : now;
   
-  const currentYear = date.getFullYear();
+  const currentRealYear = now.getFullYear();
+  const startYear = currentRealYear;
+  const endYear = startYear + 100;
+
+  // Adjust selected year if it's outside the new dynamic range
+  const currentYear = Math.max(startYear, Math.min(date.getFullYear(), endYear));
   const currentMonth = date.getMonth() + 1; 
   const currentDay = date.getDate();
 
-  const startYear = 1900;
-  const endYear = 2100;
   const years = Array.from({ length: endYear - startYear + 1 }, (_, i) => {
     const y = startYear + i;
     return { label: y.toString(), value: y };
