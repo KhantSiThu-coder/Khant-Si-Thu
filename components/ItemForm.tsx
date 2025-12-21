@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { ShoppingItem, MediaItem, ItemStatus } from '../types';
 import { MediaUploader } from './MediaUploader';
 import { analyzeItemImage } from '../services/geminiService';
+import { CalendarPicker } from './CalendarPicker';
 import { Loader2, Sparkles, Save, X, Trash2, Share2, Check, Info, Calendar } from 'lucide-react';
 import { TRANSLATIONS, Language, CATEGORY_KEYS, CURRENCY_OPTIONS } from '../constants';
 
@@ -35,6 +36,7 @@ export const ItemForm: React.FC<ItemFormProps> = ({
   const [notes, setNotes] = useState(initialData?.notes || '');
   const [media, setMedia] = useState<MediaItem[]>(initialData?.media || []);
   const [expiryDate, setExpiryDate] = useState<number | undefined>(initialData?.expiryDate);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isAIEnabled, setIsAIEnabled] = useState(enableAI);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [shareFeedback, setShareFeedback] = useState<string | null>(null);
@@ -112,10 +114,10 @@ export const ItemForm: React.FC<ItemFormProps> = ({
     }
   };
 
-  const toInputDateValue = (ts?: number) => {
-    if (!ts) return '';
+  const formatSelectedDate = (ts?: number) => {
+    if (!ts) return t.expiryDate || 'Select Date';
     const d = new Date(ts);
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
   };
 
   return (
@@ -162,21 +164,20 @@ export const ItemForm: React.FC<ItemFormProps> = ({
                 <Calendar size={14} className="text-gray-500 dark:text-gray-400" />
                 {t.expiryDate}
               </label>
-              <input 
-                type="date" 
-                value={toInputDateValue(expiryDate)} 
-                onChange={(e) => { 
-                  const val = e.target.value; 
-                  if (val) { 
-                    const d = new Date(val); 
-                    d.setHours(12, 0, 0, 0); 
-                    setExpiryDate(d.getTime()); 
-                  } else { 
-                    setExpiryDate(undefined); 
-                  } 
-                }} 
-                className="w-full px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none text-base"
-              />
+              <button 
+                type="button"
+                onClick={() => setIsCalendarOpen(true)}
+                className="w-full px-3 py-2.5 border bg-white dark:bg-gray-700 text-left text-gray-900 dark:text-white border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none text-base"
+              >
+                {formatSelectedDate(expiryDate)}
+              </button>
+              {isCalendarOpen && (
+                <CalendarPicker 
+                  value={expiryDate} 
+                  onChange={(ts) => { setExpiryDate(ts); setIsCalendarOpen(false); }} 
+                  onClose={() => setIsCalendarOpen(false)} 
+                />
+              )}
             </div>
           )}
           <div>

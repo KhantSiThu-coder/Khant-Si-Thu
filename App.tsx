@@ -7,6 +7,7 @@ import { RecycleBinModal } from './components/RecycleBinModal';
 import { OnboardingModal } from './components/OnboardingModal';
 import { LanguageSelectorModal } from './components/LanguageSelectorModal';
 import { ExpirationAlertModal } from './components/ExpirationAlertModal';
+import { CalendarPicker } from './components/CalendarPicker';
 import { loadItemsFromDB, saveItemToDB, deleteItemFromDB, initStoragePersistence, getStorageEstimate } from './services/storage';
 import { 
   Plus, Search, ShoppingBag, Utensils, Coffee, Shirt, Monitor, 
@@ -109,15 +110,13 @@ const App: React.FC = () => {
     };
     localStorage.setItem('smartshop_settings', JSON.stringify(settingsToSave));
     
-    // Force standard language for native pickers unless it's Japanese
     document.documentElement.lang = language === 'ja' ? 'ja' : 'en';
   }, [language, theme, enableAI, cardSize]);
 
-  // Check for first-time visit logic
+  // Check for first-time visit
   useEffect(() => {
     const hasSelectedLanguage = localStorage.getItem('smartshop_language_selected');
     const hasSeenOnboarding = localStorage.getItem('smartshop_onboarding_seen');
-    
     if (!hasSelectedLanguage) {
         setIsLanguageSelectorOpen(true);
     } else if (!hasSeenOnboarding) {
@@ -137,33 +136,34 @@ const App: React.FC = () => {
     setIsOnboardingOpen(false);
   };
 
-  // Storage Stats
-  const [storageStats, setStorageStats] = useState<{usage: number, quota: number} | null>(null);
-
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState('');
   const [activeStatuses, setActiveStatuses] = useState<ItemStatus[]>([]);
-  
-  // Price Filter
   const [isPriceFilterActive, setIsPriceFilterActive] = useState(false);
   const [priceRange, setPriceRange] = useState<{min: string, max: string}>({min: '', max: ''});
 
   // Expiration Filter
   const [isExpiryFilterActive, setIsExpiryFilterActive] = useState(false);
-  const [expiryFilterDate, setExpiryFilterDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [isFilterCalendarOpen, setIsFilterCalendarOpen] = useState(false);
+  const [expiryFilterDate, setExpiryFilterDate] = useState<number>(new Date().setHours(12, 0, 0, 0));
+
+  const formatFilterDate = (ts: number) => {
+    const d = new Date(ts);
+    return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
+  };
 
   // Expiration Alert State
   const hasCheckedExpiryRef = useRef(false);
   const [isExpiryAlertOpen, setIsExpiryAlertOpen] = useState(false);
   const [expiringItems, setExpiringItems] = useState<ShoppingItem[]>([]);
 
-  // Toast State
+  // Toast & Scroll State
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState<string>('');
   const [lastDeletedId, setLastDeletedId] = useState<string | null>(null);
-
-  // Scrollbar State
   const [isMainScrolling, setIsMainScrolling] = useState(false);
+  // Fixed: storageStats state added
+  const [storageStats, setStorageStats] = useState<{usage: number, quota: number} | null>(null);
   const mainScrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const t = TRANSLATIONS[language];
@@ -181,44 +181,7 @@ const App: React.FC = () => {
     }
   }, [theme]);
 
-  // Handle Shared URL Import
-  useEffect(() => {
-    const checkForShare = () => {
-      const params = new URLSearchParams(window.location.search);
-      const shareCode = params.get('share');
-      if (shareCode) {
-        try {
-          const json = decodeURIComponent(atob(shareCode));
-          const data = JSON.parse(json);
-          
-          const sharedItem: ShoppingItem = {
-             id: '', 
-             createdAt: Date.now(),
-             media: [],
-             name: data.n || '',
-             category: data.c || CATEGORY_KEYS[0],
-             price: data.p || null,
-             currency: 'JPY',
-             store: data.s || null,
-             status: data.st || 'to-buy',
-             notes: data.nt || '',
-          };
-
-          setEditingItem(sharedItem);
-          setIsFormOpen(true);
-          setToastMessage(t.itemImported);
-          setShowToast(true);
-          setTimeout(() => setShowToast(false), 3000);
-          window.history.replaceState({}, '', window.location.pathname);
-        } catch (e) {
-          console.error("Failed to parse share data", e);
-        }
-      }
-    };
-    checkForShare();
-  }, [t.itemImported]);
-
-  // Load items from IndexedDB and Request Persistence
+  // Load items
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -247,7 +210,16 @@ const App: React.FC = () => {
     loadData();
   }, []);
 
-  // Check for upcoming expirations
+  // Fixed: storage stats effect added
+  useEffect(() => {
+    const fetchStorageStats = async () => {
+      const stats = await getStorageEstimate();
+      setStorageStats(stats);
+    };
+    fetchStorageStats();
+  }, [items]);
+
+  // Expiry checks
   useEffect(() => {
     if (!isLoading && !hasCheckedExpiryRef.current) {
       hasCheckedExpiryRef.current = true;
@@ -274,26 +246,11 @@ const App: React.FC = () => {
     }
   }, [isLoading, items]);
 
-  useEffect(() => {
-    if (isSettingsOpen) {
-      getStorageEstimate().then(setStorageStats);
-    }
-  }, [isSettingsOpen]);
-
   const handleAddItem = async (itemData: Omit<ShoppingItem, 'id' | 'createdAt'>) => {
-    const newItem: ShoppingItem = {
-      ...itemData,
-      id: generateId(),
-      createdAt: Date.now(),
-    };
+    const newItem: ShoppingItem = { ...itemData, id: generateId(), createdAt: Date.now() };
     setItems((prev) => [newItem, ...prev]);
     setIsFormOpen(false);
-    try {
-      await saveItemToDB(newItem);
-    } catch (e) {
-      console.error("Failed to save item:", e);
-      alert("Failed to save to device storage.");
-    }
+    await saveItemToDB(newItem);
   };
 
   const handleUpdateItem = async (itemData: Omit<ShoppingItem, 'id' | 'createdAt'>) => {
@@ -307,11 +264,7 @@ const App: React.FC = () => {
     setItems((prev) => prev.map((item) => item.id === editingItem.id ? updatedItem : item));
     setEditingItem(null);
     setIsFormOpen(false);
-    try {
-      await saveItemToDB(updatedItem);
-    } catch (e) {
-      console.error("Failed to update item:", e);
-    }
+    await saveItemToDB(updatedItem);
   };
 
   const handleDeleteItem = async (id: string) => {
@@ -330,33 +283,18 @@ const App: React.FC = () => {
     }
   };
 
+  // Fixed: handlePermanentDelete added
+  const handlePermanentDelete = async (id: string) => {
+    setItems((prev) => prev.filter((i) => i.id !== id));
+    await deleteItemFromDB(id);
+  };
+
   const handleRestoreItem = async (id: string) => {
     const itemToRestore = items.find(i => i.id === id);
     if (!itemToRestore) return;
     const restoredItem = { ...itemToRestore, deletedAt: undefined };
     setItems((prev) => prev.map((i) => i.id === id ? restoredItem : i));
     await saveItemToDB(restoredItem);
-  };
-
-  const handleUndoDelete = () => {
-    if (lastDeletedId) {
-      handleRestoreItem(lastDeletedId);
-      setShowToast(false);
-      setLastDeletedId(null);
-    }
-  };
-
-  const handlePermanentDelete = async (id: string) => {
-    setItems((prev) => prev.filter((i) => i.id !== id));
-    await deleteItemFromDB(id);
-  };
-
-  const handleEmptyBin = async () => {
-    const itemsToDelete = items.filter(i => i.deletedAt);
-    setItems((prev) => prev.filter((i) => !i.deletedAt));
-    for (const item of itemsToDelete) {
-      await deleteItemFromDB(item.id);
-    }
   };
 
   const toggleItemStatus = async (id: string, currentStatus: string) => {
@@ -370,29 +308,8 @@ const App: React.FC = () => {
   };
 
   const toggleStatusFilter = (status: ItemStatus) => {
-    setActiveStatuses(prev => 
-      prev.includes(status) 
-        ? prev.filter(s => s !== status) 
-        : [...prev, status]
-    );
+    setActiveStatuses(prev => prev.includes(status) ? prev.filter(s => s !== status) : [...prev, status]);
   };
-
-  const toggleCategory = (cat: string) => {
-    setSelectedCategories(prev => {
-      if (prev.includes('All')) return [cat];
-      if (prev.includes(cat)) {
-        const next = prev.filter(c => c !== cat);
-        return next.length === 0 ? ['All'] : next;
-      }
-      return [...prev, cat];
-    });
-  };
-
-  const handleMainScroll = useCallback(() => {
-    if (!isMainScrolling) setIsMainScrolling(true);
-    if (mainScrollTimeoutRef.current) clearTimeout(mainScrollTimeoutRef.current);
-    mainScrollTimeoutRef.current = setTimeout(() => setIsMainScrolling(false), 3000);
-  }, [isMainScrolling]);
 
   const filteredItems = items.filter((item) => {
     if (item.deletedAt) return false;
@@ -423,13 +340,25 @@ const App: React.FC = () => {
   });
 
   const trashItems = items.filter(item => item.deletedAt).sort((a, b) => (b.deletedAt || 0) - (a.deletedAt || 0));
-  const categoriesToShow = selectedCategories.includes('All') ? CATEGORY_KEYS : CATEGORY_KEYS.filter(cat => selectedCategories.includes(cat));
 
+  // Fixed: handleMainScroll added
+  const handleMainScroll = () => {
+    setIsMainScrolling(true);
+    if (mainScrollTimeoutRef.current) clearTimeout(mainScrollTimeoutRef.current);
+    mainScrollTimeoutRef.current = setTimeout(() => setIsMainScrolling(false), 1000);
+  };
+
+  // Fixed: categoriesToShow added
+  const categoriesToShow = selectedCategories.includes('All') 
+    ? CATEGORY_KEYS.filter(cat => filteredItems.some(item => item.category === cat))
+    : selectedCategories;
+
+  // Fixed: getGridClasses added
   const getGridClasses = () => {
     switch (cardSize) {
-      case 'small': return "grid-cols-1 gap-4 w-full max-w-2xl mx-auto px-4 sm:px-0";
-      case 'medium': return "grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3";
-      case 'large': return "grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-4";
+      case 'small': return 'grid-cols-1 gap-3';
+      case 'large': return 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6';
+      default: return 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4';
     }
   };
 
@@ -485,7 +414,7 @@ const App: React.FC = () => {
           {CATEGORY_KEYS.map(cat => (
             <button
               key={cat}
-              onClick={() => toggleCategory(cat)}
+              onClick={() => { setSelectedCategories([cat]); setIsSidebarOpen(false); }}
               className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
                 selectedCategories.includes(cat)
                   ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 font-semibold' 
@@ -587,12 +516,20 @@ const App: React.FC = () => {
               {isExpiryFilterActive && (
                 <div className="px-4 pb-3 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700 flex items-center gap-4 animate-in slide-in-from-top-2 fade-in duration-200">
                   <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">{t.expiryDate} (&le;):</span>
-                  <input 
-                    type="date" 
-                    value={expiryFilterDate} 
-                    onChange={(e) => setExpiryFilterDate(e.target.value)} 
-                    className="px-2 py-1 text-base sm:text-sm border bg-white text-gray-900 dark:border-gray-600 rounded focus:ring-2 focus:ring-indigo-500 outline-none dark:bg-gray-700 dark:text-white shadow-sm" 
-                  />
+                  <button 
+                    onClick={() => setIsFilterCalendarOpen(true)}
+                    className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium border bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors shadow-sm"
+                  >
+                    <Calendar size={14} className="text-indigo-500" />
+                    {formatFilterDate(expiryFilterDate)}
+                  </button>
+                  {isFilterCalendarOpen && (
+                    <CalendarPicker 
+                      value={expiryFilterDate} 
+                      onChange={(ts) => { if (ts) setExpiryFilterDate(ts); }} 
+                      onClose={() => setIsFilterCalendarOpen(false)} 
+                    />
+                  )}
                 </div>
               )}
           </div>
@@ -654,7 +591,7 @@ const App: React.FC = () => {
              {toastMessage === t.itemMovedToTrash ? (
                <>
                  <div className="h-4 w-px bg-white/20 dark:bg-black/20"></div>
-                 <button onClick={handleUndoDelete} className="flex items-center gap-1.5 text-indigo-400 dark:text-indigo-600 font-bold hover:underline whitespace-nowrap"><Undo2 size={16} />{t.undo}</button>
+                 <button onClick={() => { if (lastDeletedId) handleRestoreItem(lastDeletedId); setShowToast(false); setLastDeletedId(null); }} className="flex items-center gap-1.5 text-indigo-400 dark:text-indigo-600 font-bold hover:underline whitespace-nowrap"><Undo2 size={16} />{t.undo}</button>
                </>
              ) : (
                 <span className="font-medium">{toastMessage === t.itemImported ? toastMessage : ''}</span>
@@ -682,17 +619,17 @@ const App: React.FC = () => {
             </div>
             <div className="flex-1 overflow-y-auto p-6 pt-0 space-y-6">
               <div>
-                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2"><HardDrive size={16} />{t.storage}</label>
-                 <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-xl border border-gray-100 dark:border-gray-600">
-                    {storageStats ? (
-                      <>
-                        <div className="flex justify-between text-xs mb-1.5"><span className="text-gray-600 dark:text-gray-300 font-medium">{formatBytes(storageStats.usage)} {t.used}</span><span className="text-gray-400 dark:text-gray-500">{formatBytes(storageStats.quota)} {t.available}</span></div>
-                        <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 overflow-hidden"><div className="bg-indigo-500 h-2 rounded-full transition-all duration-1000" style={{ width: `${Math.min((storageStats.usage / storageStats.quota) * 100, 100)}%` }}></div></div>
-                      </>
-                    ) : (
-                      <div className="h-6 w-full animate-pulse bg-gray-200 dark:bg-gray-600 rounded"></div>
-                    )}
-                 </div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2"><HardDrive size={16} />{t.storage}</label>
+                <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-xl border border-gray-100 dark:border-gray-600">
+                  {storageStats ? (
+                    <>
+                      <div className="flex justify-between text-xs mb-1.5"><span className="text-gray-600 dark:text-gray-300 font-medium">{formatBytes(storageStats.usage)} {t.used}</span><span className="text-gray-400 dark:text-gray-500">{formatBytes(storageStats.quota)} {t.available}</span></div>
+                      <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 overflow-hidden"><div className="bg-indigo-500 h-2 rounded-full transition-all duration-1000" style={{ width: `${Math.min((storageStats.usage / storageStats.quota) * 100, 100)}%` }}></div></div>
+                    </>
+                  ) : (
+                    <div className="h-6 w-full animate-pulse bg-gray-200 dark:bg-gray-600 rounded"></div>
+                  )}
+                </div>
               </div>
               <div>
                 <label className="flex items-center justify-between text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -753,7 +690,7 @@ const App: React.FC = () => {
         </div>
       )}
 
-      <RecycleBinModal isOpen={isRecycleBinOpen} onClose={() => setIsRecycleBinOpen(false)} items={trashItems} onRestore={handleRestoreItem} onDeletePermanent={handlePermanentDelete} onEmptyBin={handleEmptyBin} lang={language} />
+      <RecycleBinModal isOpen={isRecycleBinOpen} onClose={() => setIsRecycleBinOpen(false)} items={trashItems} onRestore={handleRestoreItem} onDeletePermanent={handlePermanentDelete} onEmptyBin={() => { setItems((prev) => prev.filter((i) => !i.deletedAt)); }} lang={language} />
       <ExpirationAlertModal isOpen={isExpiryAlertOpen} onClose={() => setIsExpiryAlertOpen(false)} items={expiringItems} lang={language} />
       <OnboardingModal isOpen={isOnboardingOpen} onClose={handleCloseOnboarding} lang={language} />
       <LanguageSelectorModal isOpen={isLanguageSelectorOpen} onSelect={handleLanguageSelect} />
