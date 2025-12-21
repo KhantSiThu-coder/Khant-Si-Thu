@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Check, RotateCcw } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
 
 interface CalendarPickerProps {
   value: number | undefined;
@@ -76,9 +77,14 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({ value, onChange,
     );
   }
 
-  return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/20 backdrop-blur-[2px]">
-      <div className="bg-white dark:bg-gray-800 rounded-[40px] shadow-2xl w-full max-w-[340px] overflow-hidden animate-in zoom-in-95 duration-200 p-6 flex flex-col gap-6">
+  // Use Portal to ensure the calendar renders above all containers (fixes the "not working" form issue)
+  return createPortal(
+    <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/40 backdrop-blur-[2px] animate-in fade-in duration-200">
+      <div 
+        className="absolute inset-0 -z-10" 
+        onClick={onClose} 
+      />
+      <div className="bg-white dark:bg-gray-800 rounded-[40px] shadow-2xl w-full max-w-[340px] overflow-hidden animate-in zoom-in-95 duration-200 p-6 flex flex-col gap-6" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1 group cursor-pointer">
@@ -130,9 +136,7 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({ value, onChange,
           </button>
         </div>
       </div>
-      
-      {/* Click outside to close */}
-      <div className="absolute inset-0 -z-10" onClick={onClose} />
-    </div>
+    </div>,
+    document.body
   );
 };

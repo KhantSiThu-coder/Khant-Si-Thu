@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { ShoppingItem, MediaItem, ItemStatus } from '../types';
 import { MediaUploader } from './MediaUploader';
-import { CalendarPicker } from './CalendarPicker';
 import { analyzeItemImage } from '../services/geminiService';
 import { Loader2, Sparkles, Save, X, Trash2, Share2, Check, Info, Calendar } from 'lucide-react';
 import { TRANSLATIONS, Language, CATEGORY_KEYS, CURRENCY_OPTIONS } from '../constants';
@@ -40,7 +39,6 @@ export const ItemForm: React.FC<ItemFormProps> = ({
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [shareFeedback, setShareFeedback] = useState<string | null>(null);
   const [showAITip, setShowAITip] = useState(false);
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const EXPIRY_CATEGORIES = ['Cooking Ingredients', 'Food & Drinks', 'Cosmetics', 'Medicine'];
   const showExpiryDate = EXPIRY_CATEGORIES.includes(category);
@@ -120,15 +118,6 @@ export const ItemForm: React.FC<ItemFormProps> = ({
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   };
 
-  const toDisplayDateValue = (ts?: number) => {
-    if (!ts) return '';
-    const d = new Date(ts);
-    const yy = String(d.getFullYear()).slice(-2);
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    return `${yy}/${mm}/${dd}`;
-  };
-
   return (
     <form onSubmit={handleSubmit} className="flex flex-col h-full bg-white dark:bg-gray-800 transition-colors relative">
       <div className="flex items-center justify-between p-4 border-b dark:border-gray-700">
@@ -173,31 +162,7 @@ export const ItemForm: React.FC<ItemFormProps> = ({
                 <Calendar size={14} className="text-gray-500 dark:text-gray-400" />
                 {t.expiryDate} <span className="text-[10px] opacity-70 font-normal ml-auto">({lang === 'ja' ? '年/月/日' : 'YY/MM/DD'})</span>
               </label>
-              {lang === 'ja' ? (
-                <input
-                  type="date"
-                  value={toInputDateValue(expiryDate)}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    if (val) {
-                      const d = new Date(val);
-                      d.setHours(12, 0, 0, 0);
-                      setExpiryDate(d.getTime());
-                    } else {
-                      setExpiryDate(undefined);
-                    }
-                  }}
-                  className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white text-base"
-                />
-              ) : (
-                <div 
-                  onClick={() => setIsCalendarOpen(true)}
-                  className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 text-base cursor-pointer flex items-center justify-between"
-                >
-                  <span>{expiryDate ? toDisplayDateValue(expiryDate) : 'Select Date'}</span>
-                  <Calendar size={16} className="text-gray-400" />
-                </div>
-              )}
+              <input type="date" value={toInputDateValue(expiryDate)} onChange={(e) => { const val = e.target.value; if (val) { const d = new Date(val); d.setHours(12, 0, 0, 0); setExpiryDate(d.getTime()); } else { setExpiryDate(undefined); } }} className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white text-base" />
             </div>
           )}
           <div>
@@ -245,14 +210,6 @@ export const ItemForm: React.FC<ItemFormProps> = ({
       <div className="p-4 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
         <button type="submit" className="w-full bg-indigo-600 text-white py-3.5 px-4 rounded-xl font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 flex items-center justify-center gap-2 text-base"><Save size={20} />{t.save}</button>
       </div>
-
-      {isCalendarOpen && (
-        <CalendarPicker 
-          value={expiryDate} 
-          onChange={setExpiryDate} 
-          onClose={() => setIsCalendarOpen(false)} 
-        />
-      )}
     </form>
   );
 };

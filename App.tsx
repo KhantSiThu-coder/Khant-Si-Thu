@@ -110,6 +110,7 @@ const App: React.FC = () => {
     localStorage.setItem('smartshop_settings', JSON.stringify(settingsToSave));
     
     // Update document lang for native UI (like date pickers)
+    // Forced to 'en' for non-Japanese languages to ensure standard labels
     document.documentElement.lang = language === 'ja' ? 'ja' : 'en';
   }, [language, theme, enableAI, cardSize]);
 
@@ -629,7 +630,13 @@ const App: React.FC = () => {
 
           <footer className="mt-12 py-8 text-center text-sm text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-800 pb-24 md:pb-8">
             <p>{t.footerCreatedBy} <span className="font-semibold text-gray-900 dark:text-gray-200">Khant Si Thu</span>.</p>
-            <p className="mt-1">{t.footerEmailPrompt} <a href="mailto:khantsithu.1999.work@gmail.com" className="text-indigo-600 dark:text-indigo-400 font-medium hover:underline decoration-2 underline-offset-2">{t.footerClickHere}</a></p>
+            <p className="mt-1">
+              {t.footerEmailPrompt}
+              <br className="md:hidden" />
+              <a href="mailto:khantsithu.1999.work@gmail.com" className="text-indigo-600 dark:text-indigo-400 font-medium hover:underline decoration-2 underline-offset-2 ml-0 md:ml-1">
+                {t.footerClickHere}
+              </a>
+            </p>
           </footer>
         </main>
 
