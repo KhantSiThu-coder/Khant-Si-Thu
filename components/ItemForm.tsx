@@ -115,7 +115,8 @@ export const ItemForm: React.FC<ItemFormProps> = ({
   };
 
   const formatSelectedDate = (ts?: number) => {
-    if (!ts) return t.expiryDate || 'Select Date';
+    // UPDATED: Placeholder changed to 'YY/MM/DD' as requested
+    if (!ts) return 'YY/MM/DD';
     const d = new Date(ts);
     return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
   };
@@ -167,7 +168,7 @@ export const ItemForm: React.FC<ItemFormProps> = ({
               <button 
                 type="button"
                 onClick={() => setIsCalendarOpen(true)}
-                className="w-full px-3 py-2.5 border bg-white dark:bg-gray-700 text-left text-gray-900 dark:text-white border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none text-base"
+                className={`w-full px-3 py-2.5 border bg-white dark:bg-gray-700 text-left border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none text-base ${!expiryDate ? 'text-gray-400 dark:text-gray-500 italic' : 'text-gray-900 dark:text-white'}`}
               >
                 {formatSelectedDate(expiryDate)}
               </button>

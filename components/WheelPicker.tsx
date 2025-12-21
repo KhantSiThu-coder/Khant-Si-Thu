@@ -4,10 +4,10 @@ import React, { useRef, useEffect } from 'react';
 interface WheelPickerProps {
   value: number | undefined; // timestamp
   onChange: (timestamp: number) => void;
-  lang?: string;
+  mode?: 'date' | 'monthYear';
 }
 
-const ITEM_HEIGHT = 44; // Slightly taller for better touch target
+const ITEM_HEIGHT = 44; 
 
 const Column = ({ 
   items, 
@@ -25,7 +25,6 @@ const Column = ({
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastHapticIndex = useRef<number>(-1);
 
-  // Sync scroll position with value
   useEffect(() => {
     if (scrollRef.current && !isScrollingRef.current) {
       const index = items.findIndex(i => i.value === selectedValue);
@@ -43,16 +42,14 @@ const Column = ({
     const target = e.currentTarget;
     const scrollTop = target.scrollTop;
     
-    // Haptic feedback logic
     const currentIndex = Math.round(scrollTop / ITEM_HEIGHT);
     if (currentIndex !== lastHapticIndex.current) {
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
-        navigator.vibrate(5); // Ultra short tick
+        navigator.vibrate(5); 
       }
       lastHapticIndex.current = currentIndex;
     }
 
-    // Debounce selection update
     timeoutRef.current = setTimeout(() => {
       isScrollingRef.current = false;
       const index = Math.round(scrollTop / ITEM_HEIGHT);
@@ -63,7 +60,6 @@ const Column = ({
         onSelect(newItem.value);
       }
       
-      // Snap visually to exact center if not already
       if (target.scrollTop !== clampedIndex * ITEM_HEIGHT) {
          target.scrollTo({
            top: clampedIndex * ITEM_HEIGHT,
@@ -77,7 +73,7 @@ const Column = ({
     <div className={`h-[220px] relative overflow-hidden flex-1 ${className}`}>
       <div 
         ref={scrollRef}
-        className="h-full overflow-y-auto snap-y snap-mandatory no-scrollbar py-[88px]" // Padding = 2 * ITEM_HEIGHT
+        className="h-full overflow-y-auto snap-y snap-mandatory no-scrollbar py-[88px]" 
         onScroll={handleScroll}
       >
         {items.map((item) => (
@@ -97,23 +93,24 @@ const Column = ({
   );
 };
 
-export const WheelPicker: React.FC<WheelPickerProps> = ({ value, onChange }) => {
+export const WheelPicker: React.FC<WheelPickerProps> = ({ value, onChange, mode = 'date' }) => {
   const now = new Date();
   const date = value ? new Date(value) : now;
   
   const currentYear = date.getFullYear();
-  const currentMonth = date.getMonth() + 1; // 1-12
+  const currentMonth = date.getMonth() + 1; 
   const currentDay = date.getDate();
 
-  // Range: Current Year - 1 to +10
-  const startYear = now.getFullYear() - 1;
-  const years = Array.from({ length: 12 }, (_, i) => {
+  const startYear = 1900;
+  const endYear = 2100;
+  const years = Array.from({ length: endYear - startYear + 1 }, (_, i) => {
     const y = startYear + i;
     return { label: y.toString(), value: y };
   });
   
-  const months = Array.from({ length: 12 }, (_, i) => ({
-    label: (i + 1).toString().padStart(2, '0'),
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const months = monthNames.map((name, i) => ({
+    label: name,
     value: i + 1
   }));
 
@@ -124,22 +121,17 @@ export const WheelPicker: React.FC<WheelPickerProps> = ({ value, onChange }) => 
   }));
 
   const updateDate = (y: number, m: number, d: number) => {
-    // Clamp day to max days in new month/year combo
     const maxDays = new Date(y, m, 0).getDate();
     const clampedDay = Math.min(d, maxDays);
     const newDate = new Date(y, m - 1, clampedDay);
-    
-    // Set to noon to avoid timezone switching issues at midnight
     newDate.setHours(12, 0, 0, 0); 
     onChange(newDate.getTime());
   };
 
   return (
     <div className="relative bg-white dark:bg-gray-800 rounded-2xl overflow-hidden mt-4">
-      {/* Pill Highlight - Centered */}
       <div className="absolute top-1/2 left-4 right-4 h-[44px] -translate-y-1/2 bg-gray-100 dark:bg-gray-700 rounded-xl pointer-events-none z-0" />
       
-      {/* Gradient Overlays for Fade Effect */}
       <div className="absolute top-0 left-0 right-0 h-[80px] bg-gradient-to-b from-white dark:from-gray-800 via-white/80 dark:via-gray-800/80 to-transparent z-10 pointer-events-none" />
       <div className="absolute bottom-0 left-0 right-0 h-[80px] bg-gradient-to-t from-white dark:from-gray-800 via-white/80 dark:via-gray-800/80 to-transparent z-10 pointer-events-none" />
 
@@ -154,11 +146,13 @@ export const WheelPicker: React.FC<WheelPickerProps> = ({ value, onChange }) => 
           selectedValue={currentMonth} 
           onSelect={(m) => updateDate(currentYear, m, currentDay)} 
         />
-        <Column 
-          items={days} 
-          selectedValue={currentDay} 
-          onSelect={(d) => updateDate(currentYear, currentMonth, d)} 
-        />
+        {mode === 'date' && (
+          <Column 
+            items={days} 
+            selectedValue={currentDay} 
+            onSelect={(d) => updateDate(currentYear, currentMonth, d)} 
+          />
+        )}
       </div>
     </div>
   );
