@@ -99,7 +99,7 @@ export const ExpirationAlertModal: React.FC<ExpirationAlertModalProps> = ({
                       <div className="flex items-center gap-2 mt-0.5">
                          <div className="flex items-center gap-1 text-xs text-orange-600 dark:text-orange-400 font-medium">
                             <CalendarClock size={12} />
-                            <span>{expiryDate.toLocaleDateString()}</span>
+                            <span>{expiryDate.toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' })}</span>
                          </div>
                          <span className="text-xs font-bold px-1.5 py-0.5 bg-white dark:bg-gray-800 rounded text-red-500 shadow-sm border border-red-100 dark:border-gray-700">
                            {dayText}

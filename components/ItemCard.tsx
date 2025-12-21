@@ -27,6 +27,16 @@ export const ItemCard: React.FC<ItemCardProps> = ({
   // Determine currency symbol
   const currencySymbol = CURRENCY_OPTIONS.find(c => c.value === item.currency)?.symbol || '¥';
 
+  // Standard date formatter for YYYY/MM/DD
+  const formatDate = (timestamp?: number) => {
+    if (!timestamp) return '';
+    return new Date(timestamp).toLocaleDateString('ja-JP', { 
+      year: 'numeric', 
+      month: '2-digit', 
+      day: '2-digit' 
+    });
+  };
+
   const getStatusBadge = (isList: boolean = false) => {
     const baseClasses = "rounded-md font-semibold backdrop-blur-md text-white shadow-sm z-20 transition-all whitespace-nowrap";
     const sizeClasses = isList ? "px-1.5 py-0.5 text-[8px] sm:text-[10px]" : (size === 'medium' ? "px-1.5 py-0.5 text-[9px]" : "px-2 py-1 text-[10px]");
@@ -106,7 +116,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
         onClick={() => onClick(item)}
         className="group relative flex items-center gap-3 sm:gap-4 p-4 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-all w-full max-w-full overflow-hidden"
       >
-        {/* Thumbnail on the far left - Increased size for height */}
+        {/* Thumbnail on the far left */}
         <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex-shrink-0 border border-gray-200 dark:border-gray-700 shadow-sm">
           {coverMedia ? (
              coverMedia.type === 'image' ? (
@@ -127,7 +137,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
            {getStatusBadge(true)}
         </div>
 
-        {/* Details Area - Vertical stack for height and details visibility */}
+        {/* Details Area */}
         <div className="flex-1 min-w-0 flex flex-col gap-1 overflow-hidden">
           <div className="flex justify-between items-start gap-2">
             <h3 className="font-bold text-sm sm:text-base text-gray-900 dark:text-white truncate" title={item.name}>
@@ -144,7 +154,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
              </span>
           </div>
 
-          {/* Metadata Row - Visible on all screen sizes now */}
+          {/* Metadata Row - Standardized Date Format */}
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[10px] text-gray-500 dark:text-gray-400">
               {item.store && (
                 <span className="flex items-center gap-1 truncate max-w-[120px]">
@@ -155,7 +165,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
               {item.expiryDate && (
                 <span className="flex items-center gap-1 flex-shrink-0">
                   <CalendarClock size={12} className="text-gray-400" /> 
-                  <span>{new Date(item.expiryDate).toLocaleDateString()}</span>
+                  <span>{formatDate(item.expiryDate)}</span>
                 </span>
               )}
           </div>
@@ -241,7 +251,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
               {item.expiryDate && (
                 <div className="flex items-center text-[10px] text-gray-500 dark:text-gray-400" title={t.expiryDate}>
                   <CalendarClock size={10} className="mr-1 flex-shrink-0" />
-                  <span>{new Date(item.expiryDate).toLocaleDateString()}</span>
+                  <span>{formatDate(item.expiryDate)}</span>
                 </div>
               )}
             </div>
