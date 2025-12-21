@@ -620,7 +620,7 @@ const App: React.FC = () => {
                 placeholder={t.search} 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-gray-700 dark:text-white rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-gray-700 dark:text-white rounded-full text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
           </div>
@@ -738,7 +738,7 @@ const App: React.FC = () => {
                       value={priceRange.min}
                       onChange={(e) => setPriceRange({...priceRange, min: e.target.value})}
                       placeholder={t.min}
-                      className="w-20 px-2 py-1 text-sm border bg-white text-gray-900 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 outline-none dark:bg-gray-700 dark:text-white"
+                      className="w-20 px-2 py-1 text-base sm:text-sm border bg-white text-gray-900 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 outline-none dark:bg-gray-700 dark:text-white"
                     />
                     <span className="text-gray-400">-</span>
                     <input 
@@ -746,7 +746,7 @@ const App: React.FC = () => {
                       value={priceRange.max}
                       onChange={(e) => setPriceRange({...priceRange, max: e.target.value})}
                       placeholder={t.max}
-                      className="w-20 px-2 py-1 text-sm border bg-white text-gray-900 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 outline-none dark:bg-gray-700 dark:text-white"
+                      className="w-20 px-2 py-1 text-base sm:text-sm border bg-white text-gray-900 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 outline-none dark:bg-gray-700 dark:text-white"
                     />
                   </div>
                 </div>
@@ -759,7 +759,7 @@ const App: React.FC = () => {
                     type="date" 
                     value={expiryFilterDate}
                     onChange={(e) => setExpiryFilterDate(e.target.value)}
-                    className="px-2 py-1 text-sm border bg-white text-gray-900 dark:border-gray-600 rounded focus:ring-2 focus:ring-purple-500 outline-none dark:bg-gray-700 dark:text-white"
+                    className="px-2 py-1 text-base sm:text-sm border bg-white text-gray-900 dark:border-gray-600 rounded focus:ring-2 focus:ring-purple-500 outline-none dark:bg-gray-700 dark:text-white"
                   />
                 </div>
               )}
@@ -969,7 +969,7 @@ const App: React.FC = () => {
                 <select
                   value={language}
                   onChange={(e) => setLanguage(e.target.value as Language)}
-                  className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-base sm:text-sm text-gray-900 dark:text-white"
                 >
                   <option value="en">English</option>
                   <option value="ja">日本語</option>

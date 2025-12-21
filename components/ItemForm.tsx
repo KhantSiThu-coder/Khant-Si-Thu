@@ -266,7 +266,7 @@ export const ItemForm: React.FC<ItemFormProps> = ({
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white text-base"
               placeholder={t.namePlaceholder}
             />
           </div>
@@ -276,7 +276,7 @@ export const ItemForm: React.FC<ItemFormProps> = ({
              <select
                value={category}
                onChange={(e) => setCategory(e.target.value)}
-               className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+               className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white text-base"
              >
                {CATEGORY_KEYS.map(cat => (
                  <option key={cat} value={cat}>{t.categories[cat as keyof typeof t.categories] || cat}</option>
@@ -306,7 +306,7 @@ export const ItemForm: React.FC<ItemFormProps> = ({
                     : 'bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-600'
                 }`}
               >
-                <span className={expiryDate ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'}>
+                <span className={`text-base ${expiryDate ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'}`}>
                    {expiryDate ? formattedExpiryDate : 'yy/mm/dd'}
                 </span>
                 {showDatePicker ? (
@@ -347,7 +347,7 @@ export const ItemForm: React.FC<ItemFormProps> = ({
                   value={currency}
                   onChange={(e) => setCurrency(e.target.value)}
                   disabled={isPriceUnknown}
-                  className="w-24 px-2 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white disabled:opacity-50"
+                  className="w-24 px-2 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white disabled:opacity-50 text-base"
                 >
                   {CURRENCY_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -362,7 +362,7 @@ export const ItemForm: React.FC<ItemFormProps> = ({
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   disabled={isPriceUnknown}
-                  className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none disabled:bg-gray-100 dark:disabled:bg-gray-600 disabled:text-gray-400 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  className="flex-1 px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none disabled:bg-gray-100 dark:disabled:bg-gray-600 disabled:text-gray-400 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white text-base"
                   placeholder={isPriceUnknown ? "-" : "0.00"}
                 />
               </div>
@@ -375,9 +375,9 @@ export const ItemForm: React.FC<ItemFormProps> = ({
                     setIsPriceUnknown(e.target.checked);
                     if (e.target.checked) setPrice('');
                   }}
-                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700"
+                  className="w-5 h-5 rounded text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700"
                 />
-                <label htmlFor="unknownPrice" className="ml-2 text-sm text-gray-700 dark:text-gray-300 select-none">{t.dontKnow}</label>
+                <label htmlFor="unknownPrice" className="ml-2 text-base text-gray-700 dark:text-gray-300 select-none">{t.dontKnow}</label>
               </div>
             </div>
           </div>
@@ -391,11 +391,11 @@ export const ItemForm: React.FC<ItemFormProps> = ({
                   value={store}
                   onChange={(e) => setStore(e.target.value)}
                   disabled={isStoreUnknown}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none disabled:bg-gray-100 dark:disabled:bg-gray-600 disabled:text-gray-400 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none disabled:bg-gray-100 dark:disabled:bg-gray-600 disabled:text-gray-400 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white text-base"
                   placeholder={isStoreUnknown ? "-" : t.storePlaceholder}
                 />
               </div>
-              <div className="flex items-center h-[42px]">
+              <div className="flex items-center h-[48px]">
                 <input
                   type="checkbox"
                   id="unknownStore"
@@ -404,9 +404,9 @@ export const ItemForm: React.FC<ItemFormProps> = ({
                     setIsStoreUnknown(e.target.checked);
                     if (e.target.checked) setStore('');
                   }}
-                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700"
+                  className="w-5 h-5 rounded text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700"
                 />
-                <label htmlFor="unknownStore" className="ml-2 text-sm text-gray-700 dark:text-gray-300 select-none">{t.dontKnow}</label>
+                <label htmlFor="unknownStore" className="ml-2 text-base text-gray-700 dark:text-gray-300 select-none">{t.dontKnow}</label>
               </div>
             </div>
           </div>
@@ -417,7 +417,7 @@ export const ItemForm: React.FC<ItemFormProps> = ({
               <button
                 type="button"
                 onClick={() => setStatus('to-buy')}
-                className={`flex-1 py-2 text-xs sm:text-sm font-medium rounded-md transition-all ${
+                className={`flex-1 py-2.5 text-xs sm:text-sm font-medium rounded-md transition-all ${
                   status === 'to-buy' 
                     ? 'bg-white dark:bg-gray-600 text-indigo-600 dark:text-indigo-300 shadow-sm' 
                     : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
@@ -428,7 +428,7 @@ export const ItemForm: React.FC<ItemFormProps> = ({
               <button
                 type="button"
                 onClick={() => setStatus('low')}
-                className={`flex-1 py-2 text-xs sm:text-sm font-medium rounded-md transition-all ${
+                className={`flex-1 py-2.5 text-xs sm:text-sm font-medium rounded-md transition-all ${
                   status === 'low' 
                     ? 'bg-white dark:bg-gray-600 text-orange-600 dark:text-orange-300 shadow-sm' 
                     : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
@@ -439,7 +439,7 @@ export const ItemForm: React.FC<ItemFormProps> = ({
               <button
                 type="button"
                 onClick={() => setStatus('in-stock')}
-                className={`flex-1 py-2 text-xs sm:text-sm font-medium rounded-md transition-all ${
+                className={`flex-1 py-2.5 text-xs sm:text-sm font-medium rounded-md transition-all ${
                   status === 'in-stock' 
                     ? 'bg-white dark:bg-gray-600 text-green-600 dark:text-green-300 shadow-sm' 
                     : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
@@ -450,7 +450,7 @@ export const ItemForm: React.FC<ItemFormProps> = ({
               <button
                 type="button"
                 onClick={() => setStatus('dont-like')}
-                className={`flex-1 py-2 text-xs sm:text-sm font-medium rounded-md transition-all ${
+                className={`flex-1 py-2.5 text-xs sm:text-sm font-medium rounded-md transition-all ${
                   status === 'dont-like' 
                     ? 'bg-white dark:bg-gray-600 text-red-600 dark:text-red-300 shadow-sm' 
                     : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
@@ -467,7 +467,7 @@ export const ItemForm: React.FC<ItemFormProps> = ({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={6}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white text-base"
               placeholder={t.notePlaceholder}
             />
           </div>
@@ -477,7 +477,7 @@ export const ItemForm: React.FC<ItemFormProps> = ({
       <div className="p-4 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
         <button
           type="submit"
-          className="w-full bg-indigo-600 text-white py-3 px-4 rounded-xl font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 flex items-center justify-center gap-2"
+          className="w-full bg-indigo-600 text-white py-3.5 px-4 rounded-xl font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 flex items-center justify-center gap-2 text-base"
         >
           <Save size={20} />
           {t.save}
