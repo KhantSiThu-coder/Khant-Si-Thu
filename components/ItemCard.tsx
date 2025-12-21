@@ -62,10 +62,10 @@ export const ItemCard: React.FC<ItemCardProps> = ({
             e.stopPropagation(); 
             onStatusToggle(item.id, item.status); 
           }}
-          className={`p-1 sm:p-1.5 rounded-lg transition-colors shadow-sm border border-black/5 dark:border-white/5 flex-shrink-0 ${colorClasses}`}
+          className={`p-1.5 sm:p-2 rounded-lg transition-colors shadow-sm border border-black/5 dark:border-white/5 flex-shrink-0 ${colorClasses}`}
           title={Label}
         >
-          <Icon size={16} className="sm:w-[18px] sm:h-[18px]" />
+          <Icon size={18} className="sm:w-[20px] sm:h-[20px]" />
         </button>
       );
     }
@@ -99,17 +99,15 @@ export const ItemCard: React.FC<ItemCardProps> = ({
     );
   };
 
-  // NEW: SMALL VIEW (List / Details)
-  // Re-laid out as: [Thumbnail] [Icon + Status] [Details (Name/Price/Meta)] [Delete]
-  // Optimized for mobile viewport to prevent horizontal scroll
+  // SMALL VIEW (List / Details)
   if (size === 'small') {
     return (
       <div 
         onClick={() => onClick(item)}
-        className="group relative flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-all first:rounded-t-xl last:rounded-b-xl last:border-b-0 w-full max-w-full overflow-hidden"
+        className="group relative flex items-center gap-3 sm:gap-4 p-4 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-all w-full max-w-full overflow-hidden"
       >
-        {/* Thumbnail on the far left */}
-        <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex-shrink-0 border border-gray-200 dark:border-gray-700">
+        {/* Thumbnail on the far left - Increased size for height */}
+        <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex-shrink-0 border border-gray-200 dark:border-gray-700 shadow-sm">
           {coverMedia ? (
              coverMedia.type === 'image' ? (
               <img src={coverMedia.url} alt={item.name} className="absolute inset-0 w-full h-full object-cover" />
@@ -118,44 +116,46 @@ export const ItemCard: React.FC<ItemCardProps> = ({
              )
           ) : (
             <div className="absolute inset-0 flex items-center justify-center text-gray-400">
-              <ShoppingCart size={18} />
+              <ShoppingCart size={24} />
             </div>
           )}
         </div>
 
-        {/* Action and Status Indicator Grouped on the Left Side */}
-        <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+        {/* Action and Status Indicator */}
+        <div className="flex flex-col items-center gap-2 flex-shrink-0 min-w-[50px] sm:min-w-[60px]">
            {getActionButton(true)}
-           <div className="hidden min-[360px]:block">
-             {getStatusBadge(true)}
-           </div>
+           {getStatusBadge(true)}
         </div>
 
-        {/* Details Area on the Right */}
-        <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center gap-0.5 md:gap-4 overflow-hidden">
-          <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-[12px] sm:text-sm text-gray-900 dark:text-white truncate" title={item.name}>
+        {/* Details Area - Vertical stack for height and details visibility */}
+        <div className="flex-1 min-w-0 flex flex-col gap-1 overflow-hidden">
+          <div className="flex justify-between items-start gap-2">
+            <h3 className="font-bold text-sm sm:text-base text-gray-900 dark:text-white truncate" title={item.name}>
               {item.name}
             </h3>
-            <div className="flex items-center flex-nowrap gap-x-2 text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400">
-              <span className="bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded font-bold text-gray-600 dark:text-gray-300 truncate max-w-[60px] sm:max-w-none">
-                {item.category}
-              </span>
-              <span className={`font-bold whitespace-nowrap flex-shrink-0 ${item.price === null ? 'text-gray-400 italic font-normal' : 'text-gray-900 dark:text-gray-200'}`}>
+            <span className={`font-bold whitespace-nowrap text-sm sm:text-base ${item.price === null ? 'text-gray-400 italic font-normal text-xs' : 'text-gray-900 dark:text-gray-200'}`}>
                 {item.price !== null ? `${currencySymbol}${item.price.toLocaleString()}` : '—'}
+            </span>
+          </div>
+          
+          <div className="flex items-center gap-2">
+             <span className="bg-indigo-50 dark:bg-indigo-900/30 px-1.5 py-0.5 rounded text-[10px] font-bold text-indigo-600 dark:text-indigo-400 truncate max-w-[80px] sm:max-w-none">
+                {item.category}
              </span>
-            </div>
           </div>
 
-          <div className="hidden sm:flex items-center flex-wrap gap-x-3 gap-y-0.5 text-[10px] text-gray-500 dark:text-gray-400">
+          {/* Metadata Row - Visible on all screen sizes now */}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[10px] text-gray-500 dark:text-gray-400">
               {item.store && (
-                <span className="flex items-center gap-0.5 truncate max-w-[80px]">
-                  <MapPin size={10} /> {item.store}
+                <span className="flex items-center gap-1 truncate max-w-[120px]">
+                  <MapPin size={12} className="text-gray-400" /> 
+                  <span className="truncate">{item.store}</span>
                 </span>
               )}
               {item.expiryDate && (
-                <span className="flex items-center gap-0.5 flex-shrink-0">
-                  <CalendarClock size={10} /> {new Date(item.expiryDate).toLocaleDateString()}
+                <span className="flex items-center gap-1 flex-shrink-0">
+                  <CalendarClock size={12} className="text-gray-400" /> 
+                  <span>{new Date(item.expiryDate).toLocaleDateString()}</span>
                 </span>
               )}
           </div>
@@ -164,18 +164,16 @@ export const ItemCard: React.FC<ItemCardProps> = ({
         {/* Delete on the far right */}
         <button 
           onClick={(e) => { e.stopPropagation(); onDelete(item.id); }}
-          className="p-1.5 sm:p-2 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 flex-shrink-0"
+          className="p-2 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 flex-shrink-0"
           title={t.delete}
         >
-          <Trash2 size={16} className="sm:w-[18px] sm:h-[18px]" />
+          <Trash2 size={18} />
         </button>
       </div>
     );
   }
 
   // Grid Layouts (Medium/Large)
-  // size 'medium' = compact grid
-  // size 'large' = standard grid
   const isLarge = size === 'large';
 
   return (

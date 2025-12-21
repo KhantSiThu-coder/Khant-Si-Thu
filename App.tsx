@@ -507,7 +507,7 @@ const App: React.FC = () => {
 
   const getGridClasses = () => {
     switch (cardSize) {
-      case 'small': return "grid-cols-1 gap-2 w-full max-w-full overflow-x-hidden"; // Details/List View
+      case 'small': return "grid-cols-1 gap-4 w-full max-w-2xl mx-auto px-4 sm:px-0"; // Refined Details/List View
       case 'medium': return "grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3"; // Compact Grid (old Small)
       case 'large': return "grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-4"; // Standard Grid (old Medium)
     }
@@ -900,7 +900,7 @@ const App: React.FC = () => {
             className="absolute inset-0 bg-black/20 dark:bg-black/60 backdrop-blur-sm"
             onClick={() => setIsSettingsOpen(false)}
           />
-          <div className="relative w-full max-w-sm bg-white dark:bg-gray-800 rounded-2xl shadow-2xl flex flex-col max-h-[90vh] transform transition-all">
+          <div className="relative w-full max-sm bg-white dark:bg-gray-800 rounded-2xl shadow-2xl flex flex-col max-h-[90vh] transform transition-all">
             <div className="flex-shrink-0 flex items-center justify-between p-6 pb-4">
               <h2 className="text-xl font-bold flex items-center gap-2 dark:text-white">
                 <Settings className="text-indigo-600 dark:text-indigo-400" />
