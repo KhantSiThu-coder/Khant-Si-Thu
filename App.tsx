@@ -108,6 +108,9 @@ const App: React.FC = () => {
       cardSize
     };
     localStorage.setItem('smartshop_settings', JSON.stringify(settingsToSave));
+    
+    // Update document lang for native UI (like date pickers)
+    document.documentElement.lang = language === 'ja' ? 'ja' : 'en';
   }, [language, theme, enableAI, cardSize]);
 
   // Check for first-time visit logic
@@ -115,22 +118,17 @@ const App: React.FC = () => {
     const hasSelectedLanguage = localStorage.getItem('smartshop_language_selected');
     const hasSeenOnboarding = localStorage.getItem('smartshop_onboarding_seen');
     
-    // If language hasn't been explicitly selected (fresh install), show selector
     if (!hasSelectedLanguage) {
         setIsLanguageSelectorOpen(true);
-    } 
-    // If language is set but onboarding hasn't been seen, show onboarding
-    else if (!hasSeenOnboarding) {
+    } else if (!hasSeenOnboarding) {
         setIsOnboardingOpen(true);
     }
   }, []);
 
   const handleLanguageSelect = (selectedLang: Language) => {
     setLanguage(selectedLang);
-    // Mark language as selected immediately so reload doesn't trigger it again
     localStorage.setItem('smartshop_language_selected', 'true');
     setIsLanguageSelectorOpen(false);
-    // Slight delay for smooth transition to onboarding
     setTimeout(() => setIsOnboardingOpen(true), 100);
   };
 
@@ -193,15 +191,14 @@ const App: React.FC = () => {
           const json = decodeURIComponent(atob(shareCode));
           const data = JSON.parse(json);
           
-          // Reconstruct item from short keys
           const sharedItem: ShoppingItem = {
-             id: '', // Empty ID triggers "New Item" / "Import" flow in logic, effectively cloning it
+             id: '', 
              createdAt: Date.now(),
              media: [],
              name: data.n || '',
              category: data.c || CATEGORY_KEYS[0],
              price: data.p || null,
-             currency: 'JPY', // Default for imported items if not present
+             currency: 'JPY',
              store: data.s || null,
              status: data.st || 'to-buy',
              notes: data.nt || '',
@@ -212,15 +209,12 @@ const App: React.FC = () => {
           setToastMessage(t.itemImported);
           setShowToast(true);
           setTimeout(() => setShowToast(false), 3000);
-          
-          // Clear URL so refresh doesn't re-import
           window.history.replaceState({}, '', window.location.pathname);
         } catch (e) {
           console.error("Failed to parse share data", e);
         }
       }
     };
-    
     checkForShare();
   }, [t.itemImported]);
 
@@ -229,27 +223,20 @@ const App: React.FC = () => {
     const loadData = async () => {
       try {
         setIsLoading(true);
-        // Request persistent storage
         await initStoragePersistence();
-        
         const storedItems = await loadItemsFromDB();
-        
-        // Filter out items that have been in trash for > 30 days
         const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
         const validItems = storedItems.map(item => ({
           ...item,
-          // Migration: Ensure currency exists
           currency: item.currency || 'JPY'
         })).filter(item => {
           if (!item.deletedAt) return true;
           if (Date.now() - item.deletedAt > THIRTY_DAYS_MS) {
-            // Cleanup: remove very old items from DB entirely
             deleteItemFromDB(item.id).catch(console.error);
             return false;
           }
           return true;
         });
-
         setItems(validItems);
       } catch (error) {
         console.error("Failed to load items from DB:", error);
@@ -260,39 +247,25 @@ const App: React.FC = () => {
     loadData();
   }, []);
 
-  // Check for upcoming expirations once items are loaded
+  // Check for upcoming expirations
   useEffect(() => {
-    // Only run if loading is finished and we haven't checked yet
     if (!isLoading && !hasCheckedExpiryRef.current) {
-      
-      // Mark as checked immediately to ensure it doesn't run again when items update (e.g. first add)
       hasCheckedExpiryRef.current = true;
-
       if (items.length > 0) {
         const now = new Date();
-        // Normalize today to start of day for accurate comparison
         const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-        
-        // Calculate date 3 days from now (inclusive range: today, +1, +2, +3)
         const thresholdDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 3);
         thresholdDate.setHours(23, 59, 59, 999);
         const threshold = thresholdDate.getTime();
 
         const upcoming = items.filter(item => {
-          // Exclude deleted items
           if (item.deletedAt) return false;
-          
-          // Only verify items that are 'owned' (in-stock or low stock)
           if (item.status !== 'in-stock' && item.status !== 'low') return false;
-          
-          // Skip items without date
           if (!item.expiryDate) return false;
-
           return item.expiryDate >= todayStart && item.expiryDate <= threshold;
         });
 
         if (upcoming.length > 0) {
-          // Sort by expiry date (soonest first)
           upcoming.sort((a, b) => (a.expiryDate || 0) - (b.expiryDate || 0));
           setExpiringItems(upcoming);
           setIsExpiryAlertOpen(true);
@@ -301,21 +274,11 @@ const App: React.FC = () => {
     }
   }, [isLoading, items]);
 
-  // Update storage stats when settings open
   useEffect(() => {
     if (isSettingsOpen) {
       getStorageEstimate().then(setStorageStats);
     }
   }, [isSettingsOpen]);
-
-  // Cleanup scroll timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (mainScrollTimeoutRef.current) {
-        clearTimeout(mainScrollTimeoutRef.current);
-      }
-    };
-  }, []);
 
   const handleAddItem = async (itemData: Omit<ShoppingItem, 'id' | 'createdAt'>) => {
     const newItem: ShoppingItem = {
@@ -323,10 +286,8 @@ const App: React.FC = () => {
       id: generateId(),
       createdAt: Date.now(),
     };
-    
     setItems((prev) => [newItem, ...prev]);
     setIsFormOpen(false);
-
     try {
       await saveItemToDB(newItem);
     } catch (e) {
@@ -337,21 +298,15 @@ const App: React.FC = () => {
 
   const handleUpdateItem = async (itemData: Omit<ShoppingItem, 'id' | 'createdAt'>) => {
     if (!editingItem) return;
-    
     if (editingItem.id === '') {
        await handleAddItem(itemData);
        setEditingItem(null);
        return;
     }
-
     const updatedItem = { ...editingItem, ...itemData };
-    
-    setItems((prev) => 
-      prev.map((item) => item.id === editingItem.id ? updatedItem : item)
-    );
+    setItems((prev) => prev.map((item) => item.id === editingItem.id ? updatedItem : item));
     setEditingItem(null);
     setIsFormOpen(false);
-
     try {
       await saveItemToDB(updatedItem);
     } catch (e) {
@@ -362,19 +317,13 @@ const App: React.FC = () => {
   const handleDeleteItem = async (id: string) => {
     const itemToDelete = items.find(i => i.id === id);
     if (!itemToDelete) return;
-
     const deletedItem = { ...itemToDelete, deletedAt: Date.now() };
-
-    setItems((prev) => 
-      prev.map((i) => i.id === id ? deletedItem : i)
-    );
-    
+    setItems((prev) => prev.map((i) => i.id === id ? deletedItem : i));
     await saveItemToDB(deletedItem);
     setLastDeletedId(id);
     setToastMessage(t.itemMovedToTrash);
     setShowToast(true);
     setTimeout(() => setShowToast(false), 4000);
-
     if (editingItem && editingItem.id === id) {
       setEditingItem(null);
       setIsFormOpen(false);
@@ -384,13 +333,8 @@ const App: React.FC = () => {
   const handleRestoreItem = async (id: string) => {
     const itemToRestore = items.find(i => i.id === id);
     if (!itemToRestore) return;
-
     const restoredItem = { ...itemToRestore, deletedAt: undefined };
-
-    setItems((prev) => 
-      prev.map((i) => i.id === id ? restoredItem : i)
-    );
-    
+    setItems((prev) => prev.map((i) => i.id === id ? restoredItem : i));
     await saveItemToDB(restoredItem);
   };
 
@@ -410,7 +354,6 @@ const App: React.FC = () => {
   const handleEmptyBin = async () => {
     const itemsToDelete = items.filter(i => i.deletedAt);
     setItems((prev) => prev.filter((i) => !i.deletedAt));
-    
     for (const item of itemsToDelete) {
       await deleteItemFromDB(item.id);
     }
@@ -418,7 +361,6 @@ const App: React.FC = () => {
 
   const toggleItemStatus = async (id: string, currentStatus: string) => {
     const newStatus: ItemStatus = currentStatus === 'to-buy' ? 'in-stock' : 'to-buy';
-    
     const item = items.find(i => i.id === id);
     if (item) {
       const updatedItem = { ...item, status: newStatus };
@@ -447,25 +389,15 @@ const App: React.FC = () => {
   };
 
   const handleMainScroll = useCallback(() => {
-    if (!isMainScrolling) {
-      setIsMainScrolling(true);
-    }
-    
-    if (mainScrollTimeoutRef.current) {
-      clearTimeout(mainScrollTimeoutRef.current);
-    }
-    
-    mainScrollTimeoutRef.current = setTimeout(() => {
-      setIsMainScrolling(false);
-    }, 3000);
+    if (!isMainScrolling) setIsMainScrolling(true);
+    if (mainScrollTimeoutRef.current) clearTimeout(mainScrollTimeoutRef.current);
+    mainScrollTimeoutRef.current = setTimeout(() => setIsMainScrolling(false), 3000);
   }, [isMainScrolling]);
 
   const filteredItems = items.filter((item) => {
     if (item.deletedAt) return false;
-
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           (item.store && item.store.toLowerCase().includes(searchQuery.toLowerCase()));
-    
     const matchesCategory = selectedCategories.includes('All') || selectedCategories.includes(item.category);
     const matchesStatus = activeStatuses.length === 0 || activeStatuses.includes(item.status);
 
@@ -474,12 +406,7 @@ const App: React.FC = () => {
       const p = item.price;
       const min = priceRange.min ? parseFloat(priceRange.min) : 0;
       const max = priceRange.max ? parseFloat(priceRange.max) : Infinity;
-      
-      if (p === null) {
-        matchesPrice = false; 
-      } else {
-        matchesPrice = p >= min && p <= max;
-      }
+      matchesPrice = p !== null && p >= min && p <= max;
     }
 
     let matchesExpiry = true;
@@ -487,29 +414,22 @@ const App: React.FC = () => {
        if (!item.expiryDate) {
          matchesExpiry = false;
        } else {
-         const itemDate = new Date(item.expiryDate);
-         itemDate.setHours(0,0,0,0);
-         const filterDate = new Date(expiryFilterDate);
-         filterDate.setHours(0,0,0,0);
-         
-         // Display item if it expires ON or BEFORE the filter date
-         matchesExpiry = itemDate.getTime() <= filterDate.getTime();
+         const itemDate = new Date(item.expiryDate).setHours(0,0,0,0);
+         const filterDate = new Date(expiryFilterDate).setHours(0,0,0,0);
+         matchesExpiry = itemDate <= filterDate;
        }
     }
-    
     return matchesSearch && matchesCategory && matchesStatus && matchesPrice && matchesExpiry;
   });
 
   const trashItems = items.filter(item => item.deletedAt).sort((a, b) => (b.deletedAt || 0) - (a.deletedAt || 0));
-  const categoriesToShow = selectedCategories.includes('All') 
-    ? CATEGORY_KEYS 
-    : CATEGORY_KEYS.filter(cat => selectedCategories.includes(cat));
+  const categoriesToShow = selectedCategories.includes('All') ? CATEGORY_KEYS : CATEGORY_KEYS.filter(cat => selectedCategories.includes(cat));
 
   const getGridClasses = () => {
     switch (cardSize) {
-      case 'small': return "grid-cols-1 gap-4 w-full max-w-2xl mx-auto px-4 sm:px-0"; // Refined Details/List View
-      case 'medium': return "grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3"; // Compact Grid (old Small)
-      case 'large': return "grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-4"; // Standard Grid (old Medium)
+      case 'small': return "grid-cols-1 gap-4 w-full max-w-2xl mx-auto px-4 sm:px-0";
+      case 'medium': return "grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3";
+      case 'large': return "grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-4";
     }
   };
 
@@ -527,7 +447,6 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col md:flex-row font-sans text-gray-900 dark:text-white transition-colors duration-200 w-full max-w-full overflow-x-hidden">
       
-      {/* Mobile Backdrop for Sidebar */}
       {isSidebarOpen && (
         <div 
           className="fixed inset-0 bg-black/50 z-[80] md:hidden backdrop-blur-sm"
@@ -562,9 +481,7 @@ const App: React.FC = () => {
             <ListFilter size={20} />
             <span className="text-sm">{t.all}</span>
           </button>
-
           <div className="h-px w-full bg-gray-200 dark:bg-gray-700 my-2"></div>
-
           {CATEGORY_KEYS.map(cat => (
             <button
               key={cat}
@@ -581,7 +498,6 @@ const App: React.FC = () => {
           ))}
         </nav>
 
-        {/* Sidebar Footer Buttons */}
         <div className="p-4 border-t border-gray-200 dark:border-gray-700 space-y-1">
           <button 
             onClick={() => { setIsOnboardingOpen(true); setIsSidebarOpen(false); }}
@@ -590,7 +506,6 @@ const App: React.FC = () => {
             <HelpCircle size={20} />
             <span className="text-sm">{t.help}</span>
           </button>
-
           <button 
             onClick={() => { setIsSettingsOpen(true); setIsSidebarOpen(false); }}
             className="w-full flex items-center gap-3 p-3 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
@@ -601,7 +516,6 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden relative w-full max-w-full">
         {/* Header */}
         <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30 flex flex-col transition-colors duration-200 w-full">
@@ -612,7 +526,6 @@ const App: React.FC = () => {
             >
               <Menu size={24} />
             </button>
-            
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={18} />
               <input 
@@ -627,102 +540,34 @@ const App: React.FC = () => {
 
           <div className="px-4 pb-3 border-t border-gray-100 dark:border-gray-700 pt-3">
              <div className="flex flex-col md:flex-row md:items-center gap-3">
-               
                <div className="grid grid-cols-4 gap-2 w-full md:w-auto md:flex md:items-center md:gap-1.5">
-                  <button 
-                    onClick={() => toggleStatusFilter('to-buy')}
-                    className={`w-full md:w-auto justify-center flex items-center gap-1 px-2 py-2 md:py-1.5 rounded-lg md:rounded-full text-[9px] sm:text-xs font-medium border transition-all ${
-                      activeStatuses.includes('to-buy') 
-                      ? 'bg-indigo-100 border-indigo-200 text-indigo-700 dark:bg-indigo-900/40 dark:border-indigo-800 dark:text-indigo-300' 
-                      : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
-                    }`}
-                  >
+                  <button onClick={() => toggleStatusFilter('to-buy')} className={`w-full md:w-auto justify-center flex items-center gap-1 px-2 py-2 md:py-1.5 rounded-lg md:rounded-full text-[9px] sm:text-xs font-medium border transition-all ${activeStatuses.includes('to-buy') ? 'bg-indigo-100 border-indigo-200 text-indigo-700 dark:bg-indigo-900/40 dark:border-indigo-800 dark:text-indigo-300' : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'}`}>
                     <CheckCircle2 size={16} strokeWidth={2.5} /> <span className="truncate">{t.toBuy}</span>
                   </button>
-                  
-                  <button 
-                    onClick={() => toggleStatusFilter('low')}
-                    className={`w-full md:w-auto justify-center flex items-center gap-1 px-2 py-2 md:py-1.5 rounded-lg md:rounded-full text-[9px] sm:text-xs font-medium border transition-all ${
-                      activeStatuses.includes('low') 
-                      ? 'bg-orange-100 border-orange-200 text-orange-700 dark:bg-orange-900/40 dark:border-orange-800 dark:text-orange-300' 
-                      : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
-                    }`}
-                  >
+                  <button onClick={() => toggleStatusFilter('low')} className={`w-full md:w-auto justify-center flex items-center gap-1 px-2 py-2 md:py-1.5 rounded-lg md:rounded-full text-[9px] sm:text-xs font-medium border transition-all ${activeStatuses.includes('low') ? 'bg-orange-100 border-orange-200 text-orange-700 dark:bg-orange-900/40 dark:border-orange-800 dark:text-orange-300' : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'}`}>
                     <AlertCircle size={16} strokeWidth={2.5} /> <span className="truncate">{t.low}</span>
                   </button>
-
-                  <button 
-                    onClick={() => toggleStatusFilter('in-stock')}
-                    className={`w-full md:w-auto justify-center flex items-center gap-1 px-2 py-2 md:py-1.5 rounded-lg md:rounded-full text-[9px] sm:text-xs font-medium border transition-all ${
-                      activeStatuses.includes('in-stock') 
-                      ? 'bg-green-100 border-green-200 text-green-700 dark:bg-green-900/40 dark:border-green-800 dark:text-green-300' 
-                      : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
-                    }`}
-                  >
+                  <button onClick={() => toggleStatusFilter('in-stock')} className={`w-full md:w-auto justify-center flex items-center gap-1 px-2 py-2 md:py-1.5 rounded-lg md:rounded-full text-[9px] sm:text-xs font-medium border transition-all ${activeStatuses.includes('in-stock') ? 'bg-green-100 border-green-200 text-green-700 dark:bg-green-900/40 dark:border-green-800 dark:text-green-300' : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'}`}>
                     <PackageCheck size={16} strokeWidth={2.5} /> <span className="truncate">{t.inStock}</span>
                   </button>
-
-                  <button 
-                    onClick={() => toggleStatusFilter('dont-like')}
-                    className={`w-full md:w-auto justify-center flex items-center gap-1 px-2 py-2 md:py-1.5 rounded-lg md:rounded-full text-[9px] sm:text-xs font-medium border transition-all ${
-                      activeStatuses.includes('dont-like') 
-                      ? 'bg-red-100 border-red-200 text-red-700 dark:bg-red-900/40 dark:border-red-800 dark:text-red-300' 
-                      : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
-                    }`}
-                  >
+                  <button onClick={() => toggleStatusFilter('dont-like')} className={`w-full md:w-auto justify-center flex items-center gap-1 px-2 py-2 md:py-1.5 rounded-lg md:rounded-full text-[9px] sm:text-xs font-medium border transition-all ${activeStatuses.includes('dont-like') ? 'bg-red-100 border-red-200 text-red-700 dark:bg-red-900/40 dark:border-red-800 dark:text-red-300' : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'}`}>
                     <Ban size={16} strokeWidth={2.5} /> <span className="truncate">{t.dontLike}</span>
                   </button>
                </div>
-
                <div className="hidden md:block w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1"></div>
-
                <div className="flex items-center justify-between flex-1 gap-3">
                    <div className="flex items-center gap-2">
-                       <button 
-                         onClick={() => setIsPriceFilterActive(!isPriceFilterActive)}
-                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
-                           isPriceFilterActive 
-                           ? 'bg-blue-100 border-blue-200 text-blue-700 dark:bg-blue-900/40 dark:border-blue-800 dark:text-blue-300' 
-                           : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
-                         }`}
-                       >
+                       <button onClick={() => setIsPriceFilterActive(!isPriceFilterActive)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${isPriceFilterActive ? 'bg-blue-100 border-blue-200 text-blue-700 dark:bg-blue-900/40 dark:border-blue-800 dark:text-blue-300' : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'}`}>
                          <SlidersHorizontal size={14} /> {t.price}
                        </button>
-
-                       <button 
-                         onClick={() => setIsExpiryFilterActive(!isExpiryFilterActive)}
-                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
-                           isExpiryFilterActive 
-                           ? 'bg-purple-100 border-purple-200 text-purple-700 dark:bg-purple-900/40 dark:border-purple-800 dark:text-purple-300' 
-                           : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
-                         }`}
-                       >
+                       <button onClick={() => setIsExpiryFilterActive(!isExpiryFilterActive)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${isExpiryFilterActive ? 'bg-purple-100 border-purple-200 text-purple-700 dark:bg-purple-900/40 dark:border-purple-800 dark:text-purple-300' : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'}`}>
                          <Calendar size={14} /> {t.expiryDate}
                        </button>
                    </div>
-
                    <div className="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5 ml-auto">
-                      <button 
-                        onClick={() => setCardSize('small')}
-                        className={`p-1.5 rounded-md transition-all ${cardSize === 'small' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-800 dark:text-white' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}`}
-                        title="List View"
-                      >
-                        <LayoutList size={16} />
-                      </button>
-                      <button 
-                        onClick={() => setCardSize('medium')}
-                        className={`p-1.5 rounded-md transition-all ${cardSize === 'medium' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-800 dark:text-white' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}`}
-                        title="Medium Grid View"
-                      >
-                        <Grid3X3 size={16} />
-                      </button>
-                      <button 
-                        onClick={() => setCardSize('large')}
-                        className={`p-1.5 rounded-md transition-all ${cardSize === 'large' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-800 dark:text-white' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}`}
-                        title="Large Grid View"
-                      >
-                        <Grid2X2 size={16} />
-                      </button>
+                      <button onClick={() => setCardSize('small')} className={`p-1.5 rounded-md transition-all ${cardSize === 'small' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-800 dark:text-white' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}`} title="List View"><LayoutList size={16} /></button>
+                      <button onClick={() => setCardSize('medium')} className={`p-1.5 rounded-md transition-all ${cardSize === 'medium' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-800 dark:text-white' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}`} title="Medium Grid View"><Grid3X3 size={16} /></button>
+                      <button onClick={() => setCardSize('large')} className={`p-1.5 rounded-md transition-all ${cardSize === 'large' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-800 dark:text-white' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}`} title="Large Grid View"><Grid2X2 size={16} /></button>
                    </div>
                </div>
              </div>
@@ -733,56 +578,30 @@ const App: React.FC = () => {
                 <div className="px-4 pb-3 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700 flex items-center gap-4 animate-in slide-in-from-top-2 fade-in duration-200">
                   <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">{t.priceRange}:</span>
                   <div className="flex items-center gap-2">
-                    <input 
-                      type="number" 
-                      value={priceRange.min}
-                      onChange={(e) => setPriceRange({...priceRange, min: e.target.value})}
-                      placeholder={t.min}
-                      className="w-20 px-2 py-1 text-base sm:text-sm border bg-white text-gray-900 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 outline-none dark:bg-gray-700 dark:text-white"
-                    />
+                    <input type="number" value={priceRange.min} onChange={(e) => setPriceRange({...priceRange, min: e.target.value})} placeholder={t.min} className="w-20 px-2 py-1 text-base sm:text-sm border bg-white text-gray-900 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 outline-none dark:bg-gray-700 dark:text-white" />
                     <span className="text-gray-400">-</span>
-                    <input 
-                      type="number" 
-                      value={priceRange.max}
-                      onChange={(e) => setPriceRange({...priceRange, max: e.target.value})}
-                      placeholder={t.max}
-                      className="w-20 px-2 py-1 text-base sm:text-sm border bg-white text-gray-900 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 outline-none dark:bg-gray-700 dark:text-white"
-                    />
+                    <input type="number" value={priceRange.max} onChange={(e) => setPriceRange({...priceRange, max: e.target.value})} placeholder={t.max} className="w-20 px-2 py-1 text-base sm:text-sm border bg-white text-gray-900 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 outline-none dark:bg-gray-700 dark:text-white" />
                   </div>
                 </div>
               )}
-
               {isExpiryFilterActive && (
                 <div className="px-4 pb-3 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700 flex items-center gap-4 animate-in slide-in-from-top-2 fade-in duration-200">
                   <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">{t.expiryDate} (&le;):</span>
-                  <input 
-                    type="date" 
-                    value={expiryFilterDate}
-                    onChange={(e) => setExpiryFilterDate(e.target.value)}
-                    className="px-2 py-1 text-base sm:text-sm border bg-white text-gray-900 dark:border-gray-600 rounded focus:ring-2 focus:ring-purple-500 outline-none dark:bg-gray-700 dark:text-white"
-                  />
+                  <input type="date" value={expiryFilterDate} onChange={(e) => setExpiryFilterDate(e.target.value)} className="px-2 py-1 text-base sm:text-sm border bg-white text-gray-900 dark:border-gray-600 rounded focus:ring-2 focus:ring-purple-500 outline-none dark:bg-gray-700 dark:text-white" />
                 </div>
               )}
           </div>
         </header>
 
         {/* Scrollable List */}
-        <main 
-          onScroll={handleMainScroll}
-          className={`flex-1 overflow-y-auto p-3 md:p-8 bg-gray-50/50 dark:bg-gray-900/50 flex flex-col fade-scrollbar ${isMainScrolling ? 'scrolling' : ''} w-full max-w-full overflow-x-hidden`}
-        >
+        <main onScroll={handleMainScroll} className={`flex-1 overflow-y-auto p-3 md:p-8 bg-gray-50/50 dark:bg-gray-900/50 flex flex-col fade-scrollbar ${isMainScrolling ? 'scrolling' : ''} w-full max-w-full overflow-x-hidden`}>
           {filteredItems.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 text-center min-h-[300px]">
               <ShoppingBag size={48} className="mb-4 opacity-50" />
               <p className="text-lg font-medium">{t.noItems}</p>
               <p className="text-sm">{t.emptyState}</p>
               {items.filter(i => !i.deletedAt).length === 0 && (
-                <button 
-                  onClick={() => setIsFormOpen(true)}
-                  className="mt-6 px-6 py-2 bg-indigo-600 text-white rounded-full font-medium shadow-lg shadow-indigo-200 hover:shadow-indigo-300 dark:shadow-none transition-all"
-                >
-                  {t.createFirst}
-                </button>
+                <button onClick={() => setIsFormOpen(true)} className="mt-6 px-6 py-2 bg-indigo-600 text-white rounded-full font-medium shadow-lg shadow-indigo-200 hover:shadow-indigo-300 dark:shadow-none transition-all">{t.createFirst}</button>
               )}
             </div>
           ) : (
@@ -790,28 +609,16 @@ const App: React.FC = () => {
               {categoriesToShow.map((cat) => {
                 const categoryItems = filteredItems.filter(i => i.category === cat);
                 if (categoryItems.length === 0) return null;
-
                 return (
                   <div key={cat} className="animate-in fade-in slide-in-from-bottom-2 duration-300 w-full max-w-full">
                     <h2 className="text-base font-bold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
-                      {getCategoryIcon(cat, 18)}
-                      {t.categories[cat as keyof typeof t.categories] || cat}
-                      <span className="ml-2 text-xs font-normal text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full">
-                        {categoryItems.length}
-                      </span>
+                      {getCategoryIcon(cat, 18)} {t.categories[cat as keyof typeof t.categories] || cat}
+                      <span className="ml-2 text-xs font-normal text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full">{categoryItems.length}</span>
                       <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700 ml-4"></div>
                     </h2>
                     <div className={`grid w-full ${getGridClasses()}`}>
                       {categoryItems.map((item) => (
-                        <ItemCard 
-                          key={item.id} 
-                          item={item} 
-                          size={cardSize}
-                          onStatusToggle={toggleItemStatus}
-                          onDelete={handleDeleteItem}
-                          onClick={(i) => { setEditingItem(i); setIsFormOpen(true); }}
-                          lang={language}
-                        />
+                        <ItemCard key={item.id} item={item} size={cardSize} onStatusToggle={toggleItemStatus} onDelete={handleDeleteItem} onClick={(i) => { setEditingItem(i); setIsFormOpen(true); }} lang={language} />
                       ))}
                     </div>
                   </div>
@@ -820,53 +627,23 @@ const App: React.FC = () => {
             </div>
           )}
 
-          {/* Footer */}
           <footer className="mt-12 py-8 text-center text-sm text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-800 pb-24 md:pb-8">
             <p>{t.footerCreatedBy} <span className="font-semibold text-gray-900 dark:text-gray-200">Khant Si Thu</span>.</p>
-            <p className="mt-1">
-              {t.footerEmailPrompt}{" "}
-              <a 
-                href="mailto:khantsithu.1999.work@gmail.com" 
-                className="text-indigo-600 dark:text-indigo-400 font-medium hover:underline decoration-2 underline-offset-2"
-              >
-                {t.footerClickHere}
-              </a>
-            </p>
+            <p className="mt-1">{t.footerEmailPrompt} <a href="mailto:khantsithu.1999.work@gmail.com" className="text-indigo-600 dark:text-indigo-400 font-medium hover:underline decoration-2 underline-offset-2">{t.footerClickHere}</a></p>
           </footer>
         </main>
 
         {!isFormOpen && !isSettingsOpen && (
-          <button
-            onClick={() => { setEditingItem(null); setIsFormOpen(true); }}
-            className="fixed right-6 bottom-6 md:right-8 md:bottom-8 z-30 
-                       bg-gradient-to-br from-indigo-500/90 to-purple-600/90 hover:from-indigo-400/90 hover:to-purple-500/90
-                       backdrop-blur-md border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]
-                       text-white h-12 w-12 flex items-center justify-center rounded-full 
-                       hover:scale-105 active:scale-95 transition-all duration-300"
-            aria-label="Add Item"
-          >
-            <Plus size={24} />
-          </button>
+          <button onClick={() => { setEditingItem(null); setIsFormOpen(true); }} className="fixed right-6 bottom-6 md:right-8 md:bottom-8 z-30 bg-gradient-to-br from-indigo-500/90 to-purple-600/90 hover:from-indigo-400/90 hover:to-purple-500/90 backdrop-blur-md border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] text-white h-12 w-12 flex items-center justify-center rounded-full hover:scale-105 active:scale-95 transition-all duration-300" aria-label="Add Item"><Plus size={24} /></button>
         )}
 
         {showToast && (
           <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900/90 dark:bg-white/90 text-white dark:text-gray-900 px-5 py-3 rounded-xl shadow-xl z-[100] flex items-center gap-4 animate-in fade-in slide-in-from-bottom-2 backdrop-blur-sm max-w-[90vw]">
-             {toastMessage === t.itemImported ? (
-                <Download size={16} />
-             ) : (
-                <span className="font-medium truncate">{toastMessage}</span>
-             )}
-             
+             {toastMessage === t.itemImported ? <Download size={16} /> : <span className="font-medium truncate">{toastMessage}</span>}
              {toastMessage === t.itemMovedToTrash ? (
                <>
                  <div className="h-4 w-px bg-white/20 dark:bg-black/20"></div>
-                 <button 
-                  onClick={handleUndoDelete} 
-                  className="flex items-center gap-1.5 text-indigo-400 dark:text-indigo-600 font-bold hover:underline whitespace-nowrap"
-                >
-                  <Undo2 size={16} />
-                  {t.undo}
-                </button>
+                 <button onClick={handleUndoDelete} className="flex items-center gap-1.5 text-indigo-400 dark:text-indigo-600 font-bold hover:underline whitespace-nowrap"><Undo2 size={16} />{t.undo}</button>
                </>
              ) : (
                 <span className="font-medium">{toastMessage === t.itemImported ? toastMessage : ''}</span>
@@ -876,101 +653,45 @@ const App: React.FC = () => {
       </div>
 
       {isFormOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end">
-          <div 
-            className="absolute inset-0 bg-black/20 dark:bg-black/50 backdrop-blur-sm transition-opacity"
-            onClick={() => setIsFormOpen(false)}
-          />
+        <div className="fixed inset-0 z-[100] flex justify-end">
+          <div className="absolute inset-0 bg-black/20 dark:bg-black/50 backdrop-blur-sm transition-opacity" onClick={() => setIsFormOpen(false)} />
           <div className="relative w-full max-w-md bg-white dark:bg-gray-800 shadow-2xl h-full transform transition-transform duration-300">
-            <ItemForm 
-              initialData={editingItem || undefined}
-              onSubmit={editingItem ? handleUpdateItem : handleAddItem}
-              onCancel={() => setIsFormOpen(false)}
-              onDelete={handleDeleteItem}
-              lang={language}
-              enableAI={enableAI}
-            />
+            <ItemForm initialData={editingItem || undefined} onSubmit={editingItem ? handleUpdateItem : handleAddItem} onCancel={() => setIsFormOpen(false)} onDelete={handleDeleteItem} lang={language} enableAI={enableAI} />
           </div>
         </div>
       )}
 
       {isSettingsOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div 
-            className="absolute inset-0 bg-black/20 dark:bg-black/60 backdrop-blur-sm"
-            onClick={() => setIsSettingsOpen(false)}
-          />
-          <div className="relative w-full max-sm bg-white dark:bg-gray-800 rounded-2xl shadow-2xl flex flex-col max-h-[90vh] transform transition-all">
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/20 dark:bg-black/60 backdrop-blur-sm" onClick={() => setIsSettingsOpen(false)} />
+          <div className="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-2xl flex flex-col max-h-[90vh] transform transition-all overflow-hidden">
             <div className="flex-shrink-0 flex items-center justify-between p-6 pb-4">
-              <h2 className="text-xl font-bold flex items-center gap-2 dark:text-white">
-                <Settings className="text-indigo-600 dark:text-indigo-400" />
-                {t.settings}
-              </h2>
-              <button 
-                onClick={() => setIsSettingsOpen(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-              >
-                <X size={24} />
-              </button>
+              <h2 className="text-xl font-bold flex items-center gap-2 dark:text-white"><Settings className="text-indigo-600 dark:text-indigo-400" />{t.settings}</h2>
+              <button onClick={() => setIsSettingsOpen(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"><X size={24} /></button>
             </div>
-
             <div className="flex-1 overflow-y-auto p-6 pt-0 space-y-6">
               <div>
-                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                   <HardDrive size={16} />
-                   {t.storage}
-                 </label>
+                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2"><HardDrive size={16} />{t.storage}</label>
                  <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-xl border border-gray-100 dark:border-gray-600">
                     {storageStats ? (
                       <>
-                        <div className="flex justify-between text-xs mb-1.5">
-                          <span className="text-gray-600 dark:text-gray-300 font-medium">
-                            {formatBytes(storageStats.usage)} {t.used}
-                          </span>
-                          <span className="text-gray-400 dark:text-gray-500">
-                            {formatBytes(storageStats.quota)} {t.available}
-                          </span>
-                        </div>
-                        <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 overflow-hidden">
-                          <div 
-                            className="bg-indigo-500 h-2 rounded-full transition-all duration-1000" 
-                            style={{ width: `${Math.min((storageStats.usage / storageStats.quota) * 100, 100)}%` }}
-                          ></div>
-                        </div>
+                        <div className="flex justify-between text-xs mb-1.5"><span className="text-gray-600 dark:text-gray-300 font-medium">{formatBytes(storageStats.usage)} {t.used}</span><span className="text-gray-400 dark:text-gray-500">{formatBytes(storageStats.quota)} {t.available}</span></div>
+                        <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 overflow-hidden"><div className="bg-indigo-500 h-2 rounded-full transition-all duration-1000" style={{ width: `${Math.min((storageStats.usage / storageStats.quota) * 100, 100)}%` }}></div></div>
                       </>
                     ) : (
                       <div className="h-6 w-full animate-pulse bg-gray-200 dark:bg-gray-600 rounded"></div>
                     )}
                  </div>
               </div>
-
               <div>
                 <label className="flex items-center justify-between text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  <div className="flex items-center gap-2">
-                    <Sparkles size={16} />
-                    {t.enableAI}
-                  </div>
-                  <button 
-                    onClick={() => setEnableAI(!enableAI)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${enableAI ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-600'}`}
-                  >
-                    <span 
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${enableAI ? 'translate-x-6' : 'translate-x-1'}`} 
-                    />
-                  </button>
+                  <div className="flex items-center gap-2"><Sparkles size={16} />{t.enableAI}</div>
+                  <button onClick={() => setEnableAI(!enableAI)} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${enableAI ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-600'}`}><span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${enableAI ? 'translate-x-6' : 'translate-x-1'}`} /></button>
                 </label>
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                  <Languages size={16} />
-                  {t.language}
-                </label>
-                <select
-                  value={language}
-                  onChange={(e) => setLanguage(e.target.value as Language)}
-                  className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-base sm:text-sm text-gray-900 dark:text-white"
-                >
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2"><Languages size={16} />{t.language}</label>
+                <select value={language} onChange={(e) => setLanguage(e.target.value as Language)} className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-base sm:text-sm text-gray-900 dark:text-white">
                   <option value="en">English</option>
                   <option value="ja">日本語</option>
                   <option value="zh">中文</option>
@@ -978,154 +699,53 @@ const App: React.FC = () => {
                   <option value="ko">한국어</option>
                 </select>
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                  <MonitorSmartphone size={16} />
-                  {t.theme}
-                </label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2"><MonitorSmartphone size={16} />{t.theme}</label>
                 <div className="grid grid-cols-3 gap-2 bg-gray-100 dark:bg-gray-700 p-1 rounded-xl">
-                  <button
-                    onClick={() => setTheme('light')}
-                    className={`flex flex-col items-center gap-1 py-2 rounded-lg text-xs font-medium transition-all ${
-                      theme === 'light' 
-                        ? 'bg-white dark:bg-gray-600 text-indigo-600 dark:text-indigo-300 shadow-sm' 
-                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
-                    }`}
-                  >
-                    <Sun size={18} />
-                    {t.light}
-                  </button>
-                  <button
-                    onClick={() => setTheme('dark')}
-                    className={`flex flex-col items-center gap-1 py-2 rounded-lg text-xs font-medium transition-all ${
-                      theme === 'dark' 
-                        ? 'bg-white dark:bg-gray-600 text-indigo-600 dark:text-indigo-300 shadow-sm' 
-                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
-                    }`}
-                  >
-                    <Moon size={18} />
-                    {t.dark}
-                  </button>
-                  <button
-                    onClick={() => setTheme('system')}
-                    className={`flex flex-col items-center gap-1 py-2 rounded-lg text-xs font-medium transition-all ${
-                      theme === 'system' 
-                        ? 'bg-white dark:bg-gray-600 text-indigo-600 dark:text-indigo-300 shadow-sm' 
-                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
-                    }`}
-                  >
-                    <MonitorSmartphone size={18} />
-                    {t.system}
-                  </button>
+                  <button onClick={() => setTheme('light')} className={`flex flex-col items-center gap-1 py-2 rounded-lg text-xs font-medium transition-all ${theme === 'light' ? 'bg-white dark:bg-gray-600 text-indigo-600 dark:text-indigo-300 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}><Sun size={18} />{t.light}</button>
+                  <button onClick={() => setTheme('dark')} className={`flex flex-col items-center gap-1 py-2 rounded-lg text-xs font-medium transition-all ${theme === 'dark' ? 'bg-white dark:bg-gray-600 text-indigo-600 dark:text-indigo-300 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}><Moon size={18} />{t.dark}</button>
+                  <button onClick={() => setTheme('system')} className={`flex flex-col items-center gap-1 py-2 rounded-lg text-xs font-medium transition-all ${theme === 'system' ? 'bg-white dark:bg-gray-600 text-indigo-600 dark:text-indigo-300 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}><MonitorSmartphone size={18} />{t.system}</button>
                 </div>
               </div>
-
               <div className="pt-2 border-t border-gray-100 dark:border-gray-700 space-y-2">
-                 <button
-                   onClick={() => {
-                     setIsSettingsOpen(false);
-                     setIsRecycleBinOpen(true);
-                   }}
-                   className="w-full flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors group"
-                 >
-                   <div className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
-                     <Trash2 size={18} className="text-gray-500 dark:text-gray-400 group-hover:text-red-500 dark:group-hover:text-red-400 transition-colors" />
-                     <span className="text-sm font-medium">{t.openRecycleBin}</span>
-                   </div>
-                   <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-600 text-xs flex items-center justify-center text-gray-600 dark:text-gray-300">
-                      {trashItems.length}
-                   </div>
+                 <button onClick={() => { setIsSettingsOpen(false); setIsRecycleBinOpen(true); }} className="w-full flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors group">
+                   <div className="flex items-center gap-2 text-gray-700 dark:text-gray-200"><Trash2 size={18} className="text-gray-500 dark:text-gray-400 group-hover:text-red-500 dark:group-hover:text-red-400 transition-colors" /><span className="text-sm font-medium">{t.openRecycleBin}</span></div>
+                   <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-600 text-xs flex items-center justify-center text-gray-600 dark:text-gray-300">{trashItems.length}</div>
                  </button>
-
-                 <button
-                   onClick={() => setIsTermsOpen(true)}
-                   className="w-full flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors text-gray-700 dark:text-gray-200 group"
-                 >
-                   <FileText size={18} className="text-gray-500 dark:text-gray-400 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors" />
-                   <span className="text-sm font-medium">{t.termsAndConditions}</span>
+                 <button onClick={() => setIsTermsOpen(true)} className="w-full flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors text-gray-700 dark:text-gray-200 group">
+                   <FileText size={18} className="text-gray-500 dark:text-gray-400 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors" /><span className="text-sm font-medium">{t.termsAndConditions}</span>
                  </button>
               </div>
             </div>
-
-            <div className="flex-shrink-0 p-6 pt-4">
-              <button 
-                onClick={() => setIsSettingsOpen(false)}
-                className="w-full py-2 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors"
-              >
-                {t.close}
-              </button>
+            <div className="flex-shrink-0 p-6 pt-4 border-t dark:border-gray-700">
+              <button onClick={() => setIsSettingsOpen(false)} className="w-full py-2 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors">{t.close}</button>
             </div>
           </div>
         </div>
       )}
 
       {isTermsOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-          <div 
-            className="absolute inset-0 bg-black/40 dark:bg-black/70 backdrop-blur-sm"
-            onClick={() => setIsTermsOpen(false)}
-          />
+        <div className="fixed inset-0 z-[160] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 dark:bg-black/70 backdrop-blur-sm" onClick={() => setIsTermsOpen(false)} />
           <div className="relative w-full max-w-lg bg-white dark:bg-gray-800 rounded-2xl shadow-2xl flex flex-col max-h-[85vh] transform transition-all animate-in zoom-in-95 duration-200">
             <div className="p-5 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <FileText className="text-indigo-600 dark:text-indigo-400" size={20} />
-                {t.termsTitle}
-              </h2>
-              <button 
-                onClick={() => setIsTermsOpen(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-              >
-                <X size={24} />
-              </button>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2"><FileText className="text-indigo-600 dark:text-indigo-400" size={20} />{t.termsTitle}</h2>
+              <button onClick={() => setIsTermsOpen(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"><X size={24} /></button>
             </div>
-
             <div className="flex-1 overflow-y-auto p-6">
-              <div 
-                className="prose dark:prose-invert max-w-none text-sm text-gray-600 dark:text-gray-300"
-                dangerouslySetInnerHTML={{ __html: t.termsContent }}
-              />
+              <div className="prose dark:prose-invert max-w-none text-sm text-gray-600 dark:text-gray-300" dangerouslySetInnerHTML={{ __html: t.termsContent }} />
             </div>
-
             <div className="p-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-b-2xl">
-              <button
-                onClick={() => setIsTermsOpen(false)}
-                className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition-colors"
-              >
-                {t.close}
-              </button>
+              <button onClick={() => setIsTermsOpen(false)} className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition-colors">{t.close}</button>
             </div>
           </div>
         </div>
       )}
 
-      <RecycleBinModal
-        isOpen={isRecycleBinOpen}
-        onClose={() => setIsRecycleBinOpen(false)}
-        items={trashItems}
-        onRestore={handleRestoreItem}
-        onDeletePermanent={handlePermanentDelete}
-        onEmptyBin={handleEmptyBin}
-        lang={language}
-      />
-
-      <ExpirationAlertModal
-        isOpen={isExpiryAlertOpen}
-        onClose={() => setIsExpiryAlertOpen(false)}
-        items={expiringItems}
-        lang={language}
-      />
-
-      <OnboardingModal
-        isOpen={isOnboardingOpen}
-        onClose={handleCloseOnboarding}
-        lang={language}
-      />
-
-      <LanguageSelectorModal 
-        isOpen={isLanguageSelectorOpen}
-        onSelect={handleLanguageSelect}
-      />
+      <RecycleBinModal isOpen={isRecycleBinOpen} onClose={() => setIsRecycleBinOpen(false)} items={trashItems} onRestore={handleRestoreItem} onDeletePermanent={handlePermanentDelete} onEmptyBin={handleEmptyBin} lang={language} />
+      <ExpirationAlertModal isOpen={isExpiryAlertOpen} onClose={() => setIsExpiryAlertOpen(false)} items={expiringItems} lang={language} />
+      <OnboardingModal isOpen={isOnboardingOpen} onClose={handleCloseOnboarding} lang={language} />
+      <LanguageSelectorModal isOpen={isLanguageSelectorOpen} onSelect={handleLanguageSelect} />
     </div>
   );
 };
