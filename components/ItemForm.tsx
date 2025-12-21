@@ -119,7 +119,7 @@ export const ItemForm: React.FC<ItemFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col h-full bg-white dark:bg-gray-800 transition-colors relative overflow-x-hidden">
+    <form onSubmit={handleSubmit} className="flex flex-col h-full bg-white dark:bg-gray-800 transition-colors relative overflow-x-hidden max-w-full">
       <div className="flex items-center justify-between p-4 border-b dark:border-gray-700">
         <h2 className="text-xl font-semibold text-gray-800 dark:text-white">{initialData ? t.edit : t.create}</h2>
         <div className="flex items-center gap-2">
@@ -131,7 +131,7 @@ export const ItemForm: React.FC<ItemFormProps> = ({
       
       {shareFeedback && <div className="absolute top-[70px] left-0 right-0 mx-4 z-10"><div className="bg-indigo-600 text-white text-xs px-3 py-2 rounded-lg shadow-lg flex items-center gap-2 animate-in fade-in slide-in-from-top-2"><Check size={14} className="flex-shrink-0" /><p className="flex-1">{t.shareSuccess} <span className="opacity-80 block text-[10px] mt-0.5 font-normal">{t.shareWarning}</span></p></div></div>}
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-6 overflow-x-hidden">
+      <div className="flex-1 overflow-y-auto p-4 space-y-6 overflow-x-hidden max-w-full">
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t.mediaTitle}</label>
           <div className="flex items-center gap-3 mb-3 relative">
@@ -160,9 +160,23 @@ export const ItemForm: React.FC<ItemFormProps> = ({
             <div className="animate-in fade-in slide-in-from-top-1">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-1.5">
                 <Calendar size={14} className="text-gray-500 dark:text-gray-400" />
-                {t.expiryDate} <span className="text-[10px] opacity-70 font-normal ml-auto">(YYYY/MM/DD)</span>
+                {t.expiryDate}
               </label>
-              <input type="date" value={toInputDateValue(expiryDate)} onChange={(e) => { const val = e.target.value; if (val) { const d = new Date(val); d.setHours(12, 0, 0, 0); setExpiryDate(d.getTime()); } else { setExpiryDate(undefined); } }} className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white text-base" />
+              <input 
+                type="date" 
+                value={toInputDateValue(expiryDate)} 
+                onChange={(e) => { 
+                  const val = e.target.value; 
+                  if (val) { 
+                    const d = new Date(val); 
+                    d.setHours(12, 0, 0, 0); 
+                    setExpiryDate(d.getTime()); 
+                  } else { 
+                    setExpiryDate(undefined); 
+                  } 
+                }} 
+                className="w-full px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none text-base"
+              />
             </div>
           )}
           <div>

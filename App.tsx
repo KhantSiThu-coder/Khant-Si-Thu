@@ -109,8 +109,7 @@ const App: React.FC = () => {
     };
     localStorage.setItem('smartshop_settings', JSON.stringify(settingsToSave));
     
-    // Update document lang for native UI (like date pickers)
-    // Forced to 'en' for non-Japanese languages to ensure standard labels
+    // Force standard language for native pickers unless it's Japanese
     document.documentElement.lang = language === 'ja' ? 'ja' : 'en';
   }, [language, theme, enableAI, cardSize]);
 
@@ -548,7 +547,7 @@ const App: React.FC = () => {
                   <button onClick={() => toggleStatusFilter('low')} className={`w-full md:w-auto justify-center flex items-center gap-1 px-2 py-2 md:py-1.5 rounded-lg md:rounded-full text-[9px] sm:text-xs font-medium border transition-all ${activeStatuses.includes('low') ? 'bg-orange-100 border-orange-200 text-orange-700 dark:bg-orange-900/40 dark:border-orange-800 dark:text-orange-300' : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'}`}>
                     <AlertCircle size={16} strokeWidth={2.5} /> <span className="truncate">{t.low}</span>
                   </button>
-                  <button onClick={() => toggleStatusFilter('in-stock')} className={`w-full md:w-auto justify-center flex items-center gap-1 px-2 py-2 md:py-1.5 rounded-lg md:rounded-full text-[9px] sm:text-xs font-medium border transition-all ${activeStatuses.includes('in-stock') ? 'bg-green-100 border-green-200 text-green-700 dark:bg-green-900/40 dark:border-green-800 dark:text-green-300' : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'}`}>
+                  <button onClick={() => toggleStatusFilter('in-stock')} className={`w-full md:w-auto justify-center flex items-center gap-1 px-2 py-2 md:py-1.5 rounded-lg md:rounded-full text-[9px] sm:text-xs font-medium border transition-all ${activeStatuses.includes('in-stock') ? 'bg-green-100 border-green-200 text-green-700 dark:bg-green-900/40 dark:border-indigo-800 dark:text-indigo-300' : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'}`}>
                     <PackageCheck size={16} strokeWidth={2.5} /> <span className="truncate">{t.inStock}</span>
                   </button>
                   <button onClick={() => toggleStatusFilter('dont-like')} className={`w-full md:w-auto justify-center flex items-center gap-1 px-2 py-2 md:py-1.5 rounded-lg md:rounded-full text-[9px] sm:text-xs font-medium border transition-all ${activeStatuses.includes('dont-like') ? 'bg-red-100 border-red-200 text-red-700 dark:bg-red-900/40 dark:border-red-800 dark:text-red-300' : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'}`}>
@@ -588,7 +587,12 @@ const App: React.FC = () => {
               {isExpiryFilterActive && (
                 <div className="px-4 pb-3 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700 flex items-center gap-4 animate-in slide-in-from-top-2 fade-in duration-200">
                   <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">{t.expiryDate} (&le;):</span>
-                  <input type="date" value={expiryFilterDate} onChange={(e) => setExpiryFilterDate(e.target.value)} className="px-2 py-1 text-base sm:text-sm border bg-white text-gray-900 dark:border-gray-600 rounded focus:ring-2 focus:ring-purple-500 outline-none dark:bg-gray-700 dark:text-white" />
+                  <input 
+                    type="date" 
+                    value={expiryFilterDate} 
+                    onChange={(e) => setExpiryFilterDate(e.target.value)} 
+                    className="px-2 py-1 text-base sm:text-sm border bg-white text-gray-900 dark:border-gray-600 rounded focus:ring-2 focus:ring-indigo-500 outline-none dark:bg-gray-700 dark:text-white shadow-sm" 
+                  />
                 </div>
               )}
           </div>
