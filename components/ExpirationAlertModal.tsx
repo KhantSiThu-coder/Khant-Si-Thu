@@ -22,20 +22,16 @@ export const ExpirationAlertModal: React.FC<ExpirationAlertModalProps> = ({
   if (!isOpen) return null;
 
   const formatExpirtyDate = (date: Date) => {
-    if (lang === 'ja') {
-      return date.toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' });
-    } else {
-      const yy = String(date.getFullYear()).slice(-2);
-      const mm = String(date.getMonth() + 1).padStart(2, '0');
-      const dd = String(date.getDate()).padStart(2, '0');
-      return `${yy}/${mm}/${dd}`;
-    }
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    return `${yyyy}/${mm}/${dd}`;
   };
 
   return (
     <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40 dark:bg-black/70 backdrop-blur-sm transition-opacity" onClick={onClose} />
-      <div className="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-2xl flex flex-col max-h-[85vh] transform transition-all animate-in zoom-in-95 duration-200">
+      <div className="relative w-full max-md:max-w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-2xl flex flex-col max-h-[85vh] transform transition-all animate-in zoom-in-95 duration-200 overflow-x-hidden">
         <div className="p-5 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
           <div className="flex items-center gap-2 text-orange-600 dark:text-orange-50">
             <AlertTriangle size={24} />
@@ -43,7 +39,7 @@ export const ExpirationAlertModal: React.FC<ExpirationAlertModalProps> = ({
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"><X size={24} /></button>
         </div>
-        <div className="flex-1 overflow-y-auto p-5">
+        <div className="flex-1 overflow-y-auto p-5 overflow-x-hidden">
            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 font-medium">{t.expiryAlertDesc}</p>
            <div className="space-y-3">
               {items.map((item) => {

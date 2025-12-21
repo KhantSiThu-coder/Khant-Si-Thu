@@ -660,9 +660,9 @@ const App: React.FC = () => {
       </div>
 
       {isFormOpen && (
-        <div className="fixed inset-0 z-[100] flex justify-end">
+        <div className="fixed inset-0 z-[100] flex justify-end overflow-x-hidden">
           <div className="absolute inset-0 bg-black/20 dark:bg-black/50 backdrop-blur-sm transition-opacity" onClick={() => setIsFormOpen(false)} />
-          <div className="relative w-full max-w-md bg-white dark:bg-gray-800 shadow-2xl h-full transform transition-transform duration-300">
+          <div className="relative w-full max-w-md bg-white dark:bg-gray-800 shadow-2xl h-full transform transition-transform duration-300 overflow-x-hidden">
             <ItemForm initialData={editingItem || undefined} onSubmit={editingItem ? handleUpdateItem : handleAddItem} onCancel={() => setIsFormOpen(false)} onDelete={handleDeleteItem} lang={language} enableAI={enableAI} />
           </div>
         </div>
