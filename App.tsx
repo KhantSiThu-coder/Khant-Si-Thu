@@ -162,7 +162,6 @@ const App: React.FC = () => {
   const [toastMessage, setToastMessage] = useState<string>('');
   const [lastDeletedId, setLastDeletedId] = useState<string | null>(null);
   const [isMainScrolling, setIsMainScrolling] = useState(false);
-  // Fixed: storageStats state added
   const [storageStats, setStorageStats] = useState<{usage: number, quota: number} | null>(null);
   const mainScrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -171,7 +170,7 @@ const App: React.FC = () => {
   // Apply Theme
   useEffect(() => {
     const root = window.document.documentElement;
-    const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-scheme: dark)').matches);
     if (isDark) {
       root.classList.add('dark');
       root.style.colorScheme = 'dark';
@@ -210,7 +209,6 @@ const App: React.FC = () => {
     loadData();
   }, []);
 
-  // Fixed: storage stats effect added
   useEffect(() => {
     const fetchStorageStats = async () => {
       const stats = await getStorageEstimate();
@@ -283,7 +281,6 @@ const App: React.FC = () => {
     }
   };
 
-  // Fixed: handlePermanentDelete added
   const handlePermanentDelete = async (id: string) => {
     setItems((prev) => prev.filter((i) => i.id !== id));
     await deleteItemFromDB(id);
@@ -309,6 +306,29 @@ const App: React.FC = () => {
 
   const toggleStatusFilter = (status: ItemStatus) => {
     setActiveStatuses(prev => prev.includes(status) ? prev.filter(s => s !== status) : [...prev, status]);
+  };
+
+  const toggleCategory = (cat: string) => {
+    if (cat === 'All') {
+      setSelectedCategories(['All']);
+      return;
+    }
+
+    setSelectedCategories((prev) => {
+      const isAllSelected = prev.includes('All');
+      const isAlreadySelected = prev.includes(cat);
+
+      if (isAllSelected) {
+        return [cat];
+      }
+
+      if (isAlreadySelected) {
+        const next = prev.filter((c) => c !== cat);
+        return next.length === 0 ? ['All'] : next;
+      }
+
+      return [...prev, cat];
+    });
   };
 
   const filteredItems = items.filter((item) => {
@@ -341,19 +361,16 @@ const App: React.FC = () => {
 
   const trashItems = items.filter(item => item.deletedAt).sort((a, b) => (b.deletedAt || 0) - (a.deletedAt || 0));
 
-  // Fixed: handleMainScroll added
   const handleMainScroll = () => {
     setIsMainScrolling(true);
     if (mainScrollTimeoutRef.current) clearTimeout(mainScrollTimeoutRef.current);
     mainScrollTimeoutRef.current = setTimeout(() => setIsMainScrolling(false), 1000);
   };
 
-  // Fixed: categoriesToShow added
   const categoriesToShow = selectedCategories.includes('All') 
     ? CATEGORY_KEYS.filter(cat => filteredItems.some(item => item.category === cat))
-    : selectedCategories;
+    : CATEGORY_KEYS.filter(cat => selectedCategories.includes(cat));
 
-  // Fixed: getGridClasses added
   const getGridClasses = () => {
     switch (cardSize) {
       case 'small': return 'grid-cols-1 gap-3';
@@ -400,10 +417,10 @@ const App: React.FC = () => {
 
         <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
           <button
-            onClick={() => { setSelectedCategories(['All']); setIsSidebarOpen(false); }}
+            onClick={() => toggleCategory('All')}
             className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
               selectedCategories.includes('All') 
-                ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 font-semibold' 
+                ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 font-semibold shadow-sm' 
                 : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
             }`}
           >
@@ -414,15 +431,18 @@ const App: React.FC = () => {
           {CATEGORY_KEYS.map(cat => (
             <button
               key={cat}
-              onClick={() => { setSelectedCategories([cat]); setIsSidebarOpen(false); }}
+              onClick={() => toggleCategory(cat)}
               className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
                 selectedCategories.includes(cat)
-                  ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 font-semibold' 
+                  ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 font-semibold shadow-sm' 
                   : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
               }`}
             >
-              {getCategoryIcon(cat)}
-              <span className="text-sm">{t.categories[cat as keyof typeof t.categories] || cat}</span>
+              <div className={selectedCategories.includes(cat) ? 'scale-110 transition-transform' : ''}>
+                {getCategoryIcon(cat)}
+              </div>
+              <span className="text-sm flex-1 text-left">{t.categories[cat as keyof typeof t.categories] || cat}</span>
+              {selectedCategories.includes(cat) && <CheckCircle2 size={16} className="text-indigo-500" />}
             </button>
           ))}
         </nav>
