@@ -74,6 +74,37 @@ export const ItemCard: React.FC<ItemCardProps> = ({
     );
   };
 
+  const renderStore = (store: string | null, isList: boolean) => {
+    if (!store) return null;
+    
+    // Check if the input looks like a URL
+    const isUrl = /^(https?:\/\/|www\.|[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/.test(store.trim());
+    const iconSize = isList ? 12 : 10;
+    
+    if (isUrl) {
+      const href = store.trim().startsWith('http') ? store.trim() : `https://${store.trim()}`;
+      return (
+        <a 
+          href={href} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className={`flex items-center gap-1 text-blue-500 hover:underline transition-colors truncate ${isList ? 'max-w-[120px]' : ''}`}
+        >
+          <MapPin size={iconSize} className="flex-shrink-0" />
+          <span className="truncate">{store}</span>
+        </a>
+      );
+    }
+
+    return (
+      <span className={`flex items-center gap-1 text-gray-500 dark:text-gray-400 truncate ${isList ? 'max-w-[120px]' : ''}`}>
+        <MapPin size={iconSize} className="text-gray-400 flex-shrink-0" />
+        <span className="truncate">{store}</span>
+      </span>
+    );
+  };
+
   if (size === 'small') {
     return (
       <div onClick={() => onClick(item)} className="group relative flex items-center gap-3 sm:gap-4 p-4 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-all w-full max-w-full overflow-hidden">
@@ -98,9 +129,9 @@ export const ItemCard: React.FC<ItemCardProps> = ({
           <div className="flex items-center gap-2">
              <span className="bg-indigo-50 dark:bg-indigo-900/30 px-1.5 py-0.5 rounded text-[10px] font-bold text-indigo-600 dark:text-indigo-400 truncate max-w-[80px] sm:max-w-none">{item.category}</span>
           </div>
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[10px] text-gray-500 dark:text-gray-400">
-              {item.store && <span className="flex items-center gap-1 truncate max-w-[120px]"><MapPin size={12} className="text-gray-400" /><span className="truncate">{item.store}</span></span>}
-              {item.expiryDate && <span className="flex items-center gap-1 flex-shrink-0"><CalendarClock size={12} className="text-gray-400" /><span>{formatDate(item.expiryDate)}</span></span>}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[10px]">
+              {renderStore(item.store, true)}
+              {item.expiryDate && <span className="flex items-center gap-1 flex-shrink-0 text-gray-500 dark:text-gray-400"><CalendarClock size={12} className="text-gray-400" /><span>{formatDate(item.expiryDate)}</span></span>}
           </div>
         </div>
         <button onClick={(e) => { e.stopPropagation(); onDelete(item.id); }} className="p-2 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 flex-shrink-0" title={t.delete}><Trash2 size={18} /></button>
@@ -128,8 +159,10 @@ export const ItemCard: React.FC<ItemCardProps> = ({
           </div>
           {isLarge && (
             <div className="space-y-1 mt-1">
-              {item.store && <div className="flex items-center text-[10px] text-gray-500 dark:text-gray-400"><MapPin size={10} className="mr-1 flex-shrink-0" /><span className="truncate">{item.store}</span></div>}
-              {item.expiryDate && <div className="flex items-center text-[10px] text-gray-500 dark:text-gray-400" title={t.expiryDate}><CalendarClock size={10} className="mr-1 flex-shrink-0" /><span>{formatDate(item.expiryDate)}</span></div>}
+              <div className="text-[10px]">
+                {renderStore(item.store, false)}
+              </div>
+              {item.expiryDate && <div className="flex items-center text-[10px] text-gray-500 dark:text-gray-400" title={t.expiryDate}><CalendarClock size={10} className="mr-1 flex-shrink-0 text-gray-400" /><span>{formatDate(item.expiryDate)}</span></div>}
             </div>
           )}
         </div>

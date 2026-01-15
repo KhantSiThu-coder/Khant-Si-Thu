@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ShoppingItem, ItemStatus } from './types';
 import { ItemForm } from './components/ItemForm';
 import { ItemCard } from './components/ItemCard';
+import { ItemDetailModal } from './components/ItemDetailModal';
 import { RecycleBinModal } from './components/RecycleBinModal';
 import { OnboardingModal } from './components/OnboardingModal';
 import { LanguageSelectorModal } from './components/LanguageSelectorModal';
@@ -70,6 +71,7 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCategories, setSelectedCategories] = useState<string[]>(['All']);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isRecycleBinOpen, setIsRecycleBinOpen] = useState(false);
   const [isTermsOpen, setIsTermsOpen] = useState(false);
@@ -77,6 +79,7 @@ const App: React.FC = () => {
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [isLanguageSelectorOpen, setIsLanguageSelectorOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ShoppingItem | null>(null);
+  const [selectedItemForDetail, setSelectedItemForDetail] = useState<ShoppingItem | null>(null);
   
   // Load settings from localStorage
   const loadSettings = (): AppSettings => {
@@ -279,6 +282,10 @@ const App: React.FC = () => {
       setEditingItem(null);
       setIsFormOpen(false);
     }
+    if (selectedItemForDetail && selectedItemForDetail.id === id) {
+      setSelectedItemForDetail(null);
+      setIsDetailOpen(false);
+    }
   };
 
   const handlePermanentDelete = async (id: string) => {
@@ -377,6 +384,17 @@ const App: React.FC = () => {
       case 'large': return 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6';
       default: return 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4';
     }
+  };
+
+  const handleCardClick = (item: ShoppingItem) => {
+    setSelectedItemForDetail(item);
+    setIsDetailOpen(true);
+  };
+
+  const handleEditFromDetail = (item: ShoppingItem) => {
+    setEditingItem(item);
+    setIsDetailOpen(false);
+    setIsFormOpen(true);
   };
 
   if (isLoading) {
@@ -580,7 +598,7 @@ const App: React.FC = () => {
                     </h2>
                     <div className={`grid w-full ${getGridClasses()}`}>
                       {categoryItems.map((item) => (
-                        <ItemCard key={item.id} item={item} size={cardSize} onStatusToggle={toggleItemStatus} onDelete={handleDeleteItem} onClick={(i) => { setEditingItem(i); setIsFormOpen(true); }} lang={language} />
+                        <ItemCard key={item.id} item={item} size={cardSize} onStatusToggle={toggleItemStatus} onDelete={handleDeleteItem} onClick={handleCardClick} lang={language} />
                       ))}
                     </div>
                   </div>
@@ -695,7 +713,7 @@ const App: React.FC = () => {
       {isTermsOpen && (
         <div className="fixed inset-0 z-[160] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40 dark:bg-black/70 backdrop-blur-sm" onClick={() => setIsTermsOpen(false)} />
-          <div className="relative w-full max-w-lg bg-white dark:bg-gray-800 rounded-2xl shadow-2xl flex flex-col max-h-[85vh] transform transition-all animate-in zoom-in-95 duration-200">
+          <div className="relative w-full max-lg:max-w-full max-w-lg bg-white dark:bg-gray-800 rounded-2xl shadow-2xl flex flex-col max-h-[85vh] transform transition-all animate-in zoom-in-95 duration-200">
             <div className="p-5 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
               <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2"><FileText className="text-indigo-600 dark:text-indigo-400" size={20} />{t.termsTitle}</h2>
               <button onClick={() => setIsTermsOpen(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"><X size={24} /></button>
@@ -710,6 +728,14 @@ const App: React.FC = () => {
         </div>
       )}
 
+      <ItemDetailModal 
+        isOpen={isDetailOpen} 
+        item={selectedItemForDetail} 
+        onClose={() => setIsDetailOpen(false)} 
+        onEdit={handleEditFromDetail} 
+        onDelete={handleDeleteItem} 
+        lang={language} 
+      />
       <RecycleBinModal isOpen={isRecycleBinOpen} onClose={() => setIsRecycleBinOpen(false)} items={trashItems} onRestore={handleRestoreItem} onDeletePermanent={handlePermanentDelete} onEmptyBin={() => { setItems((prev) => prev.filter((i) => !i.deletedAt)); }} lang={language} />
       <ExpirationAlertModal isOpen={isExpiryAlertOpen} onClose={() => setIsExpiryAlertOpen(false)} items={expiringItems} lang={language} />
       <OnboardingModal isOpen={isOnboardingOpen} onClose={handleCloseOnboarding} lang={language} />
