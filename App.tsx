@@ -81,7 +81,9 @@ const App: React.FC = () => {
   const [editingItem, setEditingItem] = useState<ShoppingItem | null>(null);
   const [selectedItemForDetail, setSelectedItemForDetail] = useState<ShoppingItem | null>(null);
   
-  // Load settings from localStorage
+  // Drag and Drop State
+  const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
+
   const loadSettings = (): AppSettings => {
     if (typeof window === 'undefined') return DEFAULT_SETTINGS;
     try {
@@ -95,15 +97,11 @@ const App: React.FC = () => {
 
   const initialSettings = useRef(loadSettings()).current;
 
-  // Settings State
   const [language, setLanguage] = useState<Language>(initialSettings.language);
   const [theme, setTheme] = useState<Theme>(initialSettings.theme);
   const [enableAI, setEnableAI] = useState<boolean>(initialSettings.enableAI);
-  
-  // View State
   const [cardSize, setCardSize] = useState<CardSize>(initialSettings.cardSize);
   
-  // Save settings effect
   useEffect(() => {
     const settingsToSave: AppSettings = {
       language,
@@ -112,11 +110,9 @@ const App: React.FC = () => {
       cardSize
     };
     localStorage.setItem('smartshop_settings', JSON.stringify(settingsToSave));
-    
     document.documentElement.lang = language === 'ja' ? 'ja' : 'en';
   }, [language, theme, enableAI, cardSize]);
 
-  // Check for first-time visit
   useEffect(() => {
     const hasSelectedLanguage = localStorage.getItem('smartshop_language_selected');
     const hasSeenOnboarding = localStorage.getItem('smartshop_onboarding_seen');
@@ -139,13 +135,11 @@ const App: React.FC = () => {
     setIsOnboardingOpen(false);
   };
 
-  // Search & Filter State
   const [searchQuery, setSearchQuery] = useState('');
   const [activeStatuses, setActiveStatuses] = useState<ItemStatus[]>([]);
   const [isPriceFilterActive, setIsPriceFilterActive] = useState(false);
   const [priceRange, setPriceRange] = useState<{min: string, max: string}>({min: '', max: ''});
 
-  // Expiration Filter
   const [isExpiryFilterActive, setIsExpiryFilterActive] = useState(false);
   const [isFilterCalendarOpen, setIsFilterCalendarOpen] = useState(false);
   const [expiryFilterDate, setExpiryFilterDate] = useState<number>(new Date().setHours(12, 0, 0, 0));
@@ -155,12 +149,10 @@ const App: React.FC = () => {
     return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
   };
 
-  // Expiration Alert State
   const hasCheckedExpiryRef = useRef(false);
   const [isExpiryAlertOpen, setIsExpiryAlertOpen] = useState(false);
   const [expiringItems, setExpiringItems] = useState<ShoppingItem[]>([]);
 
-  // Toast & Scroll State
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState<string>('');
   const [lastDeletedId, setLastDeletedId] = useState<string | null>(null);
@@ -170,7 +162,6 @@ const App: React.FC = () => {
 
   const t = TRANSLATIONS[language];
 
-  // Apply Theme
   useEffect(() => {
     const root = window.document.documentElement;
     const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-scheme: dark)').matches);
@@ -183,7 +174,6 @@ const App: React.FC = () => {
     }
   }, [theme]);
 
-  // Load items
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -220,7 +210,6 @@ const App: React.FC = () => {
     fetchStorageStats();
   }, [items]);
 
-  // Expiry checks
   useEffect(() => {
     if (!isLoading && !hasCheckedExpiryRef.current) {
       hasCheckedExpiryRef.current = true;
@@ -247,14 +236,20 @@ const App: React.FC = () => {
     }
   }, [isLoading, items]);
 
-  const handleAddItem = async (itemData: Omit<ShoppingItem, 'id' | 'createdAt'>) => {
-    const newItem: ShoppingItem = { ...itemData, id: generateId(), createdAt: Date.now() };
+  const handleAddItem = async (itemData: Omit<ShoppingItem, 'id' | 'createdAt' | 'order'>) => {
+    const timestamp = Date.now();
+    const newItem: ShoppingItem = { 
+      ...itemData, 
+      id: generateId(), 
+      createdAt: timestamp,
+      order: timestamp // Initial order same as creation time
+    };
     setItems((prev) => [newItem, ...prev]);
     setIsFormOpen(false);
     await saveItemToDB(newItem);
   };
 
-  const handleUpdateItem = async (itemData: Omit<ShoppingItem, 'id' | 'createdAt'>) => {
+  const handleUpdateItem = async (itemData: Omit<ShoppingItem, 'id' | 'createdAt' | 'order'>) => {
     if (!editingItem) return;
     if (editingItem.id === '') {
        await handleAddItem(itemData);
@@ -320,20 +315,14 @@ const App: React.FC = () => {
       setSelectedCategories(['All']);
       return;
     }
-
     setSelectedCategories((prev) => {
       const isAllSelected = prev.includes('All');
       const isAlreadySelected = prev.includes(cat);
-
-      if (isAllSelected) {
-        return [cat];
-      }
-
+      if (isAllSelected) return [cat];
       if (isAlreadySelected) {
         const next = prev.filter((c) => c !== cat);
         return next.length === 0 ? ['All'] : next;
       }
-
       return [...prev, cat];
     });
   };
@@ -395,6 +384,50 @@ const App: React.FC = () => {
     setEditingItem(item);
     setIsDetailOpen(false);
     setIsFormOpen(true);
+  };
+
+  // DRAG AND DROP HANDLERS
+  const handleDragStart = (id: string) => {
+    setDraggedItemId(id);
+  };
+
+  const handleDragOver = (e: React.DragEvent, targetId: string) => {
+    e.preventDefault();
+    if (!draggedItemId || draggedItemId === targetId) return;
+
+    const draggedItem = items.find(i => i.id === draggedItemId);
+    const targetItem = items.find(i => i.id === targetId);
+
+    // Only rearrange within the same category
+    if (draggedItem && targetItem && draggedItem.category === targetItem.category) {
+      const newItems = [...items];
+      const draggedIndex = newItems.findIndex(i => i.id === draggedItemId);
+      const targetIndex = newItems.findIndex(i => i.id === targetId);
+
+      // Swap positions in the array
+      newItems.splice(draggedIndex, 1);
+      newItems.splice(targetIndex, 0, draggedItem);
+      
+      // Update order property based on new indices for items in this category
+      const catItems = newItems.filter(i => i.category === draggedItem.category && !i.deletedAt);
+      catItems.forEach((item, index) => {
+        item.order = index; // Simple linear order
+      });
+
+      setItems(newItems);
+    }
+  };
+
+  const handleDrop = async (targetId: string) => {
+    setDraggedItemId(null);
+    // Persist all items in the affected category
+    const targetItem = items.find(i => i.id === targetId);
+    if (targetItem) {
+      const categoryToUpdate = items.filter(i => i.category === targetItem.category);
+      for (const item of categoryToUpdate) {
+        await saveItemToDB(item);
+      }
+    }
   };
 
   if (isLoading) {
@@ -598,7 +631,19 @@ const App: React.FC = () => {
                     </h2>
                     <div className={`grid w-full ${getGridClasses()}`}>
                       {categoryItems.map((item) => (
-                        <ItemCard key={item.id} item={item} size={cardSize} onStatusToggle={toggleItemStatus} onDelete={handleDeleteItem} onClick={handleCardClick} lang={language} />
+                        <ItemCard 
+                          key={item.id} 
+                          item={item} 
+                          size={cardSize} 
+                          onStatusToggle={toggleItemStatus} 
+                          onDelete={handleDeleteItem} 
+                          onClick={handleCardClick} 
+                          onDragStart={handleDragStart}
+                          onDragOver={handleDragOver}
+                          onDrop={handleDrop}
+                          lang={language}
+                          isDragging={draggedItemId === item.id}
+                        />
                       ))}
                     </div>
                   </div>
@@ -641,7 +686,7 @@ const App: React.FC = () => {
       {isFormOpen && (
         <div className="fixed inset-0 z-[100] flex justify-end overflow-x-hidden">
           <div className="absolute inset-0 bg-black/20 dark:bg-black/50 backdrop-blur-sm transition-opacity" onClick={() => setIsFormOpen(false)} />
-          <div className="relative w-full max-w-md bg-white dark:bg-gray-800 shadow-2xl h-full transform transition-transform duration-300 overflow-x-hidden">
+          <div className="relative w-full max-md:max-w-md bg-white dark:bg-gray-800 shadow-2xl h-full transform transition-transform duration-300 overflow-x-hidden">
             <ItemForm initialData={editingItem || undefined} onSubmit={editingItem ? handleUpdateItem : handleAddItem} onCancel={() => setIsFormOpen(false)} onDelete={handleDeleteItem} lang={language} enableAI={enableAI} />
           </div>
         </div>
