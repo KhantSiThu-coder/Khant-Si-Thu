@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { ShoppingItem } from '../types';
 import { TRANSLATIONS, Language, CURRENCY_OPTIONS } from '../constants';
 import { X, Edit2, Trash2, MapPin, CalendarClock, Tag, ShoppingCart, ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
@@ -207,14 +208,14 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
         </div>
       </div>
 
-      {/* Expanded Media Overlay */}
-      {isMediaExpanded && item.media.length > 0 && (
+      {/* Expanded Media Overlay using Portal */}
+      {isMediaExpanded && item.media.length > 0 && createPortal(
         <div 
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/95 backdrop-blur-xl animate-in fade-in duration-300"
+          className="fixed inset-0 z-[600] flex items-center justify-center bg-black/95 backdrop-blur-xl animate-in fade-in duration-300"
           onClick={() => setIsMediaExpanded(false)}
         >
           <button 
-            className="absolute top-6 right-6 p-3 bg-white/10 hover:bg-white/20 text-white rounded-full backdrop-blur-md transition-all z-[210]"
+            className="absolute top-6 right-6 p-3 bg-white/10 hover:bg-white/20 text-white rounded-full backdrop-blur-md transition-all z-[610]"
             onClick={(e) => {
               e.stopPropagation();
               setIsMediaExpanded(false);
@@ -262,7 +263,8 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
               </div>
             </>
           )}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

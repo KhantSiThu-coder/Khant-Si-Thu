@@ -1,5 +1,6 @@
 
 import React, { useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { MediaItem } from '../types';
 import { X, Upload, Image as ImageIcon, Film, Loader2 } from 'lucide-react';
 import { TRANSLATIONS, Language } from '../constants';
@@ -98,7 +99,7 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({ media, onMediaChan
           <div 
             key={item.id} 
             onClick={() => setPreviewMedia(item)}
-            className="relative group aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600 cursor-pointer hover:opacity-90 transition-opacity"
+            className="relative group aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600 cursor-zoom-in hover:opacity-90 transition-opacity"
             title="Click to expand"
           >
             {item.type === 'image' ? (
@@ -147,15 +148,15 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({ media, onMediaChan
         multiple
       />
 
-      {/* Lightbox Overlay */}
-      {previewMedia && (
+      {/* Lightbox Overlay using Portal */}
+      {previewMedia && createPortal(
         <div 
-          className="fixed inset-0 z-[110] flex items-center justify-center bg-black/95 backdrop-blur-sm animate-in fade-in duration-200"
+          className="fixed inset-0 z-[500] flex items-center justify-center bg-black/95 backdrop-blur-md animate-in fade-in duration-200"
           onClick={() => setPreviewMedia(null)}
         >
           <button 
             type="button"
-            className="absolute top-4 right-4 md:top-6 md:right-6 p-3 text-white/90 hover:text-white bg-white/10 hover:bg-white/20 active:bg-white/30 rounded-full transition-all z-[120] backdrop-blur-md shadow-lg"
+            className="absolute top-4 right-4 md:top-6 md:right-6 p-3 text-white/90 hover:text-white bg-white/10 hover:bg-white/20 active:bg-white/30 rounded-full transition-all z-[520] backdrop-blur-md shadow-lg"
             onClick={(e) => {
               e.stopPropagation();
               setPreviewMedia(null);
@@ -165,20 +166,18 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({ media, onMediaChan
             <X size={32} />
           </button>
           
-          <div 
-            className="relative w-full h-full p-2 md:p-8 flex items-center justify-center pointer-events-none"
-          >
+          <div className="relative w-full h-full p-2 md:p-8 flex items-center justify-center">
             {previewMedia.type === 'image' ? (
               <img 
                 src={previewMedia.url} 
                 alt="Full preview" 
-                className="max-w-full max-h-full object-contain rounded-md shadow-2xl pointer-events-auto" 
+                className="max-w-full max-h-full object-contain rounded-md shadow-2xl" 
                 onClick={(e) => e.stopPropagation()}
               />
             ) : (
               <video 
                 src={previewMedia.url} 
-                className="max-w-full max-h-full object-contain rounded-md shadow-2xl pointer-events-auto" 
+                className="max-w-full max-h-full object-contain rounded-md shadow-2xl" 
                 controls 
                 autoPlay 
                 playsInline
@@ -186,7 +185,8 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({ media, onMediaChan
               />
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
