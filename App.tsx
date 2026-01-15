@@ -81,9 +81,6 @@ const App: React.FC = () => {
   const [editingItem, setEditingItem] = useState<ShoppingItem | null>(null);
   const [selectedItemForDetail, setSelectedItemForDetail] = useState<ShoppingItem | null>(null);
   
-  // Drag and Drop State
-  const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
-
   // Load settings from localStorage
   const loadSettings = (): AppSettings => {
     if (typeof window === 'undefined') return DEFAULT_SETTINGS;
@@ -102,8 +99,6 @@ const App: React.FC = () => {
   const [language, setLanguage] = useState<Language>(initialSettings.language);
   const [theme, setTheme] = useState<Theme>(initialSettings.theme);
   const [enableAI, setEnableAI] = useState<boolean>(initialSettings.enableAI);
-  
-  // View State
   const [cardSize, setCardSize] = useState<CardSize>(initialSettings.cardSize);
   
   // Save settings effect
@@ -115,7 +110,6 @@ const App: React.FC = () => {
       cardSize
     };
     localStorage.setItem('smartshop_settings', JSON.stringify(settingsToSave));
-    
     document.documentElement.lang = language === 'ja' ? 'ja' : 'en';
   }, [language, theme, enableAI, cardSize]);
 
@@ -271,7 +265,7 @@ const App: React.FC = () => {
        return;
     }
     const updatedItem = { ...editingItem, ...itemData };
-    setItems((prev) => prev.map((item) => item.id === editingItem.id ? updatedItem : item));
+    setItems((prev) => prev.map((item) => item.id === editingItem.id ? updatedItem : item).sort((a, b) => a.order - b.order));
     setEditingItem(null);
     setIsFormOpen(false);
     await saveItemToDB(updatedItem);
@@ -329,20 +323,14 @@ const App: React.FC = () => {
       setSelectedCategories(['All']);
       return;
     }
-
     setSelectedCategories((prev) => {
       const isAllSelected = prev.includes('All');
       const isAlreadySelected = prev.includes(cat);
-
-      if (isAllSelected) {
-        return [cat];
-      }
-
+      if (isAllSelected) return [cat];
       if (isAlreadySelected) {
         const next = prev.filter((c) => c !== cat);
         return next.length === 0 ? ['All'] : next;
       }
-
       return [...prev, cat];
     });
   };
@@ -404,51 +392,6 @@ const App: React.FC = () => {
     setEditingItem(item);
     setIsDetailOpen(false);
     setIsFormOpen(true);
-  };
-
-  // DRAG AND DROP HANDLERS
-  const handleDragStart = (id: string) => {
-    setDraggedItemId(id);
-  };
-
-  const handleDragOver = (e: React.DragEvent, targetId: string) => {
-    e.preventDefault();
-    if (!draggedItemId || draggedItemId === targetId) return;
-
-    const draggedItem = items.find(i => i.id === draggedItemId);
-    const targetItem = items.find(i => i.id === targetId);
-
-    // Only rearrange within the same category to maintain grouped logical separation
-    if (draggedItem && targetItem && draggedItem.category === targetItem.category) {
-      const newItems = [...items];
-      const draggedIndex = newItems.findIndex(i => i.id === draggedItemId);
-      const targetIndex = newItems.findIndex(i => i.id === targetId);
-
-      newItems.splice(draggedIndex, 1);
-      newItems.splice(targetIndex, 0, draggedItem);
-      
-      // Update order property within this category to be ascending based on new position
-      const catItems = newItems.filter(i => i.category === draggedItem.category && !i.deletedAt);
-      const startOrder = catItems[0].order;
-      
-      catItems.forEach((item, index) => {
-        item.order = index; // Re-index for consistent order tracking
-      });
-
-      setItems(newItems);
-    }
-  };
-
-  const handleDrop = async (targetId: string) => {
-    setDraggedItemId(null);
-    // Persist all items in the category whose order was updated
-    const targetItem = items.find(i => i.id === targetId);
-    if (targetItem) {
-      const affectedItems = items.filter(i => i.category === targetItem.category);
-      for (const item of affectedItems) {
-        await saveItemToDB(item);
-      }
-    }
   };
 
   if (isLoading) {
@@ -659,11 +602,7 @@ const App: React.FC = () => {
                           onStatusToggle={toggleItemStatus} 
                           onDelete={handleDeleteItem} 
                           onClick={handleCardClick} 
-                          onDragStart={handleDragStart}
-                          onDragOver={handleDragOver}
-                          onDrop={handleDrop}
                           lang={language} 
-                          isDragging={draggedItemId === item.id}
                         />
                       ))}
                     </div>

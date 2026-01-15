@@ -1,7 +1,7 @@
 
-import React, { useState, useRef } from 'react';
+import React from 'react';
 import { ShoppingItem } from '../types';
-import { MapPin, Check, ShoppingCart, Trash2, Ban, CalendarClock, GripVertical } from 'lucide-react';
+import { MapPin, Check, ShoppingCart, Trash2, Ban, CalendarClock } from 'lucide-react';
 import { TRANSLATIONS, Language, CURRENCY_OPTIONS } from '../constants';
 
 interface ItemCardProps {
@@ -9,12 +9,8 @@ interface ItemCardProps {
   onStatusToggle: (id: string, currentStatus: string) => void;
   onDelete: (id: string) => void;
   onClick: (item: ShoppingItem) => void;
-  onDragStart?: (id: string) => void;
-  onDragOver?: (e: React.DragEvent, id: string) => void;
-  onDrop?: (id: string) => void;
   size?: 'small' | 'medium' | 'large';
   lang?: Language;
-  isDragging?: boolean;
 }
 
 export const ItemCard: React.FC<ItemCardProps> = ({ 
@@ -22,17 +18,10 @@ export const ItemCard: React.FC<ItemCardProps> = ({
   onStatusToggle, 
   onDelete, 
   onClick, 
-  onDragStart,
-  onDragOver,
-  onDrop,
   size = 'medium', 
   lang = 'en',
-  isDragging = false,
 }) => {
   const t = TRANSLATIONS[lang];
-  const [isDraggable, setIsDraggable] = useState(false);
-  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   const coverMedia = item.media.length > 0 ? item.media[0] : null;
   const currencySymbol = CURRENCY_OPTIONS.find(c => c.value === item.currency)?.symbol || '¥';
 
@@ -43,31 +32,6 @@ export const ItemCard: React.FC<ItemCardProps> = ({
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
     return `${yyyy}/${mm}/${dd}`;
-  };
-
-  const handlePointerDown = () => {
-    longPressTimer.current = setTimeout(() => {
-      setIsDraggable(true);
-      if (typeof navigator !== 'undefined' && navigator.vibrate) {
-        navigator.vibrate(100);
-      }
-    }, 2000);
-  };
-
-  const handlePointerUp = () => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-    }
-  };
-
-  const handleDragStart = (e: React.DragEvent) => {
-    if (onDragStart) onDragStart(item.id);
-    e.dataTransfer.setData('text/plain', item.id);
-    e.dataTransfer.effectAllowed = 'move';
-  };
-
-  const handleDragEnd = () => {
-    setIsDraggable(false);
   };
 
   const getStatusBadge = (isList: boolean = false) => {
@@ -140,31 +104,16 @@ export const ItemCard: React.FC<ItemCardProps> = ({
   };
 
   const cardBaseClasses = `
-    bg-white dark:bg-gray-800 rounded-xl shadow-sm border overflow-hidden transition-all duration-200 group relative flex flex-col h-full
-    ${isDragging ? 'opacity-30 scale-95 border-indigo-500 border-dashed' : 'border-gray-100 dark:border-gray-700'}
-    ${isDraggable ? 'ring-2 ring-indigo-500 scale-105 cursor-grabbing shadow-lg' : 'hover:shadow-md'}
+    bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-all duration-200 group relative flex flex-col h-full hover:shadow-md
     ${item.status === 'dont-like' ? 'opacity-80' : ''}
   `;
 
   if (size === 'small') {
     return (
       <div 
-        onClick={() => !isDraggable && onClick(item)}
-        onPointerDown={handlePointerDown}
-        onPointerUp={handlePointerUp}
-        onPointerLeave={handlePointerUp}
-        onDragStart={handleDragStart}
-        onDragOver={(e) => onDragOver?.(e, item.id)}
-        onDrop={() => onDrop?.(item.id)}
-        onDragEnd={handleDragEnd}
-        draggable={isDraggable}
-        className={`group relative flex items-center gap-3 sm:gap-4 p-4 bg-white dark:bg-gray-800 border shadow-sm rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-all w-full max-w-full overflow-hidden ${isDragging ? 'opacity-30 border-dashed border-indigo-500' : 'border-gray-100 dark:border-gray-700'} ${isDraggable ? 'ring-2 ring-indigo-500 scale-[1.02] cursor-grabbing' : ''}`}
+        onClick={() => onClick(item)}
+        className="group relative flex items-center gap-3 sm:gap-4 p-4 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-all w-full max-w-full overflow-hidden"
       >
-        {isDraggable && (
-          <div className="flex-shrink-0 text-indigo-500 animate-pulse">
-            <GripVertical size={20} />
-          </div>
-        )}
         <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex-shrink-0 border border-gray-200 dark:border-gray-700 shadow-sm">
           {coverMedia ? (
              coverMedia.type === 'image' ? <img src={coverMedia.url} alt={item.name} className="absolute inset-0 w-full h-full object-cover" /> : <video src={coverMedia.url} className="absolute inset-0 w-full h-full object-cover" muted loop autoPlay playsInline />
@@ -198,18 +147,8 @@ export const ItemCard: React.FC<ItemCardProps> = ({
 
   const isLarge = size === 'large';
   return (
-    <div 
-      onPointerDown={handlePointerDown}
-      onPointerUp={handlePointerUp}
-      onPointerLeave={handlePointerUp}
-      onDragStart={handleDragStart}
-      onDragOver={(e) => onDragOver?.(e, item.id)}
-      onDrop={() => onDrop?.(item.id)}
-      onDragEnd={handleDragEnd}
-      draggable={isDraggable}
-      className={cardBaseClasses}
-    >
-      <div onClick={() => !isDraggable && onClick(item)} className={`${isDraggable ? 'cursor-grabbing' : 'cursor-pointer'} flex-1 relative flex flex-col`}>
+    <div className={cardBaseClasses}>
+      <div onClick={() => onClick(item)} className="cursor-pointer flex-1 relative flex flex-col">
         <div className={`w-full bg-gray-100 dark:bg-gray-900 relative overflow-hidden ${isLarge ? 'aspect-[4/3]' : 'aspect-square'}`}>
           {coverMedia ? (
              coverMedia.type === 'image' ? <img src={coverMedia.url} alt={item.name} loading="lazy" className={`absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${item.status === 'dont-like' ? 'grayscale' : ''}`} /> : <video src={coverMedia.url} muted loop autoPlay playsInline className={`absolute inset-0 w-full h-full object-cover pointer-events-none ${item.status === 'dont-like' ? 'grayscale' : ''}`} />
@@ -218,11 +157,6 @@ export const ItemCard: React.FC<ItemCardProps> = ({
           )}
           {item.media.length > 1 && <div className="absolute bottom-1 right-1 bg-black/60 backdrop-blur-sm text-white text-[9px] px-1 py-0.5 rounded-md flex items-center gap-1 z-10 font-medium">+{item.media.length - 1}</div>}
           <div className="absolute top-1.5 left-1.5 z-10">{getStatusBadge()}</div>
-          {isDraggable && (
-             <div className="absolute inset-0 bg-indigo-500/10 flex items-center justify-center">
-                <GripVertical size={40} className="text-indigo-600 opacity-50" />
-             </div>
-          )}
         </div>
         <div className={`${isLarge ? 'p-3' : 'p-2'} flex-1 flex flex-col`}>
           <div className="flex justify-between items-start mb-0.5 gap-1.5">
