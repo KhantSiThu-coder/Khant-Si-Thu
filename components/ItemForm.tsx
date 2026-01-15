@@ -9,7 +9,7 @@ import { TRANSLATIONS, Language, CATEGORY_KEYS, CURRENCY_OPTIONS } from '../cons
 
 interface ItemFormProps {
   initialData?: Partial<ShoppingItem>;
-  onSubmit: (item: Omit<ShoppingItem, 'id' | 'createdAt'>) => void;
+  onSubmit: (item: Omit<ShoppingItem, 'id' | 'createdAt' | 'order'>) => void;
   onCancel: () => void;
   onDelete?: (id: string) => void;
   lang?: Language;
@@ -115,7 +115,6 @@ export const ItemForm: React.FC<ItemFormProps> = ({
   };
 
   const formatSelectedDate = (ts?: number) => {
-    // UPDATED: Placeholder changed to 'YY/MM/DD' as requested
     if (!ts) return 'YY/MM/DD';
     const d = new Date(ts);
     return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;

@@ -32,7 +32,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
   const t = TRANSLATIONS[lang];
   const [isDraggable, setIsDraggable] = useState(false);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  
+
   const coverMedia = item.media.length > 0 ? item.media[0] : null;
   const currencySymbol = CURRENCY_OPTIONS.find(c => c.value === item.currency)?.symbol || '¥';
 
@@ -46,11 +46,10 @@ export const ItemCard: React.FC<ItemCardProps> = ({
   };
 
   const handlePointerDown = () => {
-    // Start a 2-second timer for long press
     longPressTimer.current = setTimeout(() => {
       setIsDraggable(true);
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
-        navigator.vibrate(100); // Haptic feedback for long press
+        navigator.vibrate(100);
       }
     }, 2000);
   };
@@ -150,7 +149,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
   if (size === 'small') {
     return (
       <div 
-        onClick={() => onClick(item)}
+        onClick={() => !isDraggable && onClick(item)}
         onPointerDown={handlePointerDown}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
@@ -219,7 +218,6 @@ export const ItemCard: React.FC<ItemCardProps> = ({
           )}
           {item.media.length > 1 && <div className="absolute bottom-1 right-1 bg-black/60 backdrop-blur-sm text-white text-[9px] px-1 py-0.5 rounded-md flex items-center gap-1 z-10 font-medium">+{item.media.length - 1}</div>}
           <div className="absolute top-1.5 left-1.5 z-10">{getStatusBadge()}</div>
-          
           {isDraggable && (
              <div className="absolute inset-0 bg-indigo-500/10 flex items-center justify-center">
                 <GripVertical size={40} className="text-indigo-600 opacity-50" />

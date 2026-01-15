@@ -21,7 +21,7 @@ export interface ShoppingItem {
   createdAt: number;
   deletedAt?: number;
   expiryDate?: number;
-  order: number; // Added for manual rearrangement within categories
+  order: number;
 }
 
 export interface GeminiAnalysisResult {

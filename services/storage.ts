@@ -97,6 +97,7 @@ export const deleteItemFromDB = async (id: string): Promise<void> => {
 
 /**
  * Load all items from the DB
+ * Re-creates ephemeral blob URLs from the stored files
  */
 export const loadItemsFromDB = async (): Promise<ShoppingItem[]> => {
   const db = await openDB();
@@ -106,22 +107,19 @@ export const loadItemsFromDB = async (): Promise<ShoppingItem[]> => {
     const request = store.getAll();
 
     request.onsuccess = () => {
-      const items = request.result as any[];
+      const items = request.result as any[]; 
       
       const revivedItems: ShoppingItem[] = items.map(item => ({
         ...item,
-        order: item.order ?? item.createdAt, // Fallback for legacy items
+        order: item.order ?? item.createdAt, // Fallback for existing items
         media: (item.media || []).map((m: any) => ({
           ...m,
           url: m.file ? URL.createObjectURL(m.file) : ''
         }))
       }));
 
-      // Primary sort by order, secondary by createdAt
-      revivedItems.sort((a, b) => {
-        if (a.order !== b.order) return a.order - b.order;
-        return b.createdAt - a.createdAt;
-      });
+      // Sort items in ASCENDING order (Oldest/Lower order first)
+      revivedItems.sort((a, b) => a.order - b.order);
       resolve(revivedItems);
     };
     request.onerror = () => reject(request.error);
