@@ -1,5 +1,6 @@
 
 export type ItemStatus = 'to-buy' | 'in-stock' | 'low' | 'dont-like';
+export type SortMode = 'name-asc' | 'name-desc' | 'date-desc' | 'date-asc';
 
 export interface MediaItem {
   id: string;

@@ -1,5 +1,4 @@
 
-
 export type Language = 'en' | 'ja' | 'zh' | 'my' | 'ko';
 
 export const CATEGORY_KEYS = ['Cooking Ingredients', 'Food & Drinks', 'Household products', 'Cosmetics', 'Medicine', 'Clothing', 'Electronics', 'Others'];
@@ -21,6 +20,13 @@ export const TRANSLATIONS = {
     all: 'All Items',
     search: 'Search items...',
     filter: 'Filter:',
+    sort: 'Sort',
+    sortModes: {
+      'name-asc': 'Name (A to Z)',
+      'name-desc': 'Name (Z to A)',
+      'date-desc': 'Newest First',
+      'date-asc': 'Oldest First'
+    },
     toBuy: 'To Buy',
     low: 'Low Stock',
     inStock: 'In Stock',
@@ -159,6 +165,13 @@ export const TRANSLATIONS = {
     all: 'すべて',
     search: '検索...',
     filter: 'フィルター:',
+    sort: '並べ替え',
+    sortModes: {
+      'name-asc': '名前 (AからZ)',
+      'name-desc': '名前 (ZからA)',
+      'date-desc': '新しい順',
+      'date-asc': '古い順'
+    },
     toBuy: '買うもの',
     low: '残りわずか',
     inStock: '在庫あり',
@@ -297,6 +310,13 @@ export const TRANSLATIONS = {
     all: '所有物品',
     search: '搜索...',
     filter: '筛选:',
+    sort: '排序',
+    sortModes: {
+      'name-asc': '名称 (A到Z)',
+      'name-desc': '名称 (Z到A)',
+      'date-desc': '从新到旧',
+      'date-asc': '从旧到新'
+    },
     toBuy: '待购买',
     low: '库存不足',
     inStock: '有库存',
@@ -435,6 +455,13 @@ export const TRANSLATIONS = {
     all: 'ပစ္စည်းအားလုံး',
     search: 'ရှာဖွေပါ...',
     filter: 'စစ်ထုတ်ပါ:',
+    sort: 'စီပါ',
+    sortModes: {
+      'name-asc': 'အမည် (က-အ)',
+      'name-desc': 'အမည် (အ-က)',
+      'date-desc': 'အသစ်ဆုံး အရင်',
+      'date-asc': 'အဟောင်းဆုံး အရင်'
+    },
     toBuy: 'ဝယ်ရန်',
     low: 'လက်ကျန်နည်းနေ',
     inStock: 'လက်ကျန်ရှိ',
@@ -573,6 +600,13 @@ export const TRANSLATIONS = {
     all: '모든 항목',
     search: '검색...',
     filter: '필터:',
+    sort: '정렬',
+    sortModes: {
+      'name-asc': '이름 (A-Z)',
+      'name-desc': '이름 (Z-A)',
+      'date-desc': '최신순',
+      'date-asc': '오래된순'
+    },
     toBuy: '구매 예정',
     low: '재고 부족',
     inStock: '재고 있음',

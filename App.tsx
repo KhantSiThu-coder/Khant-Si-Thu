@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ShoppingItem, ItemStatus } from './types';
+import { ShoppingItem, ItemStatus, SortMode } from './types';
 import { ItemForm } from './components/ItemForm';
 import { ItemCard } from './components/ItemCard';
 import { ItemDetailModal } from './components/ItemDetailModal';
@@ -14,7 +14,7 @@ import {
   Plus, Search, ShoppingBag, Utensils, Coffee, Shirt, Monitor, 
   MoreHorizontal, ListFilter, SlidersHorizontal, Grid3X3, Grid2X2, LayoutList, 
   CheckCircle2, AlertCircle, PackageCheck, Settings, X, Moon, Sun, MonitorSmartphone, Languages,
-  Trash2, Undo2, Database, HardDrive, Download, Menu, Sparkles, Palette, Pill, FileText, Ban, Home, HelpCircle, Calendar
+  Trash2, Undo2, Database, HardDrive, Download, Menu, Sparkles, Palette, Pill, FileText, Ban, Home, HelpCircle, Calendar, ArrowUpDown, ChevronDown
 } from 'lucide-react';
 import { TRANSLATIONS, Language, CATEGORY_KEYS } from './constants';
 
@@ -57,13 +57,15 @@ interface AppSettings {
   theme: Theme;
   enableAI: boolean;
   cardSize: CardSize;
+  sortMode: SortMode;
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
   language: 'en',
   theme: 'system',
   enableAI: true,
-  cardSize: 'medium'
+  cardSize: 'medium',
+  sortMode: 'date-desc'
 };
 
 const App: React.FC = () => {
@@ -78,9 +80,12 @@ const App: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [isLanguageSelectorOpen, setIsLanguageSelectorOpen] = useState(false);
+  const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ShoppingItem | null>(null);
   const [selectedItemForDetail, setSelectedItemForDetail] = useState<ShoppingItem | null>(null);
   
+  const sortContainerRef = useRef<HTMLDivElement>(null);
+
   // Load settings from localStorage
   const loadSettings = (): AppSettings => {
     if (typeof window === 'undefined') return DEFAULT_SETTINGS;
@@ -100,6 +105,7 @@ const App: React.FC = () => {
   const [theme, setTheme] = useState<Theme>(initialSettings.theme);
   const [enableAI, setEnableAI] = useState<boolean>(initialSettings.enableAI);
   const [cardSize, setCardSize] = useState<CardSize>(initialSettings.cardSize);
+  const [sortMode, setSortMode] = useState<SortMode>(initialSettings.sortMode);
   
   // Save settings effect
   useEffect(() => {
@@ -107,11 +113,23 @@ const App: React.FC = () => {
       language,
       theme,
       enableAI,
-      cardSize
+      cardSize,
+      sortMode
     };
     localStorage.setItem('smartshop_settings', JSON.stringify(settingsToSave));
     document.documentElement.lang = language === 'ja' ? 'ja' : 'en';
-  }, [language, theme, enableAI, cardSize]);
+  }, [language, theme, enableAI, cardSize, sortMode]);
+
+  // Handle outside click for sort menu
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (sortContainerRef.current && !sortContainerRef.current.contains(event.target as Node)) {
+        setIsSortMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Check for first-time visit
   useEffect(() => {
@@ -252,7 +270,7 @@ const App: React.FC = () => {
       createdAt: timestamp,
       order: timestamp
     };
-    setItems((prev) => [...prev, newItem].sort((a, b) => a.order - b.order));
+    setItems((prev) => [...prev, newItem]);
     setIsFormOpen(false);
     await saveItemToDB(newItem);
   };
@@ -265,7 +283,7 @@ const App: React.FC = () => {
        return;
     }
     const updatedItem = { ...editingItem, ...itemData };
-    setItems((prev) => prev.map((item) => item.id === editingItem.id ? updatedItem : item).sort((a, b) => a.order - b.order));
+    setItems((prev) => prev.map((item) => item.id === editingItem.id ? updatedItem : item));
     setEditingItem(null);
     setIsFormOpen(false);
     await saveItemToDB(updatedItem);
@@ -393,6 +411,19 @@ const App: React.FC = () => {
     setIsDetailOpen(false);
     setIsFormOpen(true);
   };
+
+  // Helper to apply sorting within categories
+  const sortItems = useCallback((itemsList: ShoppingItem[]) => {
+    return [...itemsList].sort((a, b) => {
+      switch (sortMode) {
+        case 'name-asc': return a.name.localeCompare(b.name, language);
+        case 'name-desc': return b.name.localeCompare(a.name, language);
+        case 'date-desc': return b.createdAt - a.createdAt;
+        case 'date-asc': return a.createdAt - b.createdAt;
+        default: return 0;
+      }
+    });
+  }, [sortMode, language]);
 
   if (isLoading) {
     return (
@@ -528,10 +559,42 @@ const App: React.FC = () => {
                          <Calendar size={14} /> {t.expiryDate}
                        </button>
                    </div>
-                   <div className="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5 ml-auto">
-                      <button onClick={() => setCardSize('small')} className={`p-1.5 rounded-md transition-all ${cardSize === 'small' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-800 dark:text-white' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}`} title="List View"><LayoutList size={16} /></button>
-                      <button onClick={() => setCardSize('medium')} className={`p-1.5 rounded-md transition-all ${cardSize === 'medium' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-800 dark:text-white' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}`} title="Medium Grid View"><Grid3X3 size={16} /></button>
-                      <button onClick={() => setCardSize('large')} className={`p-1.5 rounded-md transition-all ${cardSize === 'large' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-800 dark:text-white' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}`} title="Large Grid View"><Grid2X2 size={16} /></button>
+                   <div className="flex items-center gap-1.5 ml-auto">
+                      {/* Sort Selector Container with Ref */}
+                      <div className="relative" ref={sortContainerRef}>
+                        <button 
+                          onClick={() => setIsSortMenuOpen(!isSortMenuOpen)}
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${isSortMenuOpen ? 'bg-indigo-50 border-indigo-200 text-indigo-600 dark:bg-indigo-900/40' : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'}`}
+                        >
+                          <ArrowUpDown size={14} />
+                          <span className="hidden sm:inline">{t.sort}</span>
+                          <ChevronDown size={12} className={`transition-transform duration-200 ${isSortMenuOpen ? 'rotate-180' : ''}`} />
+                        </button>
+
+                        {isSortMenuOpen && (
+                          <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 z-[60] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                             {(['name-asc', 'name-desc', 'date-desc', 'date-asc'] as SortMode[]).map((mode) => (
+                               <button
+                                 key={mode}
+                                 type="button"
+                                 onClick={() => {
+                                   setSortMode(mode);
+                                   setIsSortMenuOpen(false);
+                                 }}
+                                 className={`w-full text-left px-4 py-3 text-xs font-medium transition-colors border-b last:border-0 border-gray-50 dark:border-gray-700 ${sortMode === mode ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50'}`}
+                               >
+                                 {t.sortModes[mode as keyof typeof t.sortModes]}
+                               </button>
+                             ))}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5">
+                        <button onClick={() => setCardSize('small')} className={`p-1.5 rounded-md transition-all ${cardSize === 'small' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-800 dark:text-white' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}`} title="List View"><LayoutList size={16} /></button>
+                        <button onClick={() => setCardSize('medium')} className={`p-1.5 rounded-md transition-all ${cardSize === 'medium' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-800 dark:text-white' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}`} title="Medium Grid View"><Grid3X3 size={16} /></button>
+                        <button onClick={() => setCardSize('large')} className={`p-1.5 rounded-md transition-all ${cardSize === 'large' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-800 dark:text-white' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}`} title="Large Grid View"><Grid2X2 size={16} /></button>
+                      </div>
                    </div>
                </div>
              </div>
@@ -584,8 +647,12 @@ const App: React.FC = () => {
           ) : (
             <div className="space-y-6 flex-1 w-full max-w-full">
               {categoriesToShow.map((cat) => {
-                const categoryItems = filteredItems.filter(i => i.category === cat);
-                if (categoryItems.length === 0) return null;
+                const rawCategoryItems = filteredItems.filter(i => i.category === cat);
+                if (rawCategoryItems.length === 0) return null;
+                
+                // Apply sorting only within the category group
+                const categoryItems = sortItems(rawCategoryItems);
+
                 return (
                   <div key={cat} className="animate-in fade-in slide-in-from-bottom-2 duration-300 w-full max-w-full">
                     <h2 className="text-base font-bold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
